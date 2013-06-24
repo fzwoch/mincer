@@ -215,5 +215,5 @@ GST_PLUGIN_DEFINE
 	"0.0.0",
 	"GPL",
 	"Mincer",
-	"http://mincer.quake1.de/"
+	"https://github.com/fzwoch/mincer"
 )
