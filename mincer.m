@@ -73,20 +73,26 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	switch (GST_MESSAGE_TYPE(msg))
 	{
 	case GST_MESSAGE_WARNING:
-		gst_message_parse_warning(msg, &error, &debug);
-		g_free(debug);
+		@autoreleasepool
+		{
+			gst_message_parse_warning(msg, &error, &debug);
+			g_free(debug);
 		
-		NSLog(@"%@", [NSString stringWithCString:error->message encoding:NSUTF8StringEncoding]);
-		g_error_free(error);
+			NSLog(@"%@", [NSString stringWithCString:error->message encoding:NSUTF8StringEncoding]);
+			g_error_free(error);
+		}
 		break;
 	case GST_MESSAGE_ERROR:
-		gst_message_parse_error(msg, &error, &debug);
-		g_free(debug);
+		@autoreleasepool
+		{
+			gst_message_parse_error(msg, &error, &debug);
+			g_free(debug);
 
-		[[NSApp delegate] performSelectorOnMainThread:@selector(alert:) withObject:[NSString stringWithCString:error->message encoding:NSUTF8StringEncoding] waitUntilDone:YES];
-		g_error_free(error);
+			[[NSApp delegate] performSelectorOnMainThread:@selector(alert:) withObject:[NSString stringWithCString:error->message encoding:NSUTF8StringEncoding] waitUntilDone:YES];
+			g_error_free(error);
 		
-		[[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:NO];
+			[[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:NO];
+		}
 		break;
 	default:
 		break;
