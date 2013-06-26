@@ -306,8 +306,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		"tee_264. ! queue ! flvmux name=flv_mux ! %@=\"%@\" "
 		"tee_264. ! queue ! qtmux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" "
 		"osxaudiosrc do-timestamp=true ! audioconvert ! faac bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac "
-		"tee_aac. ! queue ! flv_mux. "
-		"tee_aac. ! queue ! mp4_mux.",
+		"tee_aac. ! queue max-size-time=0 ! flv_mux. "
+		"tee_aac. ! queue max-size-time=0 ! mp4_mux.",
 		framerates[[framerate indexOfSelectedItem]],
 		resolutions[[resolution indexOfSelectedItem]].width,
 		resolutions[[resolution indexOfSelectedItem]].height,
