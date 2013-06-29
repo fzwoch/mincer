@@ -150,11 +150,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url setStringValue:@"rtmp://live.twitch.tv/app/"];
 	[url setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
-	[[url cell] setLineBreakMode:NSLineBreakByCharWrapping];
-	
 	url_secret = [NSSecureTextField new];
 	[url_secret setHidden:YES];
 	[url_secret setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	[[url cell] setLineBreakMode:NSLineBreakByCharWrapping];
+	[[url_secret cell] setLineBreakMode:NSLineBreakByCharWrapping];
 	
 	NSTextField *resolution_label = [NSTextField new];
 	[resolution_label setStringValue:@"Video Resolution"];
@@ -174,7 +175,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	NSTextField *framerate_label = [NSTextField new];
-	[framerate_label setStringValue:@"Frame Rate"];
+	[framerate_label setStringValue:@"Framerate"];
 	[framerate_label setBezeled:NO];
 	[framerate_label setDrawsBackground:NO];
 	[framerate_label setEditable:NO];
