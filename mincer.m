@@ -150,6 +150,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url setStringValue:@"rtmp://live.twitch.tv/app/"];
 	[url setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
+	[[url cell] setLineBreakMode:NSLineBreakByCharWrapping];
+	
 	url_secret = [NSSecureTextField new];
 	[url_secret setHidden:YES];
 	[url_secret setTranslatesAutoresizingMaskIntoConstraints:NO];
