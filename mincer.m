@@ -309,7 +309,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[date setDateFormat:@"yyyy-MM-dd_HH:mm:ss"];
 	
 	NSString *desc = [NSString stringWithFormat:@
-		"osxdesktopsrc ! video/x-raw, framerate=%d/1 ! videoscale add-borders=true ! video/x-raw, width=%d, height=%d ! tee name=tee_vid "
+		"osxdesktopsrc ! video/x-raw, framerate=%d/1 ! videoscale ! video/x-raw, width=%d, height=%d ! tee name=tee_vid "
 		"tee_vid. ! queue ! videoconvert ! x264enc bitrate=%d speed-preset=1 ! tee name=tee_264 "
 		"tee_264. ! queue ! flvmux name=flv_mux ! %@=\"%@\" "
 		"tee_264. ! queue ! qtmux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" "
