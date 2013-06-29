@@ -101,6 +101,30 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	width = CGImageGetWidth(img);
 	height = CGImageGetHeight(img);
 	
+	if (width != GST_OSX_DESKTOP_SRC(src)->width || height != GST_OSX_DESKTOP_SRC(src)->height)
+	{
+		GstPadTemplate *pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(src), "src");
+		GstCaps *caps = gst_caps_copy(gst_pad_template_get_caps(pad_template));
+		GstEvent *event;
+		
+		gst_caps_set_simple(caps, "width", G_TYPE_INT, width, NULL);
+		gst_caps_set_simple(caps, "height", G_TYPE_INT, height, NULL);
+		gst_caps_set_simple(caps, "framerate", GST_TYPE_FRACTION, GST_OSX_DESKTOP_SRC(src)->framerate_num, GST_OSX_DESKTOP_SRC(src)->framerate_denom, NULL);
+		
+		event = gst_event_new_caps(caps);
+		gst_pad_push_event(GST_BASE_SRC_PAD(src), event);
+		
+		gst_base_src_set_blocksize(GST_BASE_SRC(src), width * height * 4);
+		
+		GST_OSX_DESKTOP_SRC(src)->width = width;
+		GST_OSX_DESKTOP_SRC(src)->height = height;
+		
+		buf->pts = buf->dts = GST_OSX_DESKTOP_SRC(src)->count++ * 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+		buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+		
+		return GST_FLOW_OK;
+	}
+	
 	gst_buffer_map(buf, &info, GST_MAP_WRITE);
 	
 	ctx = CGBitmapContextCreate
