@@ -341,7 +341,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[progress]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-[audio_bitrate_label]-[audio_bitrate(>=25)]-[button]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-[button]-15-|" options:0 metrics:nil views:views]];
 	
 	[window makeKeyAndOrderFront:nil];
 	[window center];
