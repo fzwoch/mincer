@@ -74,6 +74,8 @@ static gint framerates[] =
 	60
 };
 
+static glong audio_device_ids[32] = {0};
+
 static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	gchar *debug;
@@ -229,6 +231,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[audio_device addItemWithTitle:[NSString stringWithFormat:@"None"]];
 	
 	guint size = 0;
+	glong *audio_device_id = audio_device_ids;
+	
+	audio_device_id[0] = 0;
+	audio_device_id++;
 	
 	AudioObjectPropertyAddress addr =
 	{
@@ -249,7 +255,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		addr.mScope = kAudioObjectPropertyScopeGlobal;
 		
 		AudioObjectGetPropertyData(devices[i], &addr, 0, NULL, &size, &name);
-			
+		
 		addr.mSelector = kAudioDevicePropertyStreams;
 		addr.mScope = kAudioDevicePropertyScopeInput;
 		
@@ -258,6 +264,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		if (size)
 		{
 			[audio_device addItemWithTitle:(NSString*)name];
+			
+			audio_device_id[0] = devices[i];
+			audio_device_id++;
 		}
 		
 		CFRelease(name);
@@ -373,23 +382,28 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSDateFormatter* date = [NSDateFormatter new];
 	[date setDateFormat:@"yyyy-MM-dd_HH:mm:ss"];
 	
-	NSString *desc = [NSString stringWithFormat:@
-		"osxdesktopsrc ! video/x-raw, framerate=%d/1 ! videoscale ! video/x-raw, width=%d, height=%d ! tee name=tee_vid "
-		"tee_vid. ! queue ! videoconvert ! x264enc bitrate=%d speed-preset=1 ! tee name=tee_264 "
-		"tee_264. ! queue ! flvmux name=flv_mux ! %@=\"%@\" "
-		"tee_264. ! queue ! qtmux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" "
-		"osxaudiosrc do-timestamp=true ! audioconvert ! faac bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac "
-		"tee_aac. ! queue max-size-time=0 ! flv_mux. "
-		"tee_aac. ! queue max-size-time=0 ! mp4_mux.",
-		framerates[[framerate indexOfSelectedItem]],
-		resolutions[[resolution indexOfSelectedItem]].width,
-		resolutions[[resolution indexOfSelectedItem]].height,
-		[video_bitrate intValue],
-		[[url stringValue] length] == 0 ? @"fakesink name" : @"rtmpsink location",
-		[[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-		[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0],
-		[date stringFromDate:[NSDate date]],
-		[audio_bitrate intValue] * 1000];
+	NSMutableString *desc = [NSMutableString new];
+	
+	[desc appendFormat:@"osxdesktopsrc ! videoscale ! video/x-raw, width=%d, height=%d, framerate=%d/1 ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height, framerates[[framerate indexOfSelectedItem]]];
+	[desc appendFormat:@"videoconvert ! x264enc bitrate=%d speed-preset=1 ! tee name=tee_264 ", [video_bitrate intValue]];
+	[desc appendFormat:@"osxaudiosrc do-timestamp=true ! audioconvert ! adder name=audio_mix ! faac bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac ", [audio_bitrate intValue] * 1000];
+	
+	if ([[url stringValue] length])
+	{
+		[desc appendFormat:@"tee_264. ! queue ! flvmux name=flv_mux ! rtmpsink=\"%@\" ", [[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! flv_mux. "];
+	}
+	
+	if (1)
+	{
+		[desc appendFormat:@"tee_264. ! queue ! qtmux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0], [date stringFromDate:[NSDate date]]];
+		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! mp4_mux. "];
+	}
+	
+	if ([audio_device indexOfSelectedItem])
+	{
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioresample ! audioconvert ! audio_mix. ", (long)[audio_device indexOfSelectedItem]];
+	}
 	
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);
 	if (error)
