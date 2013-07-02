@@ -88,7 +88,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		{
 			gst_message_parse_warning(msg, &error, &debug);
 			g_free(debug);
-		
+			
 			NSLog(@"%@", [NSString stringWithCString:error->message encoding:NSUTF8StringEncoding]);
 			g_error_free(error);
 		}
@@ -98,10 +98,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		{
 			gst_message_parse_error(msg, &error, &debug);
 			g_free(debug);
-
+			
 			[[NSApp delegate] performSelectorOnMainThread:@selector(alert:) withObject:[NSString stringWithCString:error->message encoding:NSUTF8StringEncoding] waitUntilDone:YES];
 			g_error_free(error);
-		
+			
 			[[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:NO];
 		}
 		break;
@@ -138,6 +138,32 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 @implementation AppDelegate
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+	[NSApp setMainMenu:[NSMenu new]];
+	
+	NSMenuItem *item = [[NSApp mainMenu] addItemWithTitle:@"Mincer" action:nil keyEquivalent:@""];
+	
+	NSMenu *mincer_menu = [NSMenu new];
+	[mincer_menu setTitle:@"Mincer"];
+	[mincer_menu addItemWithTitle:@"About" action:nil keyEquivalent:@""];
+	[mincer_menu addItem:[NSMenuItem separatorItem]];
+	[mincer_menu addItemWithTitle:@"Preferences" action:nil keyEquivalent:@""];
+	[mincer_menu addItem:[NSMenuItem separatorItem]];
+	[mincer_menu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
+	[item setSubmenu:mincer_menu];
+	
+	item = [[NSApp mainMenu] addItemWithTitle:@"Edit" action:NULL keyEquivalent:@""];
+	
+	NSMenu *edit_menu = [NSMenu new];
+	[edit_menu setTitle:@"Edit"];
+	[edit_menu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@"z"];
+	[edit_menu addItem:[NSMenuItem separatorItem]];
+	[edit_menu addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"];
+	[edit_menu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
+	[edit_menu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"];
+	[edit_menu addItem:[NSMenuItem separatorItem]];
+	[edit_menu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
+	[item setSubmenu:edit_menu];
+	
 	NSWindow *window = [NSWindow new];
 	[window setStyleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask];
 	[window setBackingType:NSBackingStoreBuffered];
