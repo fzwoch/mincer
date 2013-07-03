@@ -74,6 +74,21 @@ static gint framerates[] =
 	60
 };
 
+static gchar *encoder_speeds[] =
+{
+	"",
+	"Ultra Fast",
+	"Super Fast",
+	"Very Fast",
+	"Faster",
+	"Fast",
+	"Medium",
+	"Slow",
+	"Slower",
+	"Very Slow",
+	"Placebo"
+};
+
 static glong audio_device_ids[32] = {0};
 
 static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
@@ -120,6 +135,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSPopUpButton *resolution;
 	NSPopUpButton *framerate;
 	
+	NSTextField *encoder_speed_label;
+	NSSlider *encoder_speed;
+	
 	NSTextField *video_bitrate_label;
 	NSSlider *video_bitrate;
 	
@@ -144,11 +162,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMenu *mincer_menu = [NSMenu new];
 	[mincer_menu setTitle:@"Mincer"];
-	[mincer_menu addItemWithTitle:@"About" action:nil keyEquivalent:@""];
+	[mincer_menu addItemWithTitle:@"About Mincer" action:nil keyEquivalent:@""];
 	[mincer_menu addItem:[NSMenuItem separatorItem]];
 	[mincer_menu addItemWithTitle:@"Preferences" action:nil keyEquivalent:@""];
 	[mincer_menu addItem:[NSMenuItem separatorItem]];
-	[mincer_menu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
+	[mincer_menu addItemWithTitle:@"Quit Mincer" action:@selector(terminate:) keyEquivalent:@"q"];
 	[item setSubmenu:mincer_menu];
 	
 	item = [[NSApp mainMenu] addItemWithTitle:@"Edit" action:NULL keyEquivalent:@""];
@@ -223,6 +241,25 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	[framerate selectItemWithTitle:@"30"];
+	
+	encoder_speed_label = [NSTextField new];
+	[encoder_speed_label setBezeled:NO];
+	[encoder_speed_label setDrawsBackground:NO];
+	[encoder_speed_label setEditable:NO];
+	[encoder_speed_label setSelectable:NO];
+	[encoder_speed_label setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	encoder_speed = [NSSlider new];
+	[encoder_speed setMinValue:1];
+	[encoder_speed setMaxValue:10];
+	[encoder_speed setIntValue:1];
+	[encoder_speed setNumberOfTickMarks:[encoder_speed maxValue]];
+	[encoder_speed setAllowsTickMarkValuesOnly:YES];
+	[encoder_speed setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[encoder_speed setAction:@selector(updateEncoderSpeed)];
+	[encoder_speed setEnabled:NO];
+	
+	[self updateEncoderSpeed];
 	
 	video_bitrate_label = [NSTextField new];
 	[video_bitrate_label setBezeled:NO];
@@ -341,6 +378,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:resolution];
 	[[window contentView] addSubview:framerate_label];
 	[[window contentView] addSubview:framerate];
+	[[window contentView] addSubview:encoder_speed_label];
+	[[window contentView] addSubview:encoder_speed];
 	[[window contentView] addSubview:video_bitrate_label];
 	[[window contentView] addSubview:video_bitrate];
 	[[window contentView] addSubview:audio_device_label];
@@ -350,7 +389,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:progress];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, progress, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, progress, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url(>=300)]-15-|" options:0 metrics:nil views:views]];
@@ -362,6 +401,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution]-15-[framerate(==resolution)]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url]-15-[framerate_label]-[framerate]" options:0 metrics:nil views:views]];
+	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed_label]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_bitrate_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_bitrate]-15-|" options:0 metrics:nil views:views]];
@@ -376,7 +418,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[progress]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-[button]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-[button]-15-|" options:0 metrics:nil views:views]];
 	
 	[window makeKeyAndOrderFront:nil];
 	[window center];
@@ -410,13 +452,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	[desc appendFormat:@"osxdesktopsrc ! videoscale ! video/x-raw, width=%d, height=%d, framerate=%d/1 ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height, framerates[[framerate indexOfSelectedItem]]];
-	[desc appendFormat:@"videoconvert ! x264enc bitrate=%d speed-preset=1 ! tee name=tee_264 ", [video_bitrate intValue]];
+	[desc appendFormat:@"osxdesktopsrc ! videoscale method=lanczos ! video/x-raw, width=%d, height=%d, framerate=%d/1 ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height, framerates[[framerate indexOfSelectedItem]]];
+	[desc appendFormat:@"videoconvert ! x264enc bitrate=%d speed-preset=%d ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue]];
 	[desc appendFormat:@"osxaudiosrc do-timestamp=true ! audioconvert ! adder name=audio_mix ! faac bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac ", [audio_bitrate intValue] * 1000];
 	
 	if ([[url stringValue] length])
 	{
-		[desc appendFormat:@"tee_264. ! queue ! flvmux name=flv_mux ! rtmpsink=\"%@\" ", [[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+		[desc appendFormat:@"tee_264. ! queue ! flvmux name=flv_mux ! rtmpsink location=\"%@\" ", [[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! flv_mux. "];
 	}
 	
@@ -487,6 +529,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[progress stopAnimation:nil];
 	
 	[button setTitle:@"Start"];
+}
+- (void)updateEncoderSpeed
+{	
+	[encoder_speed_label setStringValue:[NSString stringWithFormat:@"Encoder Speed - %s", encoder_speeds[[encoder_speed intValue]]]];
 }
 - (void)updateVideoBitrate
 {
