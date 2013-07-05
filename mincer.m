@@ -315,13 +315,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	AudioDeviceID *devices = malloc(size);
 	AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr, 0, NULL, &size, devices);
 	
-	for (gint i = 0; i < size / sizeof(AudioDeviceID); i++)
+	gint device_count = size / sizeof(AudioDeviceID);
+	
+	for (gint i = 0; i < device_count; i++)
 	{
 		CFStringRef name = NULL;
 		
 		addr.mSelector = kAudioDevicePropertyDeviceNameCFString;
 		addr.mScope = kAudioObjectPropertyScopeGlobal;
 		
+		size = sizeof(CFStringRef);
 		AudioObjectGetPropertyData(devices[i], &addr, 0, NULL, &size, &name);
 		
 		addr.mSelector = kAudioDevicePropertyStreams;
