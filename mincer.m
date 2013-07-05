@@ -21,6 +21,8 @@
 #import <CoreAudio/AudioHardware.h>
 #import <gst/gst.h>
 
+#define MAX_AUDIO_DEVICES 32
+
 struct resolution_pair {
 	gint width;
 	gint height;
@@ -90,7 +92,7 @@ static gchar *encoder_speeds[] =
 	"Placebo"
 };
 
-static glong audio_device_ids[32] = {0};
+static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
 
 static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
@@ -317,6 +319,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	gint device_count = size / sizeof(AudioDeviceID);
 	
+	if (device_count > MAX_AUDIO_DEVICES)
+	{
+		device_count = MAX_AUDIO_DEVICES;
+	}
+	
 	for (gint i = 0; i < device_count; i++)
 	{
 		CFStringRef name = NULL;
@@ -478,7 +485,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([audio_device indexOfSelectedItem])
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audioresample ! audioconvert ! audio_mix. ", (long)[audio_device indexOfSelectedItem]];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioresample ! audioconvert ! audio_mix. ", (long)audio_device_ids[[audio_device indexOfSelectedItem]]];
 	}
 	
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);
