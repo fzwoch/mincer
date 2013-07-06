@@ -479,13 +479,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (1)
 	{
-		[desc appendFormat:@"tee_264. ! queue ! qtmux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0], [date stringFromDate:[NSDate date]]];
+		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0], [date stringFromDate:[NSDate date]]];
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! mp4_mux. "];
 	}
 	
 	if ([audio_device indexOfSelectedItem])
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audioresample ! audioconvert ! audio_mix. ", (long)audio_device_ids[[audio_device indexOfSelectedItem]]];
+		[desc appendFormat:@"osxaudiosrc do-timestamp=true device=%ld ! audioresample ! audioconvert ! audio_mix. ", (long)audio_device_ids[[audio_device indexOfSelectedItem]]];
 	}
 	
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);

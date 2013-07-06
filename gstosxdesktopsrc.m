@@ -101,6 +101,9 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	width = CGImageGetWidth(img);
 	height = CGImageGetHeight(img);
 	
+	buf->pts = buf->dts = GST_OSX_DESKTOP_SRC(src)->count++ * 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+	buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+	
 	if (width != GST_OSX_DESKTOP_SRC(src)->width || height != GST_OSX_DESKTOP_SRC(src)->height)
 	{
 		GstPadTemplate *pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(src), "src");
@@ -119,8 +122,7 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 		GST_OSX_DESKTOP_SRC(src)->width = width;
 		GST_OSX_DESKTOP_SRC(src)->height = height;
 		
-		buf->pts = buf->dts = GST_OSX_DESKTOP_SRC(src)->count++ * 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
-		buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+		CGImageRelease(img);
 		
 		return GST_FLOW_OK;
 	}
@@ -165,9 +167,6 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	CGImageRelease(img);
 	
 	gst_buffer_unmap(buf, &info);
-	
-	buf->pts = buf->dts = GST_OSX_DESKTOP_SRC(src)->count++ * 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
-	buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
 	
 	return GST_FLOW_OK;
 }
