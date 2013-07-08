@@ -93,6 +93,7 @@ static gchar *encoder_speeds[] =
 };
 
 static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
+static glong audio_soundflower_id = 0;
 
 static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
@@ -351,6 +352,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			
 			audio_device_id[0] = devices[i];
 			audio_device_id++;
+			
+			if ([(NSString*)name isEqualToString:@"Soundflower (2ch)"])
+			{
+				audio_soundflower_id = devices[i];
+			}
 		}
 		
 		CFRelease(name);
@@ -475,7 +481,22 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[desc appendFormat:@"osxdesktopsrc ! videoscale ! video/x-raw, width=%d, height=%d, framerate=%d/1 ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height, framerates[[framerate indexOfSelectedItem]]];
 	[desc appendFormat:@"videoconvert ! x264enc bitrate=%d speed-preset=%d bframes=0 ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue]];
-	[desc appendFormat:@"osxaudiosrc do-timestamp=true ! audioconvert ! adder name=audio_mix ! faac bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac ", [audio_bitrate intValue] * 1000];
+	[desc appendFormat:@"adder name=audio_mix ! faac bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac ", [audio_bitrate intValue] * 1000];
+	
+	if (audio_soundflower_id)
+	{
+		[desc appendFormat:@"osxaudiosrc do-timestamp=true device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_soundflower_id];
+	}
+	
+	if ([audio_device indexOfSelectedItem])
+	{
+		[desc appendFormat:@"osxaudiosrc do-timestamp=true device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
+	}
+	
+	if (![audio_device indexOfSelectedItem] && !audio_soundflower_id)
+	{
+		[desc appendFormat:@"audiotestsrc is-live=true do-timestamp=true wave=silence ! audio_mix. "];
+	}
 	
 	if ([[url stringValue] length])
 	{
@@ -487,11 +508,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0], [date stringFromDate:[NSDate date]]];
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! mp4_mux. "];
-	}
-	
-	if ([audio_device indexOfSelectedItem])
-	{
-		[desc appendFormat:@"osxaudiosrc do-timestamp=true device=%ld ! audioresample ! audioconvert ! audio_mix. ", (long)audio_device_ids[[audio_device indexOfSelectedItem]]];
 	}
 	
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);

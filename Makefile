@@ -27,6 +27,7 @@ ZIP = mincer.zip
 
 GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstcoreelements.so \
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudiotestsrc.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaudio.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstadder.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioconvert.so \
