@@ -28,8 +28,6 @@ typedef struct {
 	gint height;
 	gint framerate_num;
 	gint framerate_denom;
-	
-	gint count;
 } GstOsxDesktopSrc;
 
 typedef struct {
@@ -96,13 +94,13 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	
 	CGContextRef ctx;
 	
+	buf->pts = buf->dts = gst_clock_get_time(GST_ELEMENT_CLOCK(src));
+	buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+
 	img = CGDisplayCreateImage(CGMainDisplayID());
 	
 	width = CGImageGetWidth(img);
 	height = CGImageGetHeight(img);
-	
-	buf->pts = buf->dts = GST_OSX_DESKTOP_SRC(src)->count++ * 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
-	buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
 	
 	if (width != GST_OSX_DESKTOP_SRC(src)->width || height != GST_OSX_DESKTOP_SRC(src)->height)
 	{
@@ -210,8 +208,6 @@ static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
 	
 	filter->framerate_num = 30;
 	filter->framerate_denom = 1;
-	
-	filter->count = 0;
 	
 	gst_base_src_set_format(GST_BASE_SRC(filter), GST_FORMAT_TIME);
 	gst_base_src_set_live(GST_BASE_SRC(filter), TRUE);
