@@ -167,7 +167,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mincer_menu setTitle:@"Mincer"];
 	[mincer_menu addItemWithTitle:@"About Mincer" action:nil keyEquivalent:@""];
 	[mincer_menu addItem:[NSMenuItem separatorItem]];
-	[mincer_menu addItemWithTitle:@"Preferences" action:nil keyEquivalent:@""];
+	[mincer_menu addItemWithTitle:@"Preferences" action:nil keyEquivalent:@","];
+	[mincer_menu addItem:[NSMenuItem separatorItem]];
+	[mincer_menu addItemWithTitle:@"Hide Mincer" action:@selector(hide:) keyEquivalent:@"h"];
+	[[mincer_menu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"] setKeyEquivalentModifierMask:NSAlternateKeyMask | NSCommandKeyMask];
+	[mincer_menu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
 	[mincer_menu addItem:[NSMenuItem separatorItem]];
 	[mincer_menu addItemWithTitle:@"Quit Mincer" action:@selector(terminate:) keyEquivalent:@"q"];
 	[item setSubmenu:mincer_menu];
@@ -177,10 +181,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSMenu *edit_menu = [NSMenu new];
 	[edit_menu setTitle:@"Edit"];
 	[edit_menu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@"z"];
+	[[edit_menu addItemWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:@"z"] setKeyEquivalentModifierMask:NSShiftKeyMask | NSCommandKeyMask];
 	[edit_menu addItem:[NSMenuItem separatorItem]];
 	[edit_menu addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"];
 	[edit_menu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
 	[edit_menu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"];
+	[edit_menu addItemWithTitle:@"Delete" action:@selector(delete:) keyEquivalent:[NSString stringWithFormat:@"%c", NSBackspaceCharacter ]];
 	[edit_menu addItem:[NSMenuItem separatorItem]];
 	[edit_menu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
 	[item setSubmenu:edit_menu];
@@ -547,7 +553,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 }
 - (void)updateEncoderSpeed
 {	
-	[encoder_speed_label setStringValue:[NSString stringWithFormat:@"Encoder Speed - %s", encoder_speeds[[encoder_speed intValue]]]];
+	[encoder_speed_label setStringValue:[NSString stringWithFormat:@"Video Encoder Speed - %s", encoder_speeds[[encoder_speed intValue]]]];
 }
 - (void)updateVideoBitrate
 {
