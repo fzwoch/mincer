@@ -27,38 +27,41 @@ struct resolution_pair {
 	gint width;
 	gint height;
 	gchar aspect_ratio[64];
-	gint seperator;
 };
 
 static struct resolution_pair resolutions[] =
 {
-	{640, 360, "16:9", 0},
-	{854, 480, "16:9", 0},
-	{960, 540, "16:9", 0},
-	{1024, 576, "16:9", 0},
-	{1152, 648, "16:9", 0},
-	{1280, 720, "16:9", 0},
-	{1366, 768, "16:9", 0},
-	{1600, 900, "16:9", 0},
-	{1920, 1080, "16:9", 1},
+	{640, 360, "16:9"},
+	{854, 480, "16:9"},
+	{960, 540, "16:9"},
+	{1024, 576, "16:9"},
+	{1152, 648, "16:9"},
+	{1280, 720, "16:9"},
+	{1366, 768, "16:9"},
+	{1600, 900, "16:9"},
+	{1920, 1080, "16:9"},
 	
-	{640, 400, "16:10", 0},
-	{800, 500, "16:10", 0},
-	{960, 600, "16:10", 0},
-	{1024, 640, "16:10", 0},
-	{1152, 720, "16:10", 0},
-	{1280, 800, "16:10", 0},
-	{1440, 900, "16:10", 0},
-	{1680, 1050, "16:10", 0},
-	{1920, 1200, "16:10", 1},
+	{0, 0, ""},
 	
-	{640, 480, "4:3", 0},
-	{800, 600, "4:3", 0},
-	{1024, 768, "4:3", 0},
-	{1152, 864, "4:3", 0},
-	{1280, 960, "4:3", 0},
-	{1400, 1050, "4:3", 0},
-	{1600, 1200, "4:3", 0}
+	{640, 400, "16:10"},
+	{800, 500, "16:10"},
+	{960, 600, "16:10"},
+	{1024, 640, "16:10"},
+	{1152, 720, "16:10"},
+	{1280, 800, "16:10"},
+	{1440, 900, "16:10"},
+	{1680, 1050, "16:10"},
+	{1920, 1200, "16:10"},
+	
+	{0, 0, ""},
+	
+	{640, 480, "4:3"},
+	{800, 600, "4:3"},
+	{1024, 768, "4:3"},
+	{1152, 864, "4:3"},
+	{1280, 960, "4:3"},
+	{1400, 1050, "4:3"},
+	{1600, 1200, "4:3"}
 };
 
 static gint framerates[] =
@@ -230,11 +233,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	for (gint i = 0; i < sizeof(resolutions) / sizeof(struct resolution_pair); i++)
 	{
-		[resolution addItemWithTitle:[NSString stringWithFormat:@"%dx%d\t%s", resolutions[i].width, resolutions[i].height, resolutions[i].aspect_ratio]];
-		
-		if (resolutions[i].seperator)
+		if (resolutions[i].width == 0)
 		{
 			[[resolution menu] addItem:[NSMenuItem separatorItem]];
+		}
+		else
+		{
+			[resolution addItemWithTitle:[NSString stringWithFormat:@"%dx%d\t%s", resolutions[i].width, resolutions[i].height, resolutions[i].aspect_ratio]];
 		}
 	}
 	
