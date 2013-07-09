@@ -169,7 +169,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMenu *mincer_menu = [NSMenu new];
 	[mincer_menu setTitle:@"Mincer"];
-	[mincer_menu addItemWithTitle:@"About Mincer" action:nil keyEquivalent:@""];
+	[mincer_menu addItemWithTitle:@"About Mincer" action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
 	[mincer_menu addItem:[NSMenuItem separatorItem]];
 	[mincer_menu addItemWithTitle:@"Preferences" action:nil keyEquivalent:@","];
 	[mincer_menu addItem:[NSMenuItem separatorItem]];
