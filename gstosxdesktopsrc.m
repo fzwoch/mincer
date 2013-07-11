@@ -28,6 +28,9 @@ typedef struct {
 	gint height;
 	gint framerate_num;
 	gint framerate_denom;
+	
+	gint64 time_first;
+	gint64 time_next;
 } GstOsxDesktopSrc;
 
 typedef struct {
@@ -94,9 +97,31 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	
 	CGContextRef ctx;
 	
-	buf->pts = buf->dts = gst_clock_get_time(GST_ELEMENT_CLOCK(src));
-	buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
-
+	if (GST_OSX_DESKTOP_SRC(src)->time_first < 0)
+	{
+		GST_OSX_DESKTOP_SRC(src)->time_first = GST_OSX_DESKTOP_SRC(src)->time_next = g_get_monotonic_time();
+	}
+	
+	for (;;)
+	{
+		gint64 time_cur = g_get_monotonic_time();
+		
+		if (time_cur > GST_OSX_DESKTOP_SRC(src)->time_next)
+		{
+			buf->pts = buf->dts = (time_cur - GST_OSX_DESKTOP_SRC(src)->time_first) * 1000;
+			buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+			
+			while (GST_OSX_DESKTOP_SRC(src)->time_next < time_cur)
+			{
+				GST_OSX_DESKTOP_SRC(src)->time_next += buf->duration / 1000;
+			}
+			
+			break;
+		}
+		
+		g_usleep(1000);
+	}
+	
 	img = CGDisplayCreateImage(CGMainDisplayID());
 	
 	width = CGImageGetWidth(img);
@@ -169,11 +194,6 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	return GST_FLOW_OK;
 }
 
-static void gst_osx_desktop_src_get_times(GstBaseSrc *src, GstBuffer *buf, GstClockTime *start, GstClockTime *end)
-{	
-	*start = buf->pts - buf->pts % buf->duration + buf->duration;
-}
-
 static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *klass)
 {
 	GstElementClass *gstelement_class = (GstElementClass*)klass;
@@ -193,7 +213,6 @@ static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *klass)
 	
 	gstbasesrc_class->get_caps = gst_osx_desktop_src_get_caps;
 	gstbasesrc_class->set_caps = gst_osx_desktop_src_set_caps;
-	gstbasesrc_class->get_times = gst_osx_desktop_src_get_times;
 	gstpushsrc_class->fill = gst_osx_desktop_src_fill;
 }
 
@@ -209,9 +228,11 @@ static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
 	filter->framerate_num = 30;
 	filter->framerate_denom = 1;
 	
+	filter->time_next = -1;
+	filter->time_first = -1;
+	
 	gst_base_src_set_format(GST_BASE_SRC(filter), GST_FORMAT_TIME);
 	gst_base_src_set_live(GST_BASE_SRC(filter), TRUE);
-	gst_base_src_set_do_timestamp(GST_BASE_SRC(filter), TRUE);
 	gst_base_src_set_blocksize(GST_BASE_SRC(filter), filter->width * filter->height * 4);
 }
 
@@ -234,5 +255,5 @@ GST_PLUGIN_DEFINE
 	"0.0.0",
 	"GPL",
 	"Mincer",
-	"https://github.com/fzwoch/mincer"
+	"https://github.com/fzwoch/mincer/"
 )
