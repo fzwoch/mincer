@@ -409,7 +409,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording_label setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	mp4_recording = [NSButton new];
-	[mp4_recording setTitle:[[mp4_recording_panel directoryURL] lastPathComponent]];
+	[mp4_recording setTitle:[[mp4_recording_panel directoryURL] relativePath]];
 	[mp4_recording setBezelStyle:NSRoundedBezelStyle];
 	[mp4_recording setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[mp4_recording setAction:@selector(updateRecordingDirectory)];
@@ -452,7 +452,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, progress, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url(>=300)]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_secret]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url_label]-[url_secret]" options:0 metrics:nil views:views]];
@@ -475,7 +475,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_bitrate]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[mp4_recording_label]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[mp4_recording]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[mp4_recording(==330)]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[progress]" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[progress]-15-|" options:0 metrics:nil views:views]];
@@ -626,7 +626,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	mp4_recording_enabled = [mp4_recording_panel runModal];
 	
-	[mp4_recording setTitle: mp4_recording_enabled ? [[mp4_recording_panel directoryURL] lastPathComponent] : @"- Disabled -"];
+	[mp4_recording setTitle: mp4_recording_enabled ? [[mp4_recording_panel directoryURL] relativePath] : @"- Disabled -"];
 
 }
 - (void)alert:(NSString *)message
