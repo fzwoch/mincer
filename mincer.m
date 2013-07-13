@@ -153,6 +153,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSTextField *audio_bitrate_label;
 	NSSlider *audio_bitrate;
 	
+	NSOpenPanel *mp4_recording_panel;
+	NSButton *mp4_recording;
+	NSInteger mp4_recording_enabled;
+	
 	NSProgressIndicator *progress;
 	NSButton *button;
 	
@@ -390,6 +394,28 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[self updateAudioBitrate];
 	
+	mp4_recording_panel = [NSOpenPanel new];
+	[mp4_recording_panel setCanChooseFiles:NO];
+	[mp4_recording_panel setCanChooseDirectories:YES];
+	[mp4_recording_panel setAllowsMultipleSelection:NO];
+	[mp4_recording_panel setDirectoryURL:[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
+	
+	NSTextField *mp4_recording_label = [NSTextField new];
+	[mp4_recording_label setStringValue:@"MP4 Recording Directory"];
+	[mp4_recording_label setBezeled:NO];
+	[mp4_recording_label setDrawsBackground:NO];
+	[mp4_recording_label setEditable:NO];
+	[mp4_recording_label setSelectable:NO];
+	[mp4_recording_label setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	mp4_recording = [NSButton new];
+	[mp4_recording setTitle:[[mp4_recording_panel directoryURL] lastPathComponent]];
+	[mp4_recording setBezelStyle:NSRoundedBezelStyle];
+	[mp4_recording setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[mp4_recording setAction:@selector(updateRecordingDirectory)];
+	
+	mp4_recording_enabled = 1;
+	
 	progress = [NSProgressIndicator new];
 	[progress setStyle:NSProgressIndicatorSpinningStyle];
 	[progress setControlSize:NSSmallControlSize];
@@ -418,10 +444,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:audio_device];
 	[[window contentView] addSubview:audio_bitrate_label];
 	[[window contentView] addSubview:audio_bitrate];
+	[[window contentView] addSubview:mp4_recording_label];
+	[[window contentView] addSubview:mp4_recording];
 	[[window contentView] addSubview:progress];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, progress, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, progress, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url(>=300)]-15-|" options:0 metrics:nil views:views]];
@@ -446,11 +474,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_bitrate_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_bitrate]-15-|" options:0 metrics:nil views:views]];
 	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[mp4_recording_label]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[mp4_recording]-15-|" options:0 metrics:nil views:views]];
+	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[progress]" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[progress]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-[button]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
 	
 	[window makeKeyAndOrderFront:nil];
 	[window center];
@@ -478,6 +509,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	GError *error = NULL;
 	GstBus *bus;
+	
+	if (![[url stringValue] length] && !mp4_recording_enabled)
+	{
+		[self alert:@"No RTMP and no MP4 option set. Nothing to be done."];
+		
+		return;
+	}
 	
 	NSDateFormatter* date = [NSDateFormatter new];
 	[date setDateFormat:@"yyyy-MM-dd_HH:mm:ss"];
@@ -509,9 +547,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! flv_mux. "];
 	}
 	
-	if (1)
+	if (mp4_recording_enabled)
 	{
-		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0], [date stringFromDate:[NSDate date]]];
+		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [[mp4_recording_panel directoryURL] relativePath], [date stringFromDate:[NSDate date]]];
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! mp4_mux. "];
 	}
 	
@@ -583,6 +621,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 - (void)updateAudioBitrate
 {
 	[audio_bitrate_label setStringValue:[NSString stringWithFormat:@"Audio Bitrate - %d kbps", [audio_bitrate intValue]]];
+}
+- (void)updateRecordingDirectory
+{
+	mp4_recording_enabled = [mp4_recording_panel runModal];
+	
+	[mp4_recording setTitle: mp4_recording_enabled ? [[mp4_recording_panel directoryURL] lastPathComponent] : @"- Disabled -"];
+
 }
 - (void)alert:(NSString *)message
 {
