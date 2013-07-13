@@ -592,6 +592,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 
 int main(int argc, char *argv[])
 {
+	g_setenv("LC_ALL", "en_US.UTF-8", TRUE);
+	
 	gst_init(&argc, &argv);
 	gst_registry_fork_set_enabled(FALSE);
 	gst_registry_scan_path(gst_registry_get(), [[[[NSBundle mainBundle] privateFrameworksPath] stringByAppendingString:@"/gstreamer-1.0/"] cStringUsingEncoding:NSUTF8StringEncoding]);
