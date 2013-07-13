@@ -18,7 +18,7 @@
 #
 
 CFLAGS  = -Wall -O2 `pkg-config --cflags gstreamer-1.0`
-LDFLAGS = `pkg-config --libs gstreamer-1.0` -framework Cocoa -framework Coreaudio 
+LDFLAGS = `pkg-config --libs gstreamer-1.0` -Wl,-headerpad_max_install_names -framework Cocoa -framework Coreaudio 
 
 APP = Mincer.app/Contents/MacOS/mincer
 OBJ = mincer.o
