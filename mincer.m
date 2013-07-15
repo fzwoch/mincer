@@ -401,7 +401,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording_panel setDirectoryURL:[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
 	
 	NSTextField *mp4_recording_label = [NSTextField new];
-	[mp4_recording_label setStringValue:@"MP4 Recording Directory"];
+	[mp4_recording_label setStringValue:@"Recordings"];
 	[mp4_recording_label setBezeled:NO];
 	[mp4_recording_label setDrawsBackground:NO];
 	[mp4_recording_label setEditable:NO];
