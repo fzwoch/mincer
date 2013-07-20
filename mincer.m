@@ -543,8 +543,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([[url stringValue] length])
 	{
-		[desc appendFormat:@"tee_264. ! queue ! flvmux name=flv_mux ! rtmpsink location=\"%@\" ", [[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! flv_mux. "];
+		[desc appendFormat:@"tee_264. ! queue ! flvmux name=flv_mux ! rtmpsink location=\"%@\" ", [[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 	}
 	
 	if (mp4_recording_enabled)
