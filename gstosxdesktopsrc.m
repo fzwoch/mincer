@@ -39,9 +39,9 @@ typedef struct {
 
 #define GST_TYPE_OSX_DESKTOP_SRC (gst_osx_desktop_src_get_type())
 #define GST_OSX_DESKTOP_SRC(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_OSX_DESKTOP_SRC,GstOsxDesktopSrc))
-#define GST_OSX_DESKTOP_SRC_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_OSX_DESKTOP_SRC,GstOsxDesktopSrcClass))
+#define GST_OSX_DESKTOP_SRC_CLASS(class) (G_TYPE_CHECK_CLASS_CAST((class),GST_TYPE_OSX_DESKTOP_SRC,GstOsxDesktopSrcClass))
 #define GST_IS_OSX_DESKTOP_SRC(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_OSX_DESKTOP_SRC))
-#define GST_IS_OSX_DESKTOP_SRC_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_OSX_DESKTOP_SRC))
+#define GST_IS_OSX_DESKTOP_SRC_CLASS(class) (G_TYPE_CHECK_CLASS_TYPE((class),GST_TYPE_OSX_DESKTOP_SRC))
 
 G_DEFINE_TYPE(GstOsxDesktopSrc, gst_osx_desktop_src, GST_TYPE_PUSH_SRC);
 
@@ -73,11 +73,10 @@ static GstCaps* gst_osx_desktop_src_get_caps(GstBaseSrc *src, GstCaps *filter)
 
 static gboolean gst_osx_desktop_src_set_caps(GstBaseSrc *src, GstCaps *caps)
 {
-	GstStructure *struc = gst_caps_get_structure(caps, 0);
 	gint num = 0;
 	gint denom = 1;
 	
-	gst_structure_get_fraction(struc, "framerate", &num, &denom);
+	gst_structure_get_fraction(gst_caps_get_structure(caps, 0), "framerate", &num, &denom);
 	
 	if (num)
 	{
@@ -164,56 +163,49 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	);
 	
 	CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), img);
+	CGImageRelease(img);
 	
-	if (!CGCursorIsDrawnInFramebuffer())
+	if (!CGCursorIsDrawnInFramebuffer() && CGCursorIsVisible())
 	{
 		@autoreleasepool
 		{
-			NSPoint loc = [NSEvent mouseLocation];
+			NSRect rect;
 			NSCursor *cursor = [NSCursor currentSystemCursor];
-			NSImage *cursor_image = [cursor image];
-			NSGraphicsContext *ctx_ = [NSGraphicsContext graphicsContextWithGraphicsPort:ctx flipped:FALSE];
+			NSImage *cursor_img = [cursor image];
 			
-			loc.x -= [cursor hotSpot].x;
-			loc.y -= [cursor_image size].height - [cursor hotSpot].y;
+			rect.size = [cursor_img size];
+			rect.origin = [NSEvent mouseLocation];
 			
-			[NSGraphicsContext saveGraphicsState];
-			[NSGraphicsContext setCurrentContext:ctx_];
+			rect.origin.x -= [cursor hotSpot].x;
+			rect.origin.y -= [cursor_img size].height - [cursor hotSpot].y;
 			
-			[cursor_image drawAtPoint:loc fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-			
-			[NSGraphicsContext restoreGraphicsState];
+			CGContextDrawImage(ctx, NSRectToCGRect(rect), [cursor_img CGImageForProposedRect:NULL context:NULL hints:NULL]);
 		}
 	}
 	
 	CGContextRelease(ctx);
-	CGImageRelease(img);
 	
 	gst_buffer_unmap(buf, &info);
 	
 	return GST_FLOW_OK;
 }
 
-static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *klass)
+static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *class)
 {
-	GstElementClass *gstelement_class = (GstElementClass*)klass;
-	GstBaseSrcClass *gstbasesrc_class = (GstBaseSrcClass*)klass;
-	GstPushSrcClass *gstpushsrc_class = (GstPushSrcClass*)klass;
-	
 	gst_element_class_set_static_metadata
 	(
-		gstelement_class,
+		GST_ELEMENT_CLASS(class),
 		"OS X Desktop Source",
 		"Capture/Video",
 		"Captures OS X Desktop",
 		"Florian Zwoch <fzwoch@gmail.com>"
 	);
 	
-	gst_element_class_add_pad_template(gstelement_class, gst_static_pad_template_get(&src_template));
+	gst_element_class_add_pad_template(GST_ELEMENT_CLASS(class), gst_static_pad_template_get(&src_template));
 	
-	gstbasesrc_class->get_caps = gst_osx_desktop_src_get_caps;
-	gstbasesrc_class->set_caps = gst_osx_desktop_src_set_caps;
-	gstpushsrc_class->fill = gst_osx_desktop_src_fill;
+	GST_BASE_SRC_CLASS(class)->get_caps = gst_osx_desktop_src_get_caps;
+	GST_BASE_SRC_CLASS(class)->set_caps = gst_osx_desktop_src_set_caps;
+	GST_PUSH_SRC_CLASS(class)->fill = gst_osx_desktop_src_fill;
 }
 
 static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
