@@ -335,9 +335,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	gint device_count = size / sizeof(AudioDeviceID);
 	
-	if (device_count > MAX_AUDIO_DEVICES)
+	if (device_count > MAX_AUDIO_DEVICES - 1)
 	{
-		device_count = MAX_AUDIO_DEVICES;
+		device_count = MAX_AUDIO_DEVICES - 1;
 	}
 	
 	for (gint i = 0; i < device_count; i++)
