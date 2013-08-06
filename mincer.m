@@ -557,8 +557,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	if (error)
 	{
 		[self alert:[NSString stringWithCString:error->message encoding:NSUTF8StringEncoding]];
-		
 		g_error_free(error);
+		
+		if (pipeline)
+		{
+			gst_object_unref(pipeline);
+			pipeline = NULL;
+		}
 		
 		return;
 	}
