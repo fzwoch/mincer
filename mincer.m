@@ -538,7 +538,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (![audio_device indexOfSelectedItem] && !audio_soundflower_id)
 	{
-		[desc appendFormat:@"audiotestsrc is-live=true do-timestamp=true wave=silence ! audio_mix. "];
+		[desc appendFormat:@"audiotestsrc is-live=true do-timestamp=true wave=silence ! audio/x-raw, channels=2, rate=44100 ! audio_mix. "];
 	}
 	
 	if ([[url stringValue] length])
