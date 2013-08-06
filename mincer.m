@@ -549,8 +549,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (mp4_recording_enabled)
 	{
-		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [[mp4_recording_panel directoryURL] relativePath], [date stringFromDate:[NSDate date]]];
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! mp4_mux. "];
+		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [[mp4_recording_panel directoryURL] relativePath], [date stringFromDate:[NSDate date]]];
 	}
 	
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);
