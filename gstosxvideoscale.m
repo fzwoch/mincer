@@ -86,8 +86,11 @@ static GstCaps* gst_osx_videoscale_transform_caps(GstBaseTransform *trans, GstPa
 		gst_structure_get_int(gst_caps_get_structure(filter, 0), "width", &width);
 		gst_structure_get_int(gst_caps_get_structure(filter, 0), "height", &height);
 		
-		gst_caps_set_simple(new_caps, "width", G_TYPE_INT, width, NULL);
-		gst_caps_set_simple(new_caps, "height", G_TYPE_INT, height, NULL);
+		if (width && height)
+		{
+			gst_caps_set_simple(new_caps, "width", G_TYPE_INT, width, NULL);
+			gst_caps_set_simple(new_caps, "height", G_TYPE_INT, height, NULL);
+		}
 	}
 	
 	return new_caps;
