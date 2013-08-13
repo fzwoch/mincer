@@ -32,7 +32,6 @@ GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstadder.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioconvert.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioresample.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstvideoscale.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstvideoconvert.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstx264.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstfaac.so \
@@ -41,7 +40,8 @@ GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstrtmp.so
 
 GST_OBJ = \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so \
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so
 	
 all: $(ZIP)
 	@echo " DONE"
@@ -85,7 +85,7 @@ Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so:/opt/local/lib/gstreamer-1.0/%
 
 lib%.so:../../../../%.m
 	@echo " CC $@"
-	@$(CC) -Wall -O2 -shared $< `pkg-config --cflags --libs gstreamer-base-1.0` -o $@ -framework Cocoa
+	@$(CC) -Wall -O2 -shared $< `pkg-config --cflags --libs gstreamer-base-1.0` /opt/local/lib/libswscale.a /opt/local/lib/libavutil.a -o $@ -framework Cocoa
 
 clean:
 	@echo " CLEAN"
