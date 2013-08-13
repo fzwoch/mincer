@@ -17,9 +17,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define USE_SWSCALE 1
+
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
+#if USE_SWSCALE
+#include <libswscale/swscale.h>
+#else
 #include <Cocoa/Cocoa.h>
+#endif
 
 typedef struct {
 	GstBaseTransform element;
@@ -29,6 +35,10 @@ typedef struct {
 	
 	gint width_out;
 	gint height_out;
+	
+#if USE_SWSCALE
+	struct SwsContext *sws;
+#endif
 } GstOsxVideoscale;
 
 typedef struct {
@@ -112,14 +122,33 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 	GstMapInfo info_in;
 	GstMapInfo info_out;
 	
+#if USE_SWSCALE
+	const guint8 *src[3] = { NULL };
+	gint src_stride[3] = { 0 };
+	
+	guint8 *dst[3] = { NULL };
+	gint dst_stride[3] = { 0 };
+#else
 	CGContextRef ctx_in;
 	CGContextRef ctx_out;
 	
 	CGImageRef img;
+#endif
 	
 	gst_buffer_map(inbuf, &info_in, GST_MAP_READ);
 	gst_buffer_map(outbuf, &info_out, GST_MAP_WRITE);
-	 
+	
+#if USE_SWSCALE
+	src[0] = info_in.data;
+	src_stride[0] = GST_OSX_VIDEOSCALE(trans)->width_in * 4;
+	
+	dst[0] = info_out.data;
+	dst_stride[0] = GST_OSX_VIDEOSCALE(trans)->width_out * 4;
+	
+	GST_OSX_VIDEOSCALE(trans)->sws = sws_getCachedContext(GST_OSX_VIDEOSCALE(trans)->sws, GST_OSX_VIDEOSCALE(trans)->width_in, GST_OSX_VIDEOSCALE(trans)->height_in, PIX_FMT_RGB32, GST_OSX_VIDEOSCALE(trans)->width_out, GST_OSX_VIDEOSCALE(trans)->height_out, PIX_FMT_RGB32, SWS_BILINEAR, NULL, NULL, NULL);
+	
+	sws_scale(GST_OSX_VIDEOSCALE(trans)->sws, src, src_stride, 0, GST_OSX_VIDEOSCALE(trans)->height_in, dst, dst_stride);
+#else
 	ctx_in = CGBitmapContextCreate
 	(
 		info_in.data,
@@ -150,6 +179,7 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 	CGImageRelease(img);
 	CGContextRelease(ctx_in);
 	CGContextRelease(ctx_out);
+#endif
 	
 	gst_buffer_unmap(inbuf, &info_in);
 	gst_buffer_unmap(outbuf, &info_out);
@@ -185,6 +215,10 @@ static void gst_osx_videoscale_init(GstOsxVideoscale *filter)
 	
 	filter->width_out = 0;
 	filter->height_out = 0;
+	
+#if USE_SWSCALE
+	filter->sws = NULL; // leaks!
+#endif
 }
 
 static gboolean plugin_init(GstPlugin *plugin)
