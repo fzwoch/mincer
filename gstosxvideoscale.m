@@ -124,10 +124,10 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 	
 #if USE_SWSCALE
 	const guint8 *src[3] = { NULL };
-	gint src_stride[3] = { 0 };
+	gint src_stride[4] = { 0 };
 	
 	guint8 *dst[3] = { NULL };
-	gint dst_stride[3] = { 0 };
+	gint dst_stride[4] = { 0 };
 #else
 	CGContextRef ctx_in;
 	CGContextRef ctx_out;
