@@ -107,6 +107,8 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 		
 		if (time_cur > GST_OSX_DESKTOP_SRC(src)->time_next)
 		{
+			buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+			
 			while (GST_OSX_DESKTOP_SRC(src)->time_next < time_cur)
 			{
 				GST_OSX_DESKTOP_SRC(src)->time_next += 1000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
