@@ -522,23 +522,23 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	[desc appendFormat:@"osxdesktopsrc do-timestamp=true ! queue ! osxvideoscale ! video/x-raw, width=%d, height=%d, framerate=%d/1 ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height, framerates[[framerate indexOfSelectedItem]]];
+	[desc appendFormat:@"osxdesktopsrc ! queue ! osxvideoscale ! video/x-raw, width=%d, height=%d, framerate=%d/1 ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height, framerates[[framerate indexOfSelectedItem]]];
 	[desc appendFormat:@"videoconvert ! x264enc bitrate=%d speed-preset=%d bframes=0 ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue]];
 	[desc appendFormat:@"adder name=audio_mix ! faac rate-control=ABR bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac ", [audio_bitrate intValue] * 1000];
 	
 	if (audio_soundflower_id)
 	{
-		[desc appendFormat:@"osxaudiosrc do-timestamp=true device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_soundflower_id];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_soundflower_id];
 	}
 	
 	if ([audio_device indexOfSelectedItem])
 	{
-		[desc appendFormat:@"osxaudiosrc do-timestamp=true device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_soundflower_id)
 	{
-		[desc appendFormat:@"audiotestsrc is-live=true do-timestamp=true wave=silence ! audio/x-raw, channels=2, rate=44100 ! audio_mix. "];
+		[desc appendFormat:@"audiotestsrc is-live=true wave=silence ! audio/x-raw, channels=2, rate=44100 ! audio_mix. "];
 	}
 	
 	if ([[url stringValue] length])
