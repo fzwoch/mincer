@@ -41,7 +41,8 @@ GST = \
 
 GST_OBJ = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so \
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so
 	
 all: $(ZIP)
 	@echo " DONE"
