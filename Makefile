@@ -86,7 +86,7 @@ Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so:/opt/local/lib/gstreamer-1.0/%
 
 lib%.so:../../../../%.m
 	@echo " CC $@"
-	@$(CC) -Wall -O2 -shared $< `pkg-config --cflags --libs gstreamer-base-1.0` /opt/local/lib/libswscale.a /opt/local/lib/libavutil.a -o $@ -framework Cocoa
+	@$(CC) -Wall -O2 -shared $< `pkg-config --cflags --libs gstreamer-base-1.0` `pkg-config --cflags --libs gstreamer-audio-1.0` /opt/local/lib/libswscale.a /opt/local/lib/libavutil.a -o $@ -framework Cocoa -framework AudioToolBox
 
 clean:
 	@echo " CLEAN"
