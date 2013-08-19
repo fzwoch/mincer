@@ -522,7 +522,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	[desc appendFormat:@"osxdesktopsrc ! queue ! osxvideoscale ! video/x-raw, width=%d, height=%d, framerate=%d/1 ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height, framerates[[framerate indexOfSelectedItem]]];
+	[desc appendFormat:@"osxdesktopsrc ! video/x-raw, framerate=%d/1 ! queue ! osxvideoscale ! video/x-raw, width=%d, height=%d ! ", framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	[desc appendFormat:@"videoconvert ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
 	[desc appendFormat:@"adder name=audio_mix ! faac rate-control=ABR bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac ", [audio_bitrate intValue] * 1000];
 	
