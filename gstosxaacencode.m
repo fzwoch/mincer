@@ -215,9 +215,10 @@ static gboolean gst_osx_aac_encode_set_format(GstAudioEncoder *enc, GstAudioInfo
 	
 	codec_data = gst_buffer_new_and_alloc(tmp);
 	gst_buffer_fill(codec_data, 0, buffer, tmp);
+	free(buffer);
 	
 	gst_caps_set_simple(caps, "codec_data", GST_TYPE_BUFFER, codec_data, NULL);
-	gst_buffer_unref (codec_data);
+	gst_buffer_unref(codec_data);
 	
 	gst_audio_encoder_set_output_format(enc, caps);
 	gst_caps_unref(caps);
@@ -251,14 +252,19 @@ static GstFlowReturn gst_osx_aac_encode_handle_frame(GstAudioEncoder *enc, GstBu
 	GstFlowReturn ret = GST_FLOW_OK;
 	GstMapInfo info_in;
 	GstMapInfo info_out;
-	GstBuffer *buf_out = gst_buffer_new_allocate(NULL, 1024 * 8, NULL);
-	
+	GstBuffer *buf_out;
 	UInt32 desc_num = 1;
+	UInt32 max_out_buf;
+	UInt32 max_out_buf_size = sizeof(max_out_buf);
 	
 	if (!buf)
 	{
 		return GST_FLOW_OK;
 	}
+	
+	AudioConverterGetProperty(GST_OSX_AAC_ENCODE(enc)->encoder, kAudioConverterPropertyMaximumOutputPacketSize, &max_out_buf_size, &max_out_buf);
+	
+	buf_out = gst_buffer_new_allocate(NULL, max_out_buf, NULL);
 	
 	gst_buffer_map(buf, &info_in, GST_MAP_READ);
 	gst_buffer_map(buf_out, &info_out, GST_MAP_WRITE);
@@ -278,17 +284,17 @@ static GstFlowReturn gst_osx_aac_encode_handle_frame(GstAudioEncoder *enc, GstBu
 	
 	AudioConverterFillComplexBuffer(GST_OSX_AAC_ENCODE(enc)->encoder, aac_cb, &info_in, &desc_num, &list, NULL);
 	
+	gst_buffer_set_size(buf_out, list.mBuffers[0].mDataByteSize);
+	
+	gst_buffer_unmap(buf, &info_in);
+	gst_buffer_unmap(buf_out, &info_out);
+	
 	if (!list.mBuffers[0].mDataByteSize)
 	{
 		gst_buffer_unref(buf_out);
 		
 		return GST_FLOW_OK;
 	}
-	
-	gst_buffer_set_size(buf_out, list.mBuffers[0].mDataByteSize);
-	
-	gst_buffer_unmap(buf, &info_in);
-	gst_buffer_unmap(buf_out, &info_out);
 	
 	ret = gst_audio_encoder_finish_frame(enc, buf_out, 1024);
 	
