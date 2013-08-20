@@ -78,6 +78,80 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE
 	)
 );
 
+#define MP4ESDescrTag			0x03
+#define MP4DecConfigDescrTag	0x04
+#define MP4DecSpecificDescrTag	0x05
+
+static int readDescrLen(UInt8 **buffer)
+{
+	int len = 0;
+	int count = 4;
+	
+	while (count--)
+	{
+		int c = *(*buffer)++;
+		
+		len = (len << 7) | (c & 0x7f);
+		if (!(c & 0x80))
+		{
+			break;
+		}
+	}
+	
+	return len;
+}
+
+static int readDescr(UInt8 **buffer, int *tag)
+{
+	*tag = *(*buffer)++;
+	
+	return readDescrLen(buffer);
+}
+
+static long ReadESDSDescExt(void* descExt, UInt8 **buffer, UInt32 *size, int versionFlags)
+{
+	UInt8 *esds = (UInt8*)descExt;
+	int tag, len;
+	*size = 0;
+	
+	if (versionFlags)
+	{
+		esds += 4; // version + flags
+	}
+	
+	readDescr(&esds, &tag);
+	esds += 2;     // ID
+	
+	if (tag == MP4ESDescrTag)
+	{
+		esds++;    // priority
+	}
+	
+	readDescr(&esds, &tag);
+	if (tag == MP4DecConfigDescrTag)
+	{
+		esds++;    // object type id
+		esds++;    // stream type
+		esds += 3; // buffer size db
+		esds += 4; // max bitrate
+		esds += 4; // average bitrate
+		
+		len = readDescr(&esds, &tag);
+		if (tag == MP4DecSpecificDescrTag)
+		{
+			*buffer = calloc(1, len + 8);
+			
+			if (*buffer)
+			{
+				memcpy(*buffer, esds, len);
+				*size = len;
+			}
+		}
+	}
+	
+	return noErr;
+}
+
 static void gst_osx_aac_encode_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
 {
 	switch (prop_id)
@@ -108,6 +182,10 @@ static gboolean gst_osx_aac_encode_set_format(GstAudioEncoder *enc, GstAudioInfo
 {
 	GstPadTemplate *pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(enc), GST_AUDIO_ENCODER_SRC_NAME);
 	GstCaps *caps = gst_caps_copy(gst_pad_template_get_caps(pad_template));
+	GstBuffer *codec_data;
+	guint8 *buffer = NULL;
+	guint8 data[64];
+	UInt32 tmp = sizeof(data);
 	
 	AudioStreamBasicDescription fmt_in;
 	AudioStreamBasicDescription fmt_out;
@@ -131,6 +209,15 @@ static gboolean gst_osx_aac_encode_set_format(GstAudioEncoder *enc, GstAudioInfo
 	AudioConverterNew(&fmt_in, &fmt_out, &GST_OSX_AAC_ENCODE(enc)->encoder);
 	
 	AudioConverterSetProperty(GST_OSX_AAC_ENCODE(enc)->encoder, kAudioConverterEncodeBitRate, sizeof(GST_OSX_AAC_ENCODE(enc)->bitrate), &GST_OSX_AAC_ENCODE(enc)->bitrate);
+	AudioConverterGetProperty(GST_OSX_AAC_ENCODE(enc)->encoder, kAudioConverterCompressionMagicCookie, &tmp, data);
+	
+	ReadESDSDescExt(data, &buffer, &tmp, 0);
+	
+	codec_data = gst_buffer_new_and_alloc(tmp);
+	gst_buffer_fill(codec_data, 0, buffer, tmp);
+	
+	gst_caps_set_simple(caps, "codec_data", GST_TYPE_BUFFER, codec_data, NULL);
+	gst_buffer_unref (codec_data);
 	
 	gst_audio_encoder_set_output_format(enc, caps);
 	gst_caps_unref(caps);
