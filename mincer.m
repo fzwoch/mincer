@@ -95,6 +95,23 @@ static gchar *encoder_speeds[] =
 	"Placebo"
 };
 
+static gint audio_bitrates[] =
+{
+	64,
+	72,
+	80,
+	96,
+	112,
+	128,
+	144,
+	160,
+	192,
+	224,
+	256,
+	288,
+	320
+};
+
 static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
 static glong audio_soundflower_id = 0;
 
@@ -384,10 +401,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[audio_bitrate_label setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	audio_bitrate = [NSSlider new];
-	[audio_bitrate setMinValue:32];
-	[audio_bitrate setMaxValue:320];
-	[audio_bitrate setIntValue:128];
-	[audio_bitrate setNumberOfTickMarks:([audio_bitrate maxValue] - [audio_bitrate minValue]) / 16 + 1];
+	[audio_bitrate setMinValue:0];
+	[audio_bitrate setMaxValue:sizeof(audio_bitrates) / sizeof(audio_bitrates[0]) - 1];
+	[audio_bitrate setIntValue:5];
+	[audio_bitrate setNumberOfTickMarks:sizeof(audio_bitrates) / sizeof(audio_bitrates[0])];
 	[audio_bitrate setAllowsTickMarkValuesOnly:YES];
 	[audio_bitrate setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[audio_bitrate setAction:@selector(updateAudioBitrate)];
@@ -524,7 +541,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[desc appendFormat:@"osxdesktopsrc ! video/x-raw, framerate=%d/1 ! queue ! osxvideoscale ! video/x-raw, width=%d, height=%d ! ", framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	[desc appendFormat:@"videoconvert ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
-	[desc appendFormat:@"adder name=audio_mix ! faac rate-control=ABR bitrate=%d ! audio/mpeg, mpegversion=4 ! tee name=tee_aac ", [audio_bitrate intValue] * 1000];
+	[desc appendFormat:@"adder name=audio_mix ! osxaacencode bitrate=%d ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
 	if (audio_soundflower_id)
 	{
@@ -538,7 +555,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (![audio_device indexOfSelectedItem] && !audio_soundflower_id)
 	{
-		[desc appendFormat:@"audiotestsrc is-live=true wave=silence ! audio/x-raw, channels=2, rate=44100 ! audio_mix. "];
+		[desc appendFormat:@"audiotestsrc is-live=true wave=silence ! audio_mix. "];
 	}
 	
 	if ([[url stringValue] length])
@@ -625,7 +642,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 }
 - (void)updateAudioBitrate
 {
-	[audio_bitrate_label setStringValue:[NSString stringWithFormat:@"Audio Bitrate - %d kbps", [audio_bitrate intValue]]];
+	[audio_bitrate_label setStringValue:[NSString stringWithFormat:@"Audio Bitrate - %d kbps", audio_bitrates[[audio_bitrate intValue]]]];
 }
 - (void)updateRecordingDirectory
 {

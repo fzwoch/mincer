@@ -34,7 +34,6 @@ GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioresample.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstvideoconvert.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstx264.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstfaac.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstflv.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstisomp4.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstrtmp.so

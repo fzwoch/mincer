@@ -26,6 +26,7 @@ typedef struct {
 	GstAudioEncoder element;
 	
 	AudioConverterRef encoder;
+	gint bitrate;
 } GstOsxAacEncode;
 
 typedef struct {
@@ -39,6 +40,12 @@ typedef struct {
 #define GST_IS_OSX_AAC_ENCODE_CLASS(class) (G_TYPE_CHECK_CLASS_TYPE((class),GST_TYPE_OSX_AAC_ENCODE))
 
 G_DEFINE_TYPE(GstOsxAacEncode, gst_osx_aac_encode, GST_TYPE_AUDIO_ENCODER);
+
+enum
+{
+	PROP_0,
+	PROP_BITRATE,
+};
 
 static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE
 (
@@ -71,11 +78,36 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE
 	)
 );
 
+static void gst_osx_aac_encode_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
+{
+	switch (prop_id)
+	{
+	case PROP_BITRATE:
+		GST_OSX_AAC_ENCODE(object)->bitrate = g_value_get_int(value);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+		break;
+	}
+}
+
+static void gst_osx_aac_encode_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
+{
+	switch (prop_id)
+	{
+	case PROP_BITRATE:
+		g_value_set_int(value, GST_OSX_AAC_ENCODE(object)->bitrate);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+		break;
+	}
+}
+
 static gboolean gst_osx_aac_encode_set_format(GstAudioEncoder *enc, GstAudioInfo *info)
 {
 	GstPadTemplate *pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(enc), GST_AUDIO_ENCODER_SRC_NAME);
 	GstCaps *caps = gst_caps_copy(gst_pad_template_get_caps(pad_template));
-	UInt32 tmp;
 	
 	AudioStreamBasicDescription fmt_in;
 	AudioStreamBasicDescription fmt_out;
@@ -98,27 +130,7 @@ static gboolean gst_osx_aac_encode_set_format(GstAudioEncoder *enc, GstAudioInfo
 	
 	AudioConverterNew(&fmt_in, &fmt_out, &GST_OSX_AAC_ENCODE(enc)->encoder);
 	
-/*
- -> 64000,000000
- -> 72000,000000
- -> 80000,000000
- -> 96000,000000
- -> 112000,000000
- -> 128000,000000
- -> 144000,000000
- -> 160000,000000
- -> 192000,000000
- -> 224000,000000
- -> 256000,000000
- -> 288000,000000
- -> 320000,000000
- */
-	
-	tmp = kAudioConverterQuality_Max;
-	AudioConverterSetProperty(GST_OSX_AAC_ENCODE(enc)->encoder, kAudioConverterCodecQuality, sizeof(tmp), &tmp);
-	
-	tmp = 128 * 1000;
-	AudioConverterSetProperty(GST_OSX_AAC_ENCODE(enc)->encoder, kAudioConverterEncodeBitRate, sizeof(tmp), &tmp);
+	AudioConverterSetProperty(GST_OSX_AAC_ENCODE(enc)->encoder, kAudioConverterEncodeBitRate, sizeof(GST_OSX_AAC_ENCODE(enc)->bitrate), &GST_OSX_AAC_ENCODE(enc)->bitrate);
 	
 	gst_audio_encoder_set_output_format(enc, caps);
 	gst_caps_unref(caps);
@@ -140,6 +152,7 @@ static OSStatus aac_cb(AudioConverterRef encoder, UInt32 *num, AudioBufferList *
 {
 	GstMapInfo *info = user;
 	
+	list->mBuffers[0].mNumberChannels = 2;
 	list->mBuffers[0].mDataByteSize = info->size;
 	list->mBuffers[0].mData = info->data;
 	
@@ -178,6 +191,13 @@ static GstFlowReturn gst_osx_aac_encode_handle_frame(GstAudioEncoder *enc, GstBu
 	
 	AudioConverterFillComplexBuffer(GST_OSX_AAC_ENCODE(enc)->encoder, aac_cb, &info_in, &desc_num, &list, NULL);
 	
+	if (!list.mBuffers[0].mDataByteSize)
+	{
+		gst_buffer_unref(buf_out);
+		
+		return GST_FLOW_OK;
+	}
+	
 	gst_buffer_set_size(buf_out, list.mBuffers[0].mDataByteSize);
 	
 	gst_buffer_unmap(buf, &info_in);
@@ -205,6 +225,11 @@ static void gst_osx_aac_encode_class_init(GstOsxAacEncodeClass *class)
 	GST_AUDIO_ENCODER_CLASS(class)->handle_frame = gst_osx_aac_encode_handle_frame;
 	GST_AUDIO_ENCODER_CLASS(class)->set_format = gst_osx_aac_encode_set_format;
 	GST_AUDIO_ENCODER_CLASS(class)->stop = gst_osx_aac_encode_stop;
+	
+	G_OBJECT_CLASS(class)->set_property = gst_osx_aac_encode_set_property;
+	G_OBJECT_CLASS(class)->get_property = gst_osx_aac_encode_get_property;
+	
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_BITRATE, g_param_spec_int("bitrate", "Bitrate (bps)", "Average Bitrate (ABR) in bits/sec", 64000, 320000, 128000, G_PARAM_CONSTRUCT | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
 
 static void gst_osx_aac_encode_init(GstOsxAacEncode *filter)
@@ -213,6 +238,7 @@ static void gst_osx_aac_encode_init(GstOsxAacEncode *filter)
 	gst_audio_encoder_set_frame_samples_max(GST_AUDIO_ENCODER(filter), 1024);
 	
 	filter->encoder = NULL;
+	filter->bitrate = 128000;
 }
 
 static gboolean plugin_init(GstPlugin *plugin)
