@@ -187,6 +187,18 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 	return GST_FLOW_OK;
 }
 
+static gboolean gst_osx_videoscale_stop(GstBaseTransform *trans)
+{
+#ifdef USE_SWSCALE
+	if (GST_OSX_VIDEOSCALE(trans)->sws)
+	{
+		sws_freeContext(GST_OSX_VIDEOSCALE(trans)->sws);
+		GST_OSX_VIDEOSCALE(trans)->sws = NULL;
+	}
+#endif
+	return TRUE;
+}
+
 static void gst_osx_videoscale_class_init(GstOsxVideoscaleClass *class)
 {
 	gst_element_class_set_static_metadata
@@ -204,6 +216,7 @@ static void gst_osx_videoscale_class_init(GstOsxVideoscaleClass *class)
 	GST_BASE_TRANSFORM_CLASS(class)->transform = gst_osx_videoscale_transform;
 	GST_BASE_TRANSFORM_CLASS(class)->transform_caps = gst_osx_videoscale_transform_caps;
 	GST_BASE_TRANSFORM_CLASS(class)->set_caps = gst_osx_videoscale_set_caps;
+	GST_BASE_TRANSFORM_CLASS(class)->stop = gst_osx_videoscale_stop;
 	
 	GST_BASE_TRANSFORM_CLASS(class)->passthrough_on_same_caps = TRUE;
 }
@@ -217,7 +230,7 @@ static void gst_osx_videoscale_init(GstOsxVideoscale *filter)
 	filter->height_out = 0;
 	
 #if USE_SWSCALE
-	filter->sws = NULL; // leaks!
+	filter->sws = NULL;
 #endif
 }
 
