@@ -32,6 +32,8 @@ GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstadder.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioconvert.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioresample.so \
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstvideoparsersbad.so \
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioparsers.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstvideoconvert.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstx264.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstflv.so \
@@ -42,7 +44,7 @@ GST_OBJ = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so
-	
+
 all: $(ZIP)
 	@echo " DONE"
 
