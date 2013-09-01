@@ -234,7 +234,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url_label setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	url = [NSTextField new];
-	[url setStringValue:@"rtmp://live.twitch.tv/app/"];
 	[url setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	url_secret = [NSSecureTextField new];
@@ -285,8 +284,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[framerate addItemWithTitle:[NSString stringWithFormat:@"%d", framerates[i]]];
 	}
 	
-	[framerate selectItemWithTitle:@"30"];
-	
 	encoder_speed_label = [NSTextField new];
 	[encoder_speed_label setBezeled:NO];
 	[encoder_speed_label setDrawsBackground:NO];
@@ -297,13 +294,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	encoder_speed = [NSSlider new];
 	[encoder_speed setMinValue:1];
 	[encoder_speed setMaxValue:10];
-	[encoder_speed setIntValue:1];
 	[encoder_speed setNumberOfTickMarks:[encoder_speed maxValue]];
 	[encoder_speed setAllowsTickMarkValuesOnly:YES];
 	[encoder_speed setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[encoder_speed setAction:@selector(updateEncoderSpeed)];
-	
-	[self updateEncoderSpeed];
 	
 	video_bitrate_label = [NSTextField new];
 	[video_bitrate_label setBezeled:NO];
@@ -315,13 +309,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	video_bitrate = [NSSlider new];
 	[video_bitrate setMinValue:300];
 	[video_bitrate setMaxValue:3000];
-	[video_bitrate setIntValue:800];
 	[video_bitrate setNumberOfTickMarks:([video_bitrate maxValue] - [video_bitrate minValue]) / 50 + 1];
 	[video_bitrate setAllowsTickMarkValuesOnly:YES];
 	[video_bitrate setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[video_bitrate setAction:@selector(updateVideoBitrate)];
-	
-	[self updateVideoBitrate];
 	
 	NSTextField *audio_device_label = [NSTextField new];
 	[audio_device_label setStringValue:@"Audio Input"];
@@ -407,13 +398,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	audio_bitrate = [NSSlider new];
 	[audio_bitrate setMinValue:0];
 	[audio_bitrate setMaxValue:sizeof(audio_bitrates) / sizeof(audio_bitrates[0]) - 1];
-	[audio_bitrate setIntValue:5];
 	[audio_bitrate setNumberOfTickMarks:sizeof(audio_bitrates) / sizeof(audio_bitrates[0])];
 	[audio_bitrate setAllowsTickMarkValuesOnly:YES];
 	[audio_bitrate setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[audio_bitrate setAction:@selector(updateAudioBitrate)];
-	
-	[self updateAudioBitrate];
 	
 	mp4_recording_panel = [NSOpenPanel new];
 	[mp4_recording_panel setCanChooseFiles:NO];
@@ -519,6 +507,19 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
 	
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	
+	[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @"rtmp://live.twitch.tv/app/"];
+	[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
+	[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
+	[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
+	[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
+	[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"] ? [defaults integerForKey:@"audio_bitrate"] : [audio_bitrate minValue]];
+	
+	[self updateEncoderSpeed];
+	[self updateVideoBitrate];
+	[self updateAudioBitrate];
+	
 	[window makeKeyAndOrderFront:nil];
 	[window center];
 	
@@ -532,6 +533,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	gst_deinit();
+	
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	
+	[defaults setObject:[url stringValue] forKey:@"url"];
+	[defaults setInteger:[resolution indexOfSelectedItem] forKey:@"resolution"];
+	[defaults setInteger:[framerate indexOfSelectedItem] forKey:@"framerate"];
+	[defaults setInteger:[encoder_speed integerValue] forKey:@"encoder_speed"];
+	[defaults setInteger:[video_bitrate integerValue] forKey:@"video_bitrate"];
+	[defaults setInteger:[audio_bitrate integerValue] forKey:@"audio_bitrate"];
+	[defaults synchronize];
 }
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
 {
