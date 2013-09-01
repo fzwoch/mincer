@@ -174,7 +174,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSButton *mp4_recording;
 	NSInteger mp4_recording_enabled;
 	
-	NSProgressIndicator *progress;
 	NSButton *button;
 	
 	NSDate *start_date;
@@ -425,13 +424,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	mp4_recording_enabled = 1;
 	
-	progress = [NSProgressIndicator new];
-	[progress setStyle:NSProgressIndicatorSpinningStyle];
-	[progress setControlSize:NSSmallControlSize];
-	[progress setIndeterminate:YES];
-	[progress setHidden:YES];
-	[progress setTranslatesAutoresizingMaskIntoConstraints:NO];
-	
 	elapsed_time = [NSTextField new];
 	[elapsed_time setTextColor:[NSColor grayColor]];
 	[elapsed_time setBezeled:NO];
@@ -468,11 +460,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:audio_bitrate];
 	[[window contentView] addSubview:mp4_recording_label];
 	[[window contentView] addSubview:mp4_recording];
-	[[window contentView] addSubview:progress];
 	[[window contentView] addSubview:elapsed_time];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, progress, elapsed_time, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -500,9 +491,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[mp4_recording_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[mp4_recording(==330)]-15-|" options:0 metrics:nil views:views]];
 	
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[progress]-10-[elapsed_time]" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[progress]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[elapsed_time]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[elapsed_time]" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[elapsed_time]-[button]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
@@ -628,9 +618,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
 	gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 	
-	[progress startAnimation:nil];
-	[progress setHidden:NO];
-	
 	start_date = [NSDate new];
 	timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(updateElapsedTime) userInfo:nil repeats:YES];
 	
@@ -661,9 +648,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url setStringValue:[url_secret stringValue]];
 	[url setHidden:NO];
 	[url_secret setHidden:YES];
-	
-	[progress setHidden:YES];
-	[progress stopAnimation:nil];
 	
 	if (start_date)
 	{
@@ -714,7 +698,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSDate *time = [NSDate dateWithTimeIntervalSince1970:elapsed];
 	NSDateFormatter *date = [NSDateFormatter new];
 	
-	[date setTimeZone:[NSTimeZone timeZoneWithName:@"UTC" ]];
+	[date setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
 	[date setDateFormat:@"HH:mm:ss"];
 	
 	[elapsed_time setStringValue:[date stringFromDate:time]];
