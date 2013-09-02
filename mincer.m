@@ -406,7 +406,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording_panel setCanChooseFiles:NO];
 	[mp4_recording_panel setCanChooseDirectories:YES];
 	[mp4_recording_panel setAllowsMultipleSelection:NO];
-	[mp4_recording_panel setDirectoryURL:[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
 	
 	NSTextField *mp4_recording_label = [NSTextField new];
 	[mp4_recording_label setStringValue:@"Recordings"];
@@ -417,12 +416,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording_label setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	mp4_recording = [NSButton new];
-	[mp4_recording setTitle:[[mp4_recording_panel directoryURL] relativePath]];
 	[mp4_recording setBezelStyle:NSRoundedBezelStyle];
 	[mp4_recording setTranslatesAutoresizingMaskIntoConstraints:NO];
-	[mp4_recording setAction:@selector(updateRecordingDirectory)];
-	
-	mp4_recording_enabled = 1;
+	[mp4_recording setAction:@selector(chooseRecordingDirectory)];
 	
 	elapsed_time = [NSTextField new];
 	[elapsed_time setTextColor:[NSColor grayColor]];
@@ -504,11 +500,20 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
 	[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
 	[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
+	[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"] ? [defaults stringForKey:@"audio_device"] : [audio_device itemTitleAtIndex:0]];
 	[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"] ? [defaults integerForKey:@"audio_bitrate"] : [audio_bitrate minValue]];
+	[mp4_recording_panel setDirectoryURL:[defaults URLForKey:@"mp4_recording_panel"] ? [defaults URLForKey:@"mp4_recording_panel"] : [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
+	mp4_recording_enabled = [defaults integerForKey:@"mp4_recording_enabled"];
 	
 	[self updateEncoderSpeed];
 	[self updateVideoBitrate];
 	[self updateAudioBitrate];
+	[self updateRecordingDirectory];
+	
+	if ([audio_device indexOfSelectedItem] == -1)
+	{
+		[audio_device selectItemAtIndex:0];
+	}
 	
 	[window makeKeyAndOrderFront:nil];
 	[window center];
@@ -531,7 +536,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[defaults setInteger:[framerate indexOfSelectedItem] forKey:@"framerate"];
 	[defaults setInteger:[encoder_speed integerValue] forKey:@"encoder_speed"];
 	[defaults setInteger:[video_bitrate integerValue] forKey:@"video_bitrate"];
+	[defaults setObject:[audio_device titleOfSelectedItem] forKey:@"audio_device"];
 	[defaults setInteger:[audio_bitrate integerValue] forKey:@"audio_bitrate"];
+	[defaults setURL:[mp4_recording_panel directoryURL] forKey:@"mp4_recording_panel"];
+	[defaults setInteger:mp4_recording_enabled forKey:@"mp4_recording_enabled"];
 	[defaults synchronize];
 }
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
@@ -680,10 +688,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 }
 - (void)updateRecordingDirectory
 {
+	[mp4_recording setTitle: mp4_recording_enabled ? [[mp4_recording_panel directoryURL] relativePath] : @"- Disabled -"];
+}
+- (void)chooseRecordingDirectory
+{
 	mp4_recording_enabled = [mp4_recording_panel runModal];
 	
-	[mp4_recording setTitle: mp4_recording_enabled ? [[mp4_recording_panel directoryURL] relativePath] : @"- Disabled -"];
-
+	[self updateRecordingDirectory];
 }
 - (void)updateElapsedTime
 {
@@ -693,7 +704,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		
 		return;
 	}
-
+	
 	NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start_date];
 	NSDate *time = [NSDate dateWithTimeIntervalSince1970:elapsed];
 	NSDateFormatter *date = [NSDateFormatter new];
