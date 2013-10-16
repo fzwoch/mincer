@@ -237,6 +237,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	url_secret = [NSSecureTextField new];
 	[url_secret setHidden:YES];
+	[url_secret setEnabled:NO];
 	[url_secret setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	[[url cell] setLineBreakMode:NSLineBreakByCharWrapping];
@@ -623,6 +624,15 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[[[NSApp keyWindow] contentView] display];
 	
+	[url setEnabled:NO];
+	[resolution setEnabled:NO];
+	[framerate setEnabled:NO];
+	[encoder_speed setEnabled:NO];
+	[video_bitrate setEnabled:NO];
+	[audio_device setEnabled:NO];
+	[audio_bitrate setEnabled:NO];
+	[mp4_recording setEnabled:NO];
+	
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
 	gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 	
@@ -656,6 +666,15 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url setStringValue:[url_secret stringValue]];
 	[url setHidden:NO];
 	[url_secret setHidden:YES];
+	
+	[url setEnabled:YES];
+	[resolution setEnabled:YES];
+	[framerate setEnabled:YES];
+	[encoder_speed setEnabled:YES];
+	[video_bitrate setEnabled:YES];
+	[audio_device setEnabled:YES];
+	[audio_bitrate setEnabled:YES];
+	[mp4_recording setEnabled:YES];
 	
 	if (start_date)
 	{
