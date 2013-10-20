@@ -494,17 +494,30 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
 	
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	[url setStringValue:@"rtmp://live.twitch.tv/app/"];
+	[resolution selectItemAtIndex:0];
+	[framerate selectItemAtIndex:0];
+	[encoder_speed setIntValue:[encoder_speed minValue]];
+	[video_bitrate setIntValue:[video_bitrate minValue]];
+	[audio_device selectItemAtIndex:0];
+	[audio_bitrate setIntValue:[audio_bitrate minValue]];
+	[mp4_recording_panel setDirectoryURL:[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
+	mp4_recording_enabled = 0;
 	
-	[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @"rtmp://live.twitch.tv/app/"];
-	[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
-	[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
-	[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
-	[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
-	[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"] ? [defaults stringForKey:@"audio_device"] : [audio_device itemTitleAtIndex:0]];
-	[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"] ? [defaults integerForKey:@"audio_bitrate"] : [audio_bitrate minValue]];
-	[mp4_recording_panel setDirectoryURL:[defaults URLForKey:@"mp4_recording_panel"] ? [defaults URLForKey:@"mp4_recording_panel"] : [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
-	mp4_recording_enabled = [defaults integerForKey:@"mp4_recording_enabled"];
+	if (([NSEvent modifierFlags] & NSCommandKeyMask) == 0)
+	{
+		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		
+		[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @"rtmp://live.twitch.tv/app/"];
+		[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
+		[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
+		[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
+		[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
+		[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"] ? [defaults stringForKey:@"audio_device"] : [audio_device itemTitleAtIndex:0]];
+		[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"] ? [defaults integerForKey:@"audio_bitrate"] : [audio_bitrate minValue]];
+		[mp4_recording_panel setDirectoryURL:[defaults URLForKey:@"mp4_recording_panel"] ? [defaults URLForKey:@"mp4_recording_panel"] : [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
+		mp4_recording_enabled = [defaults integerForKey:@"mp4_recording_enabled"];
+	}
 	
 	[self updateEncoderSpeed];
 	[self updateVideoBitrate];
