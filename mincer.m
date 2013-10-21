@@ -494,18 +494,26 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
 	
-	[url setStringValue:@"rtmp://live.twitch.tv/app/"];
-	[resolution selectItemAtIndex:0];
-	[framerate selectItemAtIndex:0];
-	[encoder_speed setIntValue:[encoder_speed minValue]];
-	[video_bitrate setIntValue:[video_bitrate minValue]];
-	[audio_device selectItemAtIndex:0];
-	[audio_bitrate setIntValue:[audio_bitrate minValue]];
-	[mp4_recording_panel setDirectoryURL:[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
-	mp4_recording_enabled = 0;
+	[window setDelegate:[NSApp delegate]];
+	[window makeKeyAndOrderFront:nil];
 	
-	if (([NSEvent modifierFlags] & NSCommandKeyMask) == 0)
+	if ([NSEvent modifierFlags] & NSCommandKeyMask)
 	{
+		[url setStringValue:@"rtmp://live.twitch.tv/app/"];
+		[resolution selectItemAtIndex:0];
+		[framerate selectItemAtIndex:0];
+		[encoder_speed setIntValue:[encoder_speed minValue]];
+		[video_bitrate setIntValue:[video_bitrate minValue]];
+		[audio_device selectItemAtIndex:0];
+		[audio_bitrate setIntValue:[audio_bitrate minValue]];
+		[mp4_recording_panel setDirectoryURL:[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
+		mp4_recording_enabled = 0;
+		
+		[window center];
+	}
+	else
+	{
+		NSPoint point;
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		
 		[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @"rtmp://live.twitch.tv/app/"];
@@ -517,6 +525,18 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"] ? [defaults integerForKey:@"audio_bitrate"] : [audio_bitrate minValue]];
 		[mp4_recording_panel setDirectoryURL:[defaults URLForKey:@"mp4_recording_panel"] ? [defaults URLForKey:@"mp4_recording_panel"] : [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
 		mp4_recording_enabled = [defaults integerForKey:@"mp4_recording_enabled"];
+		
+		point.x = [defaults floatForKey:@"pos_x"];
+		point.y = [defaults floatForKey:@"pos_y"];
+		
+		if (point.x || point.y)
+		{
+			[window setFrameOrigin:point];
+		}
+		else
+		{
+			[window center];
+		}
 	}
 	
 	[self updateEncoderSpeed];
@@ -528,9 +548,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		[audio_device selectItemAtIndex:0];
 	}
-	
-	[window makeKeyAndOrderFront:nil];
-	[window center];
 	
 	pipeline = NULL;
 }
@@ -559,6 +576,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
 {
 	return YES;
+}
+- (void)windowWillClose:(NSNotification *)notification
+{
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	
+	[defaults setFloat:[[NSApp keyWindow] frame].origin.x forKey:@"pos_x"];
+	[defaults setFloat:[[NSApp keyWindow] frame].origin.y forKey:@"pos_y"];
 }
 - (void)toggleStream
 {
