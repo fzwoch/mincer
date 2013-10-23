@@ -157,7 +157,7 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 		8,
 		GST_OSX_VIDEOSCALE(trans)->width_in * 4,
 		CGColorSpaceCreateDeviceRGB(),
-		kCGImageAlphaNoneSkipLast
+		(CGBitmapInfo)kCGImageAlphaNoneSkipLast
 	);
 	
 	img = CGBitmapContextCreateImage(ctx_in);

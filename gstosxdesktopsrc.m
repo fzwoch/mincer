@@ -158,7 +158,7 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 		CGImageGetBitsPerComponent(img),
 		CGImageGetBytesPerRow(img),
 		CGImageGetColorSpace(img),
-		kCGImageAlphaNoneSkipLast
+		(CGBitmapInfo)kCGImageAlphaNoneSkipLast
 	);
 	
 	CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), img);
