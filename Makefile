@@ -69,6 +69,10 @@ $(APP): $(OBJ) $(ICN) $(GST) $(GST_OBJ)
 	done
 	@for dylib in `ls Mincer.app/Contents/Frameworks/*.dylib`; do \
 		for lib in `otool -L $$dylib | grep /opt/local/lib | cut -d ' ' -f 1`; do \
+			if [ ! -f Mincer.app/Contents/Frameworks/`basename $$lib` ]; then \
+				echo " CP Mincer.app/Contents/Frameworks/`basename $$lib`"; \
+				cp $$lib Mincer.app/Contents/Frameworks/`basename $$lib`; \
+			fi; \
 			install_name_tool -change $$lib @loader_path/../Frameworks/`basename $$lib` $$dylib; \
 		done \
 	done
