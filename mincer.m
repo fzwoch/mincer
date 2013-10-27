@@ -722,7 +722,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	if (timer)
 	{
 		[timer invalidate];
-		[timer release];
 		timer = NULL;
 	}
 	
