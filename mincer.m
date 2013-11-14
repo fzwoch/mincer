@@ -651,6 +651,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		return;
 	}
 	
+	[date release];
+	[desc release];
+	
 	bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
 	gst_bus_set_sync_handler(bus, bus_call, NULL, NULL);
 	gst_object_unref(bus);
@@ -768,6 +771,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[date setDateFormat:@"HH:mm:ss"];
 	
 	[elapsed_time setStringValue:[date stringFromDate:time]];
+	
+	[date release];
 }
 - (void)alert:(NSString *)message
 {
