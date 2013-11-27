@@ -558,7 +558,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[self stopStream];
 	}
 	
-	gst_deinit();
+//	gst_deinit();
 	
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	
