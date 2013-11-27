@@ -686,7 +686,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 - (void)stopStream
 {
 	GstStateChangeReturn change;
-	GstBus *bus = gst_element_get_bus(pipeline);
+	GstBus *bus;
+	
+	if (!pipeline)
+	{
+		return;
+	}
+	
+	bus = gst_element_get_bus(pipeline);
 	
 	gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
 	
