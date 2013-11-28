@@ -141,7 +141,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			[[NSApp delegate] performSelectorOnMainThread:@selector(alert:) withObject:[NSString stringWithCString:error->message encoding:NSUTF8StringEncoding] waitUntilDone:YES];
 			g_error_free(error);
 			
-			[[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:NO];
+			[[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:YES];
 		}
 		break;
 	default:
