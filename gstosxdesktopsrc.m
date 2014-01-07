@@ -223,7 +223,6 @@ static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
 	filter->time_first = -1;
 	
 	gst_base_src_set_format(GST_BASE_SRC(filter), GST_FORMAT_TIME);
-	gst_base_src_set_live(GST_BASE_SRC(filter), TRUE);
 	gst_base_src_set_do_timestamp(GST_BASE_SRC(filter), TRUE);
 	gst_base_src_set_blocksize(GST_BASE_SRC(filter), filter->width * filter->height * 4);
 }
