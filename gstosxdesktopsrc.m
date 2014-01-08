@@ -29,7 +29,6 @@ typedef struct {
 	gint framerate_num;
 	gint framerate_denom;
 	
-	gint64 time_first;
 	gint64 time_next;
 } GstOsxDesktopSrc;
 
@@ -96,9 +95,9 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	
 	CGContextRef ctx;
 	
-	if (GST_OSX_DESKTOP_SRC(src)->time_first < 0)
+	if (GST_OSX_DESKTOP_SRC(src)->time_next == -1)
 	{
-		GST_OSX_DESKTOP_SRC(src)->time_first = GST_OSX_DESKTOP_SRC(src)->time_next = g_get_monotonic_time();
+		GST_OSX_DESKTOP_SRC(src)->time_next = g_get_monotonic_time();
 	}
 	
 	for (;;)
@@ -220,7 +219,6 @@ static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
 	filter->framerate_denom = 1;
 	
 	filter->time_next = -1;
-	filter->time_first = -1;
 	
 	gst_base_src_set_format(GST_BASE_SRC(filter), GST_FORMAT_TIME);
 	gst_base_src_set_do_timestamp(GST_BASE_SRC(filter), TRUE);
