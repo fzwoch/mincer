@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2013 Florian Zwoch</string>
+	<string>Copyright © 2013-2014 Florian Zwoch</string>
 	<key>CFBundleName</key>
 	<string>Mincer</string>
 	<key>CFBundleDisplayName</key>
