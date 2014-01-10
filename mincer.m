@@ -170,8 +170,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSTextField *audio_bitrate_label;
 	NSSlider *audio_bitrate;
 	
-	NSOpenPanel *mp4_recording_panel;
 	NSButton *mp4_recording;
+	NSMutableString *mp4_recording_path;
 	NSInteger mp4_recording_enabled;
 	
 	NSButton *button;
@@ -403,11 +403,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[audio_bitrate setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[audio_bitrate setAction:@selector(updateAudioBitrate)];
 	
-	mp4_recording_panel = [NSOpenPanel new];
-	[mp4_recording_panel setCanChooseFiles:NO];
-	[mp4_recording_panel setCanChooseDirectories:YES];
-	[mp4_recording_panel setAllowsMultipleSelection:NO];
-	
 	NSTextField *mp4_recording_label = [NSTextField new];
 	[mp4_recording_label setStringValue:@"Recordings"];
 	[mp4_recording_label setBezeled:NO];
@@ -420,6 +415,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording setBezelStyle:NSRoundedBezelStyle];
 	[mp4_recording setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[mp4_recording setAction:@selector(chooseRecordingDirectory)];
+	
+	mp4_recording_path = [NSMutableString new];
 	
 	elapsed_time = [NSTextField new];
 	[elapsed_time setTextColor:[NSColor grayColor]];
@@ -506,7 +503,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[video_bitrate setIntValue:[video_bitrate minValue]];
 		[audio_device selectItemAtIndex:0];
 		[audio_bitrate setIntValue:[audio_bitrate minValue]];
-		[mp4_recording_panel setDirectoryURL:[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
+		[mp4_recording_path setString:[[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0] relativePath]];
 		mp4_recording_enabled = 0;
 		
 		[window center];
@@ -523,7 +520,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
 		[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"] ? [defaults stringForKey:@"audio_device"] : [audio_device itemTitleAtIndex:0]];
 		[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"] ? [defaults integerForKey:@"audio_bitrate"] : [audio_bitrate minValue]];
-		[mp4_recording_panel setDirectoryURL:[defaults URLForKey:@"mp4_recording_panel"] ? [defaults URLForKey:@"mp4_recording_panel"] : [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0]];
+		[mp4_recording_path setString:[defaults URLForKey:@"mp4_recording_path"] ? [defaults stringForKey:@"mp4_recording_path"] : [[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0] relativePath]];
 		mp4_recording_enabled = [defaults integerForKey:@"mp4_recording_enabled"];
 		
 		point.x = [defaults floatForKey:@"pos_x"];
@@ -569,7 +566,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[defaults setInteger:[video_bitrate integerValue] forKey:@"video_bitrate"];
 	[defaults setObject:[audio_device titleOfSelectedItem] forKey:@"audio_device"];
 	[defaults setInteger:[audio_bitrate integerValue] forKey:@"audio_bitrate"];
-	[defaults setURL:[mp4_recording_panel directoryURL] forKey:@"mp4_recording_panel"];
+	[defaults setObject:mp4_recording_path forKey:@"mp4_recording_path"];
 	[defaults setInteger:mp4_recording_enabled forKey:@"mp4_recording_enabled"];
 	[defaults synchronize];
 }
@@ -633,7 +630,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	if (mp4_recording_enabled)
 	{
 		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! mp4_mux. "];
-		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", [[mp4_recording_panel directoryURL] relativePath], [date stringFromDate:[NSDate date]]];
+		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", mp4_recording_path, [date stringFromDate:[NSDate date]]];
 	}
 	
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);
@@ -753,11 +750,20 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 }
 - (void)updateRecordingDirectory
 {
-	[mp4_recording setTitle: mp4_recording_enabled ? [[mp4_recording_panel directoryURL] relativePath] : @"- Disabled -"];
+	[mp4_recording setTitle: mp4_recording_enabled ? mp4_recording_path : @"- Disabled -"];
 }
 - (void)chooseRecordingDirectory
 {
+	NSOpenPanel *mp4_recording_panel = [NSOpenPanel new];
+	[mp4_recording_panel setCanChooseFiles:NO];
+	[mp4_recording_panel setCanChooseDirectories:YES];
+	[mp4_recording_panel setAllowsMultipleSelection:NO];
+	[mp4_recording_panel setDirectoryURL:[NSURL fileURLWithPath:mp4_recording_path isDirectory:YES]];
+	
 	mp4_recording_enabled = [mp4_recording_panel runModal];
+	
+	[mp4_recording_path setString:[[mp4_recording_panel directoryURL] relativePath]];
+	[mp4_recording_panel release];
 	
 	[self updateRecordingDirectory];
 }
