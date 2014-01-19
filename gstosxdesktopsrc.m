@@ -163,7 +163,7 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), img);
 	CGImageRelease(img);
 	
-	if (!CGCursorIsDrawnInFramebuffer() && CGCursorIsVisible())
+	if (CGCursorIsVisible())
 	{
 		@autoreleasepool
 		{
