@@ -760,12 +760,15 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording_panel setAllowsMultipleSelection:NO];
 	[mp4_recording_panel setDirectoryURL:[NSURL fileURLWithPath:mp4_recording_path isDirectory:YES]];
 	
-	mp4_recording_enabled = [mp4_recording_panel runModal];
-	
-	[mp4_recording_path setString:[[mp4_recording_panel directoryURL] relativePath]];
-	[mp4_recording_panel release];
-	
-	[self updateRecordingDirectory];
+	[mp4_recording_panel beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+	{
+		mp4_recording_enabled = (result == NSFileHandlingPanelOKButton) ? 1 : 0;
+		
+		[mp4_recording_path setString:[[mp4_recording_panel directoryURL] relativePath]];
+		[mp4_recording_panel release];
+		
+		[self updateRecordingDirectory];
+	}];
 }
 - (void)updateElapsedTime
 {
