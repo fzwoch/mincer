@@ -138,10 +138,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			gst_message_parse_error(msg, &error, &debug);
 			g_free(debug);
 			
-			[[NSApp delegate] performSelectorOnMainThread:@selector(alert:) withObject:[NSString stringWithCString:error->message encoding:NSUTF8StringEncoding] waitUntilDone:YES];
-			g_error_free(error);
-			
-			[[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:YES];
+			[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+			 {
+				 g_error_free(error);
+				 
+				 [[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:YES];
+			 }];
 		}
 		break;
 	default:
@@ -616,7 +618,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (![[url stringValue] length] && !mp4_recording_enabled)
 	{
-		[self alert:@"No RTMP and no MP4 option set. Nothing to be done."];
+		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"No RTMP and no MP4 option set. Nothing to be done."] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:nil];
 		
 		return;
 	}
@@ -660,14 +662,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);
 	if (error)
 	{
-		[self alert:[NSString stringWithCString:error->message encoding:NSUTF8StringEncoding]];
-		g_error_free(error);
-		
-		if (pipeline)
-		{
-			gst_object_unref(pipeline);
-			pipeline = NULL;
-		}
+		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+		 {
+			 g_error_free(error);
+			 
+			 if (pipeline)
+			 {
+				 gst_object_unref(pipeline);
+				 pipeline = NULL;
+			 }
+		 }];
 		
 		return;
 	}
@@ -813,10 +817,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[elapsed_time setStringValue:[date stringFromDate:time]];
 	
 	[date release];
-}
-- (void)alert:(NSString *)message
-{
-	[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message] runModal];
 }
 @end
 
