@@ -649,13 +649,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([[url stringValue] length])
 	{
-		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! flv_mux. "];
+		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 leaky=upstream ! flv_mux. "];
 		[desc appendFormat:@"tee_264. ! queue ! flvmux streamable=true name=flv_mux ! rtmpsink location=\"%@\" ", [[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 	}
 	
 	if (mp4_recording_enabled)
 	{
-		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 ! mp4_mux. "];
+		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 leaky=upstream ! mp4_mux. "];
 		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", mp4_recording_path, [date stringFromDate:[NSDate date]]];
 	}
 	
