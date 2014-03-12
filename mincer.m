@@ -498,7 +498,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSPoint point = {0, 0};
 	
-	if ([NSEvent modifierFlags] & NSCommandKeyMask)
+	if ([NSEvent modifierFlags] & NSCommandKeyMask && [[NSAlert alertWithMessageText:@"Load Defaults" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Are you sure you want load defaults? All your personal settings will get lost."] runModal] == NSAlertDefaultReturn)
 	{
 		[url setStringValue:@"rtmp://live.twitch.tv/app/"];
 		[resolution selectItemAtIndex:0];
@@ -558,7 +558,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		[[NSAlert alertWithMessageText:@"Quit Mincer" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Mincer is currently running. Are you sure you want to stop processing and quit the application?"] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
 		 {
-			 if (result == NSOKButton)
+			 if (result == NSAlertDefaultReturn)
 			 {
 				 [self stopStream];
 				 [NSApp terminate:nil];
