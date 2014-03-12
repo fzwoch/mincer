@@ -242,8 +242,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url_secret setEnabled:NO];
 	[url_secret setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
-	[[url cell] setLineBreakMode:NSLineBreakByCharWrapping];
-	[[url_secret cell] setLineBreakMode:NSLineBreakByCharWrapping];
+	[[url cell] setScrollable:YES];
+	[[url cell] setUsesSingleLineMode:YES];
+	
+	[[url_secret cell] setScrollable:YES];
+	[[url_secret cell] setUsesSingleLineMode:YES];
 	
 	NSTextField *resolution_label = [NSTextField new];
 	[resolution_label setStringValue:@"Video Resolution"];
