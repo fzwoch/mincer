@@ -554,35 +554,33 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	if (pipeline)
 	{
-		if ([[NSAlert alertWithMessageText:@"Quit Mincer?" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Mincer is currently running. Are you sure you want to stop processing and quit the application?"] runModal] == NSAlertAlternateReturn)
-		{
-			return NO;
-		}
+		[[NSAlert alertWithMessageText:@"Quit Mincer" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Mincer is currently running. Are you sure you want to stop processing and quit the application?"] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+		 {
+			 if (result == NSOKButton)
+			 {
+				 [self stopStream];
+				 [NSApp terminate:nil];
+			 }
+		 }];
+		
+		return NO;
 	}
 	
 	return YES;
 }
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
-	if ([NSApp keyWindow])
+	if (pipeline)
 	{
-		if ([[[NSApp keyWindow] delegate] windowShouldClose:nil] == NO)
-		{
-			return NSTerminateCancel;
-		}
+		[[NSApp keyWindow] performClose:nil];
+		
+		return NSTerminateCancel;
 	}
 	
 	return NSTerminateNow;
 }
 - (void)applicationWillTerminate:(NSNotification *)aNotification
 {
-	if (pipeline)
-	{
-		[self stopStream];
-	}
-	
-//	gst_deinit();
-	
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	
 	[defaults setObject:[url stringValue] forKey:@"url"];
