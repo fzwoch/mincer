@@ -30,6 +30,9 @@ typedef struct {
 	gint framerate_denom;
 	
 	gint64 time_next;
+	
+	gint window_id;
+	gint display_id;
 } GstOsxDesktopSrc;
 
 typedef struct {
@@ -58,6 +61,45 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE
 		"framerate = [ 0/1, 2147483647/1 ]"
 	)
 );
+
+enum
+{
+	PROP_0,
+	PROP_WINDOW_ID,
+	PROP_DISPLAY_ID
+};
+
+static void gst_osx_desktop_src_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
+{
+	switch (prop_id)
+	{
+		case PROP_WINDOW_ID:
+			GST_OSX_DESKTOP_SRC(object)->window_id = g_value_get_int(value);
+			break;
+		case PROP_DISPLAY_ID:
+			GST_OSX_DESKTOP_SRC(object)->display_id = g_value_get_int(value);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			break;
+	}
+}
+
+static void gst_osx_desktop_src_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
+{
+	switch (prop_id)
+	{
+		case PROP_WINDOW_ID:
+			g_value_set_int(value, GST_OSX_DESKTOP_SRC(object)->window_id);
+			break;
+		case PROP_DISPLAY_ID:
+			g_value_set_int(value, GST_OSX_DESKTOP_SRC(object)->display_id);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			break;
+	}
+}
 
 static GstCaps* gst_osx_desktop_src_get_caps(GstBaseSrc *src, GstCaps *filter)
 {
@@ -89,7 +131,7 @@ static gboolean gst_osx_desktop_src_set_caps(GstBaseSrc *src, GstCaps *caps)
 static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 {
 	GstMapInfo info;
-	CGImageRef img;
+	CGImageRef img = NULL;
 	size_t width;
 	size_t height;
 	
@@ -119,7 +161,19 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 		g_usleep(1000);
 	}
 	
-	img = CGDisplayCreateImage(CGMainDisplayID());
+	if (GST_OSX_DESKTOP_SRC(src)->window_id > 0)
+	{
+		img = CGWindowListCreateImage(CGRectNull, kCGWindowListOptionIncludingWindow, GST_OSX_DESKTOP_SRC(src)->window_id, kCGWindowImageBoundsIgnoreFraming | kCGWindowImageShouldBeOpaque);
+	}
+	else if (GST_OSX_DESKTOP_SRC(src)->display_id > 0)
+	{
+		img = CGDisplayCreateImage(GST_OSX_DESKTOP_SRC(src)->display_id);
+	}
+	
+	if (img == NULL)
+	{
+		img = CGDisplayCreateImage(CGMainDisplayID());
+	}
 	
 	width = CGImageGetWidth(img);
 	height = CGImageGetHeight(img);
@@ -195,7 +249,7 @@ static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *class)
 		GST_ELEMENT_CLASS(class),
 		"OS X Desktop Source",
 		"Capture/Video",
-		"Captures OS X Desktop",
+		"Captures OS X Desktop or Windows",
 		"Florian Zwoch <fzwoch@gmail.com>"
 	);
 	
@@ -204,11 +258,30 @@ static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *class)
 	GST_BASE_SRC_CLASS(class)->get_caps = gst_osx_desktop_src_get_caps;
 	GST_BASE_SRC_CLASS(class)->set_caps = gst_osx_desktop_src_set_caps;
 	GST_PUSH_SRC_CLASS(class)->fill = gst_osx_desktop_src_fill;
+	G_OBJECT_CLASS(class)->set_property = gst_osx_desktop_src_set_property;
+	G_OBJECT_CLASS(class)->get_property = gst_osx_desktop_src_get_property;
+	
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_WINDOW_ID, g_param_spec_int("window-id", "Window ID", "Captures a specific window only", 0, G_MAXINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_DISPLAY_ID, g_param_spec_int("display-id", "Display ID", "Captures a specific display", 0, G_MAXINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
 static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
 {
-	CGImageRef img = CGDisplayCreateImage(CGMainDisplayID());
+	CGImageRef img = NULL;
+	
+	if (filter->window_id > 0)
+	{
+		img = CGWindowListCreateImage(CGRectNull, kCGWindowListOptionIncludingWindow, filter->window_id, kCGWindowImageBoundsIgnoreFraming | kCGWindowImageShouldBeOpaque);
+	}
+	else if (filter->display_id > 0)
+	{
+		img = CGDisplayCreateImage(filter->display_id);
+	}
+	
+	if (img == NULL)
+	{
+		img = CGDisplayCreateImage(CGMainDisplayID());
+	}
 	
 	filter->width = CGImageGetWidth(img);
 	filter->height = CGImageGetHeight(img);
