@@ -158,6 +158,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSTextField *url;
 	NSSecureTextField *url_secret;
 	
+	NSPopUpButton *video_device;
+	
 	NSPopUpButton *resolution;
 	NSPopUpButton *framerate;
 	
@@ -247,6 +249,79 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[[url_secret cell] setScrollable:YES];
 	[[url_secret cell] setUsesSingleLineMode:YES];
+	
+	NSTextField *video_device_label = [NSTextField new];
+	[video_device_label setStringValue:@"Video Input"];
+	[video_device_label setBezeled:NO];
+	[video_device_label setDrawsBackground:NO];
+	[video_device_label setEditable:NO];
+	[video_device_label setSelectable:NO];
+	[video_device_label setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	video_device = [NSPopUpButton new];
+	[video_device setPullsDown:NO];
+	[video_device setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	CGDirectDisplayID* displays;
+	unsigned int i, num;
+	
+	CGGetActiveDisplayList(0, NULL, &num);
+	displays = malloc(num * sizeof(CGDirectDisplayID));
+	CGGetActiveDisplayList(num, displays, &num);
+	
+	for (i = 0; i < num; i++)
+	{
+		switch (i)
+		{
+		case 0:
+			[video_device addItemWithTitle:[NSString stringWithFormat:@"Primary Desktop"]];
+			break;
+		case 1:
+			[video_device addItemWithTitle:[NSString stringWithFormat:@"Secondary Desktop"]];
+			break;
+		case 2:
+			[video_device addItemWithTitle:[NSString stringWithFormat:@"Tertiary Desktop"]];
+			break;
+		default:
+			[video_device addItemWithTitle:[NSString stringWithFormat:@"Desktop %d", i + 1]];
+			break;
+		}
+	}
+	
+	free(displays);
+	
+	[[video_device menu] addItem:[NSMenuItem separatorItem]];
+	
+	CFArrayRef window_ids = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+	
+	for (i = 0; i < CFArrayGetCount(window_ids); i++)
+	{
+		CFDictionaryRef dict = (CFDictionaryRef)CFArrayGetValueAtIndex(window_ids, i);
+		
+		if (CFDictionaryContainsKey(dict, kCGWindowName) == false || CFDictionaryContainsKey(dict, kCGWindowOwnerName) == false)
+		{
+			continue;
+		}
+		
+		if (CFStringGetLength((CFStringRef)CFDictionaryGetValue(dict, kCGWindowName)) == 0 || CFStringGetLength((CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName)) == 0)
+		{
+			continue;
+		}
+		
+		if (CFStringCompare((CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName), CFSTR("Dock"), 0) == kCFCompareEqualTo)
+		{
+			continue;
+		}
+		
+		if (CFStringCompare((CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName), CFSTR("Window Server"), 0) == kCFCompareEqualTo)
+		{
+			continue;
+		}
+		
+		[video_device addItemWithTitle:[NSString stringWithFormat:@"%@ - %@", (CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName), (CFStringRef)CFDictionaryGetValue(dict, kCGWindowName)]];
+	}
+	
+	CFRelease(window_ids);
 	
 	NSTextField *resolution_label = [NSTextField new];
 	[resolution_label setStringValue:@"Video Resolution"];
@@ -445,6 +520,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:url_label];
 	[[window contentView] addSubview:url];
 	[[window contentView] addSubview:url_secret];
+	[[window contentView] addSubview:video_device_label];
+	[[window contentView] addSubview:video_device];
 	[[window contentView] addSubview:resolution_label];
 	[[window contentView] addSubview:resolution];
 	[[window contentView] addSubview:framerate_label];
@@ -462,7 +539,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:elapsed_time];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -470,10 +547,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_secret]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url_label]-[url_secret]" options:0 metrics:nil views:views]];
 	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device_label]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device]-15-|" options:0 metrics:nil views:views]];
+	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution_label]-15-[framerate_label(==resolution_label)]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution]-15-[framerate(==resolution)]-15-|" options:0 metrics:nil views:views]];
 	
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url]-15-[framerate_label]-[framerate]" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[video_device]-15-[framerate_label]-[framerate]" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed]-15-|" options:0 metrics:nil views:views]];
@@ -494,7 +574,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[elapsed_time]-[button]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[video_device_label]-[video_device]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
 	
 	NSPoint point = {0, 0};
 	
@@ -690,6 +770,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[[NSApp keyWindow] contentView] display];
 	
 	[url setEnabled:NO];
+	[video_device setEnabled:NO];
 	[resolution setEnabled:NO];
 	[framerate setEnabled:NO];
 	[encoder_speed setEnabled:NO];
@@ -740,6 +821,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url_secret setHidden:YES];
 	
 	[url setEnabled:YES];
+	[video_device setEnabled:YES];
 	[resolution setEnabled:YES];
 	[framerate setEnabled:YES];
 	[encoder_speed setEnabled:YES];
