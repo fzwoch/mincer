@@ -252,6 +252,14 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 			rect.origin.x -= [cursor hotSpot].x;
 			rect.origin.y -= [cursor_img size].height - [cursor hotSpot].y;
 			
+			if (GST_OSX_DESKTOP_SRC(src)->display_id != 0)
+			{
+				CGRect adj_rect = CGDisplayBounds(GST_OSX_DESKTOP_SRC(src)->display_id);
+				
+				rect.origin.x -= adj_rect.origin.x;
+				rect.origin.y -= adj_rect.origin.y;
+			}
+			
 			CGContextDrawImage(ctx, NSRectToCGRect(rect), [cursor_img CGImageForProposedRect:NULL context:NULL hints:NULL]);
 		}
 	}
