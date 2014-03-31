@@ -77,8 +77,29 @@ static void gst_osx_desktop_src_set_property(GObject *object, guint prop_id, con
 			GST_OSX_DESKTOP_SRC(object)->window_id = g_value_get_int(value);
 			break;
 		case PROP_DISPLAY_ID:
-			GST_OSX_DESKTOP_SRC(object)->display_id = g_value_get_int(value);
+		{
+			guint num;
+			CGDirectDisplayID *displays;
+			
+			CGGetActiveDisplayList(0, NULL, &num);
+			
+			displays = malloc(num * sizeof(CGDirectDisplayID));
+			if (displays == NULL)
+			{
+				break;
+			}
+			
+			CGGetActiveDisplayList(num, displays, &num);
+			
+			if (g_value_get_int(value) < num)
+			{
+				GST_OSX_DESKTOP_SRC(object)->display_id = displays[g_value_get_int(value)];
+			}
+			
+			free(displays);
+			
 			break;
+		}
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 			break;
