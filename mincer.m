@@ -289,7 +289,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	free(displays);
-	
+#if 0
 	[[video_device menu] addItem:[NSMenuItem separatorItem]];
 	
 	CFArrayRef window_ids = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
@@ -322,6 +322,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	CFRelease(window_ids);
+#endif
 	
 	NSTextField *resolution_label = [NSTextField new];
 	[resolution_label setStringValue:@"Video Resolution"];
@@ -708,7 +709,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	[desc appendFormat:@"osxdesktopsrc ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 ! osxvideoscale ! video/x-raw, width=%d, height=%d ! ", framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
+	[desc appendFormat:@"osxdesktopsrc display-id=%ld ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 ! osxvideoscale ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	[desc appendFormat:@"videoconvert ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
 	[desc appendFormat:@"adder name=audio_mix ! osxaacencode bitrate=%d ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
