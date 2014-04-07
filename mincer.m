@@ -596,6 +596,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		
 		[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @"rtmp://live.twitch.tv/app/"];
+		[video_device selectItemAtIndex:[defaults integerForKey:@"video_device"]];
 		[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
 		[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
 		[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
@@ -667,6 +668,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	
 	[defaults setObject:[url stringValue] forKey:@"url"];
+	[defaults setInteger:[video_device indexOfSelectedItem] forKey:@"video_device"];
 	[defaults setInteger:[resolution indexOfSelectedItem] forKey:@"resolution"];
 	[defaults setInteger:[framerate indexOfSelectedItem] forKey:@"framerate"];
 	[defaults setInteger:[encoder_speed integerValue] forKey:@"encoder_speed"];
