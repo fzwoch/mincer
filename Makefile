@@ -17,8 +17,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-CFLAGS  = -Wall -O2 `pkg-config --cflags gstreamer-1.0`
-LDFLAGS = `pkg-config --libs gstreamer-1.0` -Wl,-headerpad_max_install_names -framework Cocoa -framework Coreaudio 
+CFLAGS  = -Wall -O2 $(shell pkg-config --cflags gstreamer-1.0)
+LDFLAGS = $(shell pkg-config --libs gstreamer-1.0) -Wl,-headerpad_max_install_names -framework Cocoa -framework Coreaudio
 
 APP = Mincer.app/Contents/MacOS/mincer
 OBJ = mincer.o
