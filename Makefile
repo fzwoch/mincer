@@ -38,9 +38,7 @@ GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstx264.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstflv.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstisomp4.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstrtmp.so
-
-GST_OBJ = \
+	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstrtmp.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so
@@ -48,7 +46,7 @@ GST_OBJ = \
 all: $(DMG)
 	@echo " DONE"
 
-$(APP): $(OBJ) $(ICN) $(GST) $(GST_OBJ)
+$(APP): $(OBJ) $(ICN) $(GST)
 	@echo " LD $@"
 	@$(CC) $< $(LDFLAGS) -o $@
 	@for dylib in `otool -L $@ | grep /opt/local/lib | cut -d ' ' -f 1`; do \
@@ -57,15 +55,6 @@ $(APP): $(OBJ) $(ICN) $(GST) $(GST_OBJ)
 			cp $$dylib Mincer.app/Contents/Frameworks/`basename $$dylib`; \
 		fi; \
 		install_name_tool -change $$dylib @loader_path/../Frameworks/`basename $$dylib` $@; \
-	done
-	@for plugin in `ls Mincer.app/Contents/Frameworks/gstreamer-1.0/*.so`; do \
-		for dylib in `otool -L $$plugin | grep /opt/local/lib | cut -d ' ' -f 1`; do \
-			if [ ! -f Mincer.app/Contents/Frameworks/`basename $$dylib` ]; then \
-				echo " CP Mincer.app/Contents/Frameworks/`basename $$dylib`"; \
-				cp $$dylib Mincer.app/Contents/Frameworks/`basename $$dylib`; \
-			fi; \
-			install_name_tool -change $$dylib @loader_path/../`basename $$dylib` $$plugin; \
-		done \
 	done
 	@for dylib in `ls Mincer.app/Contents/Frameworks/*.dylib`; do \
 		for lib in `otool -L $$dylib | grep /opt/local/lib | cut -d ' ' -f 1`; do \
@@ -88,10 +77,17 @@ $(DMG): $(APP)
 Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so:/opt/local/lib/gstreamer-1.0/%.so
 	@echo " CP $@"
 	@cp $< $@
+	@for dylib in `otool -L $@ | grep /opt/local/lib | cut -d ' ' -f 1`; do \
+		if [ ! -f Mincer.app/Contents/Frameworks/`basename $$dylib` ]; then \
+			echo " CP Mincer.app/Contents/Frameworks/`basename $$dylib`"; \
+			cp $$dylib Mincer.app/Contents/Frameworks/`basename $$dylib`; \
+		fi; \
+		install_name_tool -change $$dylib @loader_path/../`basename $$dylib` $@; \
+	done
 
 lib%.so:../../../../%.m
 	@echo " CC $@"
-	@$(CC) -Wall -O2 -shared $< `pkg-config --cflags --libs gstreamer-base-1.0` `pkg-config --cflags --libs gstreamer-audio-1.0` -o $@ -framework Cocoa -framework AudioToolBox
+	@$(CC) -Wall -O2 -shared $< $(shell pkg-config --cflags --libs gstreamer-audio-1.0) -o $@ -framework Cocoa -framework AudioToolBox
 
 clean:
 	@echo " CLEAN"
