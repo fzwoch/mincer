@@ -31,8 +31,8 @@ typedef struct {
 	
 	gint64 time_next;
 	
-	gint window_id;
-	gint display_id;
+	guint window_id;
+	guint display_id;
 } GstOsxDesktopSrc;
 
 typedef struct {
@@ -74,7 +74,7 @@ static void gst_osx_desktop_src_set_property(GObject *object, guint prop_id, con
 	switch (prop_id)
 	{
 		case PROP_WINDOW_ID:
-			GST_OSX_DESKTOP_SRC(object)->window_id = g_value_get_int(value);
+			GST_OSX_DESKTOP_SRC(object)->window_id = g_value_get_uint(value);
 			break;
 		case PROP_DISPLAY_ID:
 		{
@@ -91,9 +91,9 @@ static void gst_osx_desktop_src_set_property(GObject *object, guint prop_id, con
 			
 			CGGetActiveDisplayList(num, displays, &num);
 			
-			if (g_value_get_int(value) < num)
+			if (g_value_get_uint(value) < num)
 			{
-				GST_OSX_DESKTOP_SRC(object)->display_id = displays[g_value_get_int(value)];
+				GST_OSX_DESKTOP_SRC(object)->display_id = displays[g_value_get_uint(value)];
 			}
 			
 			free(displays);
@@ -111,10 +111,10 @@ static void gst_osx_desktop_src_get_property(GObject *object, guint prop_id, GVa
 	switch (prop_id)
 	{
 		case PROP_WINDOW_ID:
-			g_value_set_int(value, GST_OSX_DESKTOP_SRC(object)->window_id);
+			g_value_set_uint(value, GST_OSX_DESKTOP_SRC(object)->window_id);
 			break;
 		case PROP_DISPLAY_ID:
-			g_value_set_int(value, GST_OSX_DESKTOP_SRC(object)->display_id);
+			g_value_set_uint(value, GST_OSX_DESKTOP_SRC(object)->display_id);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -291,8 +291,8 @@ static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *class)
 	G_OBJECT_CLASS(class)->set_property = gst_osx_desktop_src_set_property;
 	G_OBJECT_CLASS(class)->get_property = gst_osx_desktop_src_get_property;
 	
-	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_WINDOW_ID, g_param_spec_int("window-id", "Window ID", "Captures a specific window only", 0, G_MAXINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
-	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_DISPLAY_ID, g_param_spec_int("display-id", "Display ID", "Captures a specific display", 0, G_MAXINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_WINDOW_ID, g_param_spec_uint("window-id", "Window ID", "Captures a specific window only", 0, G_MAXUINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_DISPLAY_ID, g_param_spec_uint("display-id", "Display ID", "Captures a specific display", 0, G_MAXUINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
 static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
