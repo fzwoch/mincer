@@ -23,7 +23,7 @@ LDFLAGS = $(shell pkg-config --libs gstreamer-1.0) -Wl,-headerpad_max_install_na
 APP = Mincer.app/Contents/MacOS/mincer
 OBJ = mincer.o
 ICN = Mincer.app/Contents/Resources/mincer.icns
-DMG = mincer.dmg
+DMG = Mincer.dmg
 
 GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstcoreelements.so \
