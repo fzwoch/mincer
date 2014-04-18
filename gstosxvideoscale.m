@@ -17,15 +17,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define USE_SWSCALE 0
-
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
-#if USE_SWSCALE
-#include <libswscale/swscale.h>
-#else
 #include <Cocoa/Cocoa.h>
-#endif
 
 typedef struct {
 	GstBaseTransform element;
@@ -36,9 +30,7 @@ typedef struct {
 	gint width_out;
 	gint height_out;
 	
-#if USE_SWSCALE
-	struct SwsContext *sws;
-#endif
+	gint interpolation_mode;
 } GstOsxVideoscale;
 
 typedef struct {
@@ -83,6 +75,47 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE
 	)
 );
 
+static GEnumValue interpolation_modes[] =
+{
+	{ kCGInterpolationNone, "None", "none" },
+	{ kCGInterpolationLow, "Low", "low" },
+	{ kCGInterpolationHigh, "High", "high" },
+	{ kCGInterpolationMedium, "Medium", "medium" },
+	{ 0, NULL, NULL }
+};
+
+enum
+{
+	PROP_0,
+	PROP_INTERPOLATION_MODE,
+};
+
+static void gst_osx_videoscale_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
+{
+	switch (prop_id)
+	{
+		case PROP_INTERPOLATION_MODE:
+			GST_OSX_VIDEOSCALE(object)->interpolation_mode = g_value_get_enum(value);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			break;
+	}
+}
+
+static void gst_osx_videoscale_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
+{
+	switch (prop_id)
+	{
+		case PROP_INTERPOLATION_MODE:
+			g_value_set_enum(value, GST_OSX_VIDEOSCALE(object)->interpolation_mode);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			break;
+	}
+}
+
 static GstCaps* gst_osx_videoscale_transform_caps(GstBaseTransform *trans, GstPadDirection direction, GstCaps *caps, GstCaps *filter)
 {	
 	GstPadTemplate *pad_template = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(trans), "src");
@@ -122,33 +155,14 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 	GstMapInfo info_in;
 	GstMapInfo info_out;
 	
-#if USE_SWSCALE
-	const guint8 *src[3] = { NULL };
-	gint src_stride[4] = { 0 };
-	
-	guint8 *dst[3] = { NULL };
-	gint dst_stride[4] = { 0 };
-#else
 	CGContextRef ctx_in;
 	CGContextRef ctx_out;
 	
 	CGImageRef img;
-#endif
 	
 	gst_buffer_map(inbuf, &info_in, GST_MAP_READ);
 	gst_buffer_map(outbuf, &info_out, GST_MAP_WRITE);
 	
-#if USE_SWSCALE
-	src[0] = info_in.data;
-	src_stride[0] = GST_OSX_VIDEOSCALE(trans)->width_in * 4;
-	
-	dst[0] = info_out.data;
-	dst_stride[0] = GST_OSX_VIDEOSCALE(trans)->width_out * 4;
-	
-	GST_OSX_VIDEOSCALE(trans)->sws = sws_getCachedContext(GST_OSX_VIDEOSCALE(trans)->sws, GST_OSX_VIDEOSCALE(trans)->width_in, GST_OSX_VIDEOSCALE(trans)->height_in, PIX_FMT_RGB32, GST_OSX_VIDEOSCALE(trans)->width_out, GST_OSX_VIDEOSCALE(trans)->height_out, PIX_FMT_RGB32, SWS_BILINEAR, NULL, NULL, NULL);
-	
-	sws_scale(GST_OSX_VIDEOSCALE(trans)->sws, src, src_stride, 0, GST_OSX_VIDEOSCALE(trans)->height_in, dst, dst_stride);
-#else
 	ctx_in = CGBitmapContextCreate
 	(
 		info_in.data,
@@ -173,30 +187,17 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 		(CGBitmapInfo)kCGImageAlphaNoneSkipLast
 	);
 	
-	CGContextSetInterpolationQuality(ctx_out, kCGInterpolationMedium);
+	CGContextSetInterpolationQuality(ctx_out, GST_OSX_VIDEOSCALE(trans)->interpolation_mode);
 	CGContextDrawImage(ctx_out, CGRectMake(0, 0, GST_OSX_VIDEOSCALE(trans)->width_out, GST_OSX_VIDEOSCALE(trans)->height_out), img);
 	
 	CGImageRelease(img);
 	CGContextRelease(ctx_in);
 	CGContextRelease(ctx_out);
-#endif
 	
 	gst_buffer_unmap(inbuf, &info_in);
 	gst_buffer_unmap(outbuf, &info_out);
 	
 	return GST_FLOW_OK;
-}
-
-static gboolean gst_osx_videoscale_stop(GstBaseTransform *trans)
-{
-#if USE_SWSCALE
-	if (GST_OSX_VIDEOSCALE(trans)->sws)
-	{
-		sws_freeContext(GST_OSX_VIDEOSCALE(trans)->sws);
-		GST_OSX_VIDEOSCALE(trans)->sws = NULL;
-	}
-#endif
-	return TRUE;
 }
 
 static void gst_osx_videoscale_class_init(GstOsxVideoscaleClass *class)
@@ -216,9 +217,13 @@ static void gst_osx_videoscale_class_init(GstOsxVideoscaleClass *class)
 	GST_BASE_TRANSFORM_CLASS(class)->transform = gst_osx_videoscale_transform;
 	GST_BASE_TRANSFORM_CLASS(class)->transform_caps = gst_osx_videoscale_transform_caps;
 	GST_BASE_TRANSFORM_CLASS(class)->set_caps = gst_osx_videoscale_set_caps;
-	GST_BASE_TRANSFORM_CLASS(class)->stop = gst_osx_videoscale_stop;
 	
 	GST_BASE_TRANSFORM_CLASS(class)->passthrough_on_same_caps = TRUE;
+	
+	G_OBJECT_CLASS(class)->set_property = gst_osx_videoscale_set_property;
+	G_OBJECT_CLASS(class)->get_property = gst_osx_videoscale_get_property;
+
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_INTERPOLATION_MODE, g_param_spec_enum("interpolation-mode", "Interpolation Mode", "Specifies the interpolation mode", g_enum_register_static ("CGInterpolationQuality", interpolation_modes), kCGInterpolationMedium, G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS));
 }
 
 static void gst_osx_videoscale_init(GstOsxVideoscale *filter)
@@ -229,9 +234,7 @@ static void gst_osx_videoscale_init(GstOsxVideoscale *filter)
 	filter->width_out = 0;
 	filter->height_out = 0;
 	
-#if USE_SWSCALE
-	filter->sws = NULL;
-#endif
+	filter->interpolation_mode = kCGInterpolationMedium;
 }
 
 static gboolean plugin_init(GstPlugin *plugin)
