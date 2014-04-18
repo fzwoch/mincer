@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define USE_SWSCALE 1
+#define USE_SWSCALE 0
 
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
@@ -170,7 +170,7 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 		8,
 		GST_OSX_VIDEOSCALE(trans)->width_out * 4,
 		CGColorSpaceCreateDeviceRGB(),
-		kCGImageAlphaNoneSkipLast
+		(CGBitmapInfo)kCGImageAlphaNoneSkipLast
 	);
 	
 	CGContextSetInterpolationQuality(ctx_out, kCGInterpolationMedium);
@@ -189,7 +189,7 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 
 static gboolean gst_osx_videoscale_stop(GstBaseTransform *trans)
 {
-#ifdef USE_SWSCALE
+#if USE_SWSCALE
 	if (GST_OSX_VIDEOSCALE(trans)->sws)
 	{
 		sws_freeContext(GST_OSX_VIDEOSCALE(trans)->sws);
