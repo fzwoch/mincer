@@ -68,7 +68,7 @@ $(APP): $(OBJ) $(ICN) $(GST)
 
 $(DMG): $(APP)
 	@echo " DMG $@"
-	@hdiutil create -quiet -ov  $@ -srcfolder Mincer.app
+	@hdiutil create -quiet -ov $@ -srcfolder Mincer.app
 
 %.icns:../../../%.iconset
 	@echo " IC $@"
