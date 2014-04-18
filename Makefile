@@ -23,7 +23,7 @@ LDFLAGS = $(shell pkg-config --libs gstreamer-1.0) -Wl,-headerpad_max_install_na
 APP = Mincer.app/Contents/MacOS/mincer
 OBJ = mincer.o
 ICN = Mincer.app/Contents/Resources/mincer.icns
-ZIP = mincer.zip
+DMG = mincer.dmg
 
 GST = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstcoreelements.so \
@@ -45,7 +45,7 @@ GST_OBJ = \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so \
 	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so
 
-all: $(ZIP)
+all: $(DMG)
 	@echo " DONE"
 
 $(APP): $(OBJ) $(ICN) $(GST) $(GST_OBJ)
@@ -77,9 +77,9 @@ $(APP): $(OBJ) $(ICN) $(GST) $(GST_OBJ)
 		done \
 	done
 
-$(ZIP): $(APP)
-	@echo " ZP $@"
-	@zip -r -q --exclude=*.git* $@ Mincer.app
+$(DMG): $(APP)
+	@echo " DMG $@"
+	@hdiutil create -quiet -ov  $@ -srcfolder Mincer.app
 
 %.icns:../../../%.iconset
 	@echo " IC $@"
@@ -95,7 +95,7 @@ lib%.so:../../../../%.m
 
 clean:
 	@echo " CLEAN"
-	@rm -f $(APP) $(OBJ) $(ICN) $(ZIP) Mincer.app/Contents/Frameworks/*.dylib Mincer.app/Contents/Frameworks/gstreamer-1.0/*.so
+	@rm -f $(APP) $(OBJ) $(ICN) $(DMG) Mincer.app/Contents/Frameworks/*.dylib Mincer.app/Contents/Frameworks/gstreamer-1.0/*.so
 
 %.o:%.m
 	@echo " CC $@"
