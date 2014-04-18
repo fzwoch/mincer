@@ -26,27 +26,27 @@ ICN = Mincer.app/Contents/Resources/mincer.icns
 DMG = Mincer.dmg
 
 GST = \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstcoreelements.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudiotestsrc.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaudio.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstadder.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioconvert.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioresample.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstvideoparsersbad.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstaudioparsers.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstvideoconvert.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstx264.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstflv.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstisomp4.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstrtmp.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so \
-	Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so
+	libgstcoreelements.so \
+	libgstaudiotestsrc.so \
+	libgstosxaudio.so \
+	libgstadder.so \
+	libgstaudioconvert.so \
+	libgstaudioresample.so \
+	libgstvideoparsersbad.so \
+	libgstaudioparsers.so \
+	libgstvideoconvert.so \
+	libgstx264.so \
+	libgstflv.so \
+	libgstisomp4.so \
+	libgstrtmp.so \
+	libgstosxdesktopsrc.so \
+	libgstosxvideoscale.so \
+	libgstosxaacencode.so
 
 all: $(DMG)
 	@echo " DONE"
 
-$(APP): $(OBJ) $(ICN) $(GST)
+$(APP): $(OBJ) $(ICN) $(addprefix Mincer.app/Contents/Frameworks/gstreamer-1.0/, $(GST))
 	@echo " LD $@"
 	@$(CC) $< $(LDFLAGS) -o $@
 	@for dylib in `otool -L $@ | grep /opt/local/lib | cut -d ' ' -f 1`; do \
