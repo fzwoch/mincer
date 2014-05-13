@@ -252,7 +252,7 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 			rect.origin.x -= [cursor hotSpot].x;
 			rect.origin.y -= [cursor_img size].height - [cursor hotSpot].y;
 			
-			if (GST_OSX_DESKTOP_SRC(src)->display_id != 0)
+			if (CGDisplayIsMain(GST_OSX_DESKTOP_SRC(src)->display_id) == false)
 			{
 				CGRect ref_rect = CGDisplayBounds(CGMainDisplayID());
 				CGRect adj_rect = CGDisplayBounds(GST_OSX_DESKTOP_SRC(src)->display_id);
