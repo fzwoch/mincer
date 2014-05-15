@@ -238,14 +238,14 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), img);
 	CGImageRelease(img);
 	
-	if (CGCursorIsVisible())
+	@autoreleasepool
 	{
-		@autoreleasepool
+		NSRect rect;
+		NSCursor *cursor = [NSCursor currentSystemCursor];
+		NSImage *cursor_img = [cursor image];
+		
+		if (cursor_img != nil)
 		{
-			NSRect rect;
-			NSCursor *cursor = [NSCursor currentSystemCursor];
-			NSImage *cursor_img = [cursor image];
-			
 			rect.size = [cursor_img size];
 			rect.origin = [NSEvent mouseLocation];
 			
