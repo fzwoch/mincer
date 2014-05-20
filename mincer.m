@@ -389,9 +389,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	video_bitrate = [NSSlider new];
 	[video_bitrate setMinValue:300];
-	[video_bitrate setMaxValue:3000];
-	[video_bitrate setNumberOfTickMarks:([video_bitrate maxValue] - [video_bitrate minValue]) / 50 + 1];
-	[video_bitrate setAllowsTickMarkValuesOnly:YES];
+	[video_bitrate setMaxValue:5000];
+	[video_bitrate setNumberOfTickMarks:([video_bitrate maxValue] - [video_bitrate minValue]) / 100 + 1];
+	[video_bitrate setAllowsTickMarkValuesOnly:NO];
 	[video_bitrate setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[video_bitrate setAction:@selector(updateVideoBitrate)];
 	
