@@ -863,7 +863,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[activity release];
 		activity = nil;
 	}
-		
 }
 - (void)updateEncoderSpeed
 {	
