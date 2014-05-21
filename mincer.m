@@ -185,6 +185,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSTextField *elapsed_time;
 	
 	GstElement *pipeline;
+	id<NSObject> activity;
 }
 @end
 
@@ -633,6 +634,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	pipeline = NULL;
+	activity = nil;
 }
 - (BOOL)windowShouldClose:(id)sender
 {
@@ -791,6 +793,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[timer fire];
 	
 	[button setTitle:@"Stop"];
+	
+	if ([[NSProcessInfo processInfo] respondsToSelector:@selector(beginActivityWithOptions:reason:)])
+	{
+		activity = [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiated reason:@"live capture in progress"];
+		[activity retain];
+	}
 }
 - (void)stopStream
 {
@@ -848,6 +856,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[self updateElapsedTime];
 	
 	[button setTitle:@"Start"];
+	
+	if (activity != nil)
+	{
+		[[NSProcessInfo processInfo] endActivity:activity];
+		[activity release];
+		activity = nil;
+	}
+		
 }
 - (void)updateEncoderSpeed
 {	
