@@ -88,6 +88,13 @@ Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so:/opt/local/lib/gstreamer-1.0/%
 lib%.so:../../../../%.m
 	@echo " CC $@"
 	@$(CC) -Wall -O2 -shared $< $(shell pkg-config --cflags --libs gstreamer-audio-1.0) -o $@ -framework Cocoa -framework AudioToolBox
+	@for dylib in `otool -L $@ | grep /opt/local/lib | cut -d ' ' -f 1`; do \
+		if [ ! -f Mincer.app/Contents/Frameworks/`basename $$dylib` ]; then \
+			echo " CP Mincer.app/Contents/Frameworks/`basename $$dylib`"; \
+			cp $$dylib Mincer.app/Contents/Frameworks/`basename $$dylib`; \
+		fi; \
+		install_name_tool -change $$dylib @loader_path/../`basename $$dylib` $@; \
+	done
 
 clean:
 	@echo " CLEAN"
