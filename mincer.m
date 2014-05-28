@@ -1,5 +1,5 @@
 /*
- * mincer
+ * Mincer
  *
  * Copyright (C) 2013-2014 Florian Zwoch <fzwoch@gmail.com>
  *
