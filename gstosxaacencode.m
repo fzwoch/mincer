@@ -350,7 +350,7 @@ GST_PLUGIN_DEFINE
 	osxaacencode,
 	"OS X AAC Encode",
 	plugin_init,
-	"0.0.8",
+	"0.0.9",
 	"GPL",
 	"Mincer",
 	"https://github.com/fzwoch/mincer/"
