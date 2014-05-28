@@ -923,8 +923,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 int main(int argc, char *argv[])
 {
 	g_setenv("LC_ALL", "en_US.UTF-8", TRUE);
-	g_setenv("GST_PLUGIN_PATH", [[[[NSBundle mainBundle] privateFrameworksPath] stringByAppendingString:@"/gstreamer-1.0/"] cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
+	g_setenv("GST_PLUGIN_PATH", [[[[NSBundle mainBundle] bundlePath] stringByAppendingString:@"/Contents/MacOS/gstreamer-1.0"] cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
 	
+	gst_registry_fork_set_enabled(FALSE);
 	gst_init(&argc, &argv);
 	
 	[NSApplication sharedApplication];
