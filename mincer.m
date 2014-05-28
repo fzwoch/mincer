@@ -290,40 +290,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	free(displays);
-#if 0
-	[[video_device menu] addItem:[NSMenuItem separatorItem]];
-	
-	CFArrayRef window_ids = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
-	
-	for (i = 0; i < CFArrayGetCount(window_ids); i++)
-	{
-		CFDictionaryRef dict = (CFDictionaryRef)CFArrayGetValueAtIndex(window_ids, i);
-		
-		if (CFDictionaryContainsKey(dict, kCGWindowName) == false || CFDictionaryContainsKey(dict, kCGWindowOwnerName) == false)
-		{
-			continue;
-		}
-		
-		if (CFStringGetLength((CFStringRef)CFDictionaryGetValue(dict, kCGWindowName)) == 0 || CFStringGetLength((CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName)) == 0)
-		{
-			continue;
-		}
-		
-		if (CFStringCompare((CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName), CFSTR("Dock"), 0) == kCFCompareEqualTo)
-		{
-			continue;
-		}
-		
-		if (CFStringCompare((CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName), CFSTR("Window Server"), 0) == kCFCompareEqualTo)
-		{
-			continue;
-		}
-		
-		[video_device addItemWithTitle:[NSString stringWithFormat:@"%@ - %@", (CFStringRef)CFDictionaryGetValue(dict, kCGWindowOwnerName), (CFStringRef)CFDictionaryGetValue(dict, kCGWindowName)]];
-	}
-	
-	CFRelease(window_ids);
-#endif
 	
 	NSTextField *resolution_label = [NSTextField new];
 	[resolution_label setStringValue:@"Video Resolution"];
