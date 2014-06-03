@@ -776,6 +776,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		return;
 	}
 	
+	if (timer)
+	{
+		[timer invalidate];
+		timer = NULL;
+	}
+	
+	[self updateElapsedTime];
+	
 	bus = gst_element_get_bus(pipeline);
 	
 	gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
@@ -812,14 +820,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[start_date release];
 		start_date = NULL;
 	}
-	
-	if (timer)
-	{
-		[timer invalidate];
-		timer = NULL;
-	}
-	
-	[self updateElapsedTime];
 	
 	[button setTitle:@"Start"];
 	
