@@ -119,6 +119,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	gchar *debug;
 	GError *error;
+	NSWindow *window = data;
 	
 	switch (GST_MESSAGE_TYPE(msg))
 	{
@@ -138,7 +139,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			gst_message_parse_error(msg, &error, &debug);
 			g_free(debug);
 			
-			[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+			[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:window completionHandler:^(NSInteger result)
 			 {
 				 g_error_free(error);
 				 
@@ -155,6 +156,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 {
+	NSWindow *window;
+	
 	NSTextField *url;
 	NSSecureTextField *url_secret;
 	
@@ -224,7 +227,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[edit_menu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
 	[item setSubmenu:edit_menu];
 	
-	NSWindow *window = [NSWindow new];
+	window = [NSWindow new];
 	[window setStyleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask];
 	[window setBackingType:NSBackingStoreBuffered];
 	[window setTitle:@"Mincer"];
@@ -606,7 +609,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	if (pipeline)
 	{
-		[[NSAlert alertWithMessageText:@"Quit Mincer" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Mincer is currently running. Are you sure you want to stop processing and quit the application?"] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+		[[NSAlert alertWithMessageText:@"Quit Mincer" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Mincer is currently running. Are you sure you want to stop processing and quit the application?"] beginSheetModalForWindow:window completionHandler:^(NSInteger result)
 		 {
 			 if (result == NSAlertDefaultReturn)
 			 {
@@ -624,7 +627,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	if (pipeline)
 	{
-		[[NSApp keyWindow] performClose:nil];
+		[window performClose:nil];
 		
 		return NSTerminateCancel;
 	}
@@ -655,8 +658,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	
-	[defaults setFloat:[[NSApp keyWindow] frame].origin.x forKey:@"pos_x"];
-	[defaults setFloat:[[NSApp keyWindow] frame].origin.y forKey:@"pos_y"];
+	[defaults setFloat:[window frame].origin.x forKey:@"pos_x"];
+	[defaults setFloat:[window frame].origin.y forKey:@"pos_y"];
 }
 - (void)toggleStream
 {
@@ -669,7 +672,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (![[url stringValue] length] && !mp4_recording_enabled)
 	{
-		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"No RTMP and no MP4 option set. Nothing to be done."] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:nil];
+		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"No RTMP and no MP4 option set. Nothing to be done."] beginSheetModalForWindow:window completionHandler:nil];
 		
 		return;
 	}
@@ -713,7 +716,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);
 	if (error)
 	{
-		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:window completionHandler:^(NSInteger result)
 		 {
 			 g_error_free(error);
 			 
@@ -731,14 +734,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc release];
 	
 	bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-	gst_bus_set_sync_handler(bus, bus_call, NULL, NULL);
+	gst_bus_set_sync_handler(bus, bus_call, window, NULL);
 	gst_object_unref(bus);
 	
 	[url_secret setStringValue:[url stringValue]];
 	[url_secret setHidden:NO];
 	[url setHidden:YES];
 	
-	[[[NSApp keyWindow] contentView] display];
+	[[window contentView] display];
 	
 	[url setEnabled:NO];
 	[video_device setEnabled:NO];
@@ -854,7 +857,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording_panel setAllowsMultipleSelection:NO];
 	[mp4_recording_panel setDirectoryURL:[NSURL fileURLWithPath:mp4_recording_path isDirectory:YES]];
 	
-	[mp4_recording_panel beginSheetModalForWindow:[NSApp keyWindow] completionHandler:^(NSInteger result)
+	[mp4_recording_panel beginSheetModalForWindow:window completionHandler:^(NSInteger result)
 	{
 		mp4_recording_enabled = (result == NSFileHandlingPanelOKButton) ? 1 : 0;
 		
