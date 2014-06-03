@@ -890,6 +890,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		if (elem)
 		{
 			g_object_get(elem, "skipped-frames", &skipped, NULL);
+			g_object_unref(elem);
 		}
 	}
 	
