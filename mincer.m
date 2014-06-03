@@ -883,6 +883,17 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[elapsed_time setStringValue:[date stringFromDate:time]];
 	
 	[date release];
+	
+	gint skipped_frames = 0;
+	
+	if (pipeline)
+	{
+		GstElement *elem = gst_bin_get_by_name(GST_BIN(pipeline), "osxdesktopsrc0");
+		if (elem)
+		{
+			g_object_get(elem, "skipped-frames", &skipped_frames, NULL);
+		}
+	}
 }
 @end
 

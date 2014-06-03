@@ -28,6 +28,7 @@ typedef struct {
 	gint height;
 	gint framerate_num;
 	gint framerate_denom;
+	gint skipped_frames;
 	
 	gint64 time_next;
 	
@@ -66,7 +67,8 @@ enum
 {
 	PROP_0,
 	PROP_WINDOW_ID,
-	PROP_DISPLAY_ID
+	PROP_DISPLAY_ID,
+	PROP_SKIPPED_FRAMES
 };
 
 static void gst_osx_desktop_src_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
@@ -115,6 +117,9 @@ static void gst_osx_desktop_src_get_property(GObject *object, guint prop_id, GVa
 			break;
 		case PROP_DISPLAY_ID:
 			g_value_set_uint(value, GST_OSX_DESKTOP_SRC(object)->display_id);
+			break;
+		case PROP_SKIPPED_FRAMES:
+			g_value_set_int(value, GST_OSX_DESKTOP_SRC(object)->skipped_frames);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -169,12 +174,17 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 		
 		if (time_cur > GST_OSX_DESKTOP_SRC(src)->time_next)
 		{
+			gint skipped_frames = 0;
+			
 			buf->duration = 1000000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
 			
 			while (GST_OSX_DESKTOP_SRC(src)->time_next < time_cur)
 			{
 				GST_OSX_DESKTOP_SRC(src)->time_next += 1000000LL / (GST_OSX_DESKTOP_SRC(src)->framerate_num / GST_OSX_DESKTOP_SRC(src)->framerate_denom);
+				skipped_frames++;
 			}
+			
+			GST_OSX_DESKTOP_SRC(src)->skipped_frames += skipped_frames - 1;
 			
 			break;
 		}
@@ -293,6 +303,7 @@ static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *class)
 	
 	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_WINDOW_ID, g_param_spec_uint("window-id", "Window ID", "Captures a specific window only", 0, G_MAXUINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_DISPLAY_ID, g_param_spec_uint("display-id", "Display ID", "Captures a specific display", 0, G_MAXUINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_SKIPPED_FRAMES, g_param_spec_int("skipped-frames", "Skipped Frames", "Number of skipped frames", 0, G_MAXINT, 0, G_PARAM_READABLE));
 }
 
 static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
@@ -320,6 +331,7 @@ static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
 	
 	filter->framerate_num = 30;
 	filter->framerate_denom = 1;
+	filter->skipped_frames = 0;
 	
 	filter->time_next = -1;
 	
