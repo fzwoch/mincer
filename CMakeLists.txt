@@ -71,11 +71,11 @@ set(PLUGINS
 	libgstrtmp.so)
 
 foreach(PLUGIN ${PLUGINS})
-	install(FILES "${GSTREAMER_LIBRARY_DIRS}/gstreamer-1.0/${PLUGIN}" DESTINATION "${CMAKE_BINARY_DIR}/Mincer.app/Contents/MacOS/gstreamer-1.0" COMPONENT Runtime)
+	install(FILES "${GSTREAMER_LIBRARY_DIRS}/gstreamer-1.0/${PLUGIN}" DESTINATION "${CMAKE_BINARY_DIR}/Mincer.app/Contents/MacOS/gstreamer-1.0")
 endforeach(PLUGIN)
 
 install(CODE "
 	file(GLOB PLUGINS \"Mincer.app/Contents/MacOS/gstreamer-1.0/*.so\")
 	include(BundleUtilities)
 	fixup_bundle(\"${CMAKE_BINARY_DIR}/Mincer.app\" \"\${PLUGINS}\" \"\")
-" COMPONENT Runtime)
+")
