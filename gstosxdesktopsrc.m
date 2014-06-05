@@ -28,7 +28,9 @@ typedef struct {
 	gint height;
 	gint framerate_num;
 	gint framerate_denom;
+	
 	gint skipped_frames;
+	gboolean display_cursor;
 	
 	gint64 time_next;
 	
@@ -68,7 +70,8 @@ enum
 	PROP_0,
 	PROP_WINDOW_ID,
 	PROP_DISPLAY_ID,
-	PROP_SKIPPED_FRAMES
+	PROP_SKIPPED_FRAMES,
+	PROP_DISPLAY_CURSOR
 };
 
 static void gst_osx_desktop_src_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
@@ -102,6 +105,9 @@ static void gst_osx_desktop_src_set_property(GObject *object, guint prop_id, con
 			
 			break;
 		}
+		case PROP_DISPLAY_CURSOR:
+			GST_OSX_DESKTOP_SRC(object)->display_cursor = g_value_get_boolean(value);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 			break;
@@ -120,6 +126,9 @@ static void gst_osx_desktop_src_get_property(GObject *object, guint prop_id, GVa
 			break;
 		case PROP_SKIPPED_FRAMES:
 			g_value_set_int(value, GST_OSX_DESKTOP_SRC(object)->skipped_frames);
+			break;
+		case PROP_DISPLAY_CURSOR:
+			g_value_set_boolean(value, GST_OSX_DESKTOP_SRC(object)->display_cursor);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -145,7 +154,7 @@ static gboolean gst_osx_desktop_src_set_caps(GstBaseSrc *src, GstCaps *caps)
 	
 	gst_structure_get_fraction(gst_caps_get_structure(caps, 0), "framerate", &num, &denom);
 	
-	if (num)
+	if (num > 0)
 	{
 		GST_OSX_DESKTOP_SRC(src)->framerate_num = num;
 		GST_OSX_DESKTOP_SRC(src)->framerate_denom = denom;
@@ -248,30 +257,33 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), img);
 	CGImageRelease(img);
 	
-	@autoreleasepool
+	if (GST_OSX_DESKTOP_SRC(src)->display_cursor == TRUE)
 	{
-		NSRect rect;
-		NSCursor *cursor = [NSCursor currentSystemCursor];
-		NSImage *cursor_img = [cursor image];
-		
-		if (cursor_img != nil)
+		@autoreleasepool
 		{
-			rect.size = [cursor_img size];
-			rect.origin = [NSEvent mouseLocation];
+			NSRect rect;
+			NSCursor *cursor = [NSCursor currentSystemCursor];
+			NSImage *cursor_img = [cursor image];
 			
-			rect.origin.x -= [cursor hotSpot].x;
-			rect.origin.y -= [cursor_img size].height - [cursor hotSpot].y;
-			
-			if (CGDisplayIsMain(GST_OSX_DESKTOP_SRC(src)->display_id) == false)
+			if (cursor_img != nil)
 			{
-				CGRect ref_rect = CGDisplayBounds(CGMainDisplayID());
-				CGRect adj_rect = CGDisplayBounds(GST_OSX_DESKTOP_SRC(src)->display_id);
+				rect.size = [cursor_img size];
+				rect.origin = [NSEvent mouseLocation];
 				
-				rect.origin.x -= adj_rect.origin.x;
-				rect.origin.y -= (ref_rect.size.height - adj_rect.size.height) - adj_rect.origin.y;
+				rect.origin.x -= [cursor hotSpot].x;
+				rect.origin.y -= [cursor_img size].height - [cursor hotSpot].y;
+				
+				if (CGDisplayIsMain(GST_OSX_DESKTOP_SRC(src)->display_id) == false)
+				{
+					CGRect ref_rect = CGDisplayBounds(CGMainDisplayID());
+					CGRect adj_rect = CGDisplayBounds(GST_OSX_DESKTOP_SRC(src)->display_id);
+					
+					rect.origin.x -= adj_rect.origin.x;
+					rect.origin.y -= (ref_rect.size.height - adj_rect.size.height) - adj_rect.origin.y;
+				}
+				
+				CGContextDrawImage(ctx, NSRectToCGRect(rect), [cursor_img CGImageForProposedRect:NULL context:NULL hints:NULL]);
 			}
-			
-			CGContextDrawImage(ctx, NSRectToCGRect(rect), [cursor_img CGImageForProposedRect:NULL context:NULL hints:NULL]);
 		}
 	}
 	
@@ -304,6 +316,7 @@ static void gst_osx_desktop_src_class_init(GstOsxDesktopSrcClass *class)
 	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_WINDOW_ID, g_param_spec_uint("window-id", "Window ID", "Captures a specific window only", 0, G_MAXUINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_DISPLAY_ID, g_param_spec_uint("display-id", "Display ID", "Captures a specific display", 0, G_MAXUINT, 0, G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_SKIPPED_FRAMES, g_param_spec_int("skipped-frames", "Skipped Frames", "Number of skipped frames", 0, G_MAXINT, 0, G_PARAM_READABLE));
+	g_object_class_install_property(G_OBJECT_CLASS(class), PROP_DISPLAY_CURSOR, g_param_spec_boolean("display-cursor", "Display Cursor", "Draw the cursor into the captured image", TRUE, G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
 static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
@@ -331,7 +344,9 @@ static void gst_osx_desktop_src_init(GstOsxDesktopSrc *filter)
 	
 	filter->framerate_num = 30;
 	filter->framerate_denom = 1;
+	
 	filter->skipped_frames = 0;
+	filter->display_cursor = TRUE;
 	
 	filter->time_next = -1;
 	
