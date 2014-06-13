@@ -279,13 +279,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		switch (i)
 		{
 		case 0:
-			[video_device addItemWithTitle:[NSString stringWithFormat:@"Primary Desktop"]];
+			[video_device addItemWithTitle:@"Primary Desktop"];
 			break;
 		case 1:
-			[video_device addItemWithTitle:[NSString stringWithFormat:@"Secondary Desktop"]];
+			[video_device addItemWithTitle:@"Secondary Desktop"];
 			break;
 		case 2:
-			[video_device addItemWithTitle:[NSString stringWithFormat:@"Tertiary Desktop"]];
+			[video_device addItemWithTitle:@"Tertiary Desktop"];
 			break;
 		default:
 			[video_device addItemWithTitle:[NSString stringWithFormat:@"Desktop %d", i + 1]];
