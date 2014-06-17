@@ -13,10 +13,10 @@ Build instructions
 For compiling the application you require at least he following:
 
 * XCode (https://developer.apple.com/) + command line tools
-* CMake (http://cmake.org)
+* CMake (http://cmake.org/)
 * GStreamer 1.x development files (http://gstreamer.freedesktop.org/)
 
-The recommended way to install these libraries and tools on your system is via a packet manager. I personally use Macports (http://macports.org/) but there are also alternatives - most commonly Fink (http://finkproject.org/) or Homebrew (http://brew.sh).
+The recommended way to install these libraries and tools on your system is via a packet manager. I personally use Macports (http://macports.org/) but there are also alternatives - most commonly Fink (http://finkproject.org/) or Homebrew (http://brew.sh/).
 
 If using Macports you can install the required packages with the following command. You will have to adapt the command to other package managers if you have selected a different one.
 
