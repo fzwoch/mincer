@@ -113,7 +113,7 @@ static gint audio_bitrates[] =
 };
 
 static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
-static glong audio_soundflower_id = 0;
+static glong audio_capture_id = 0;
 
 static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
@@ -426,9 +426,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			audio_device_id[0] = devices[i];
 			audio_device_id++;
 			
-			if ([(NSString*)name isEqualToString:@"Soundflower (2ch)"])
+			if (!audio_capture_id && ([(NSString*)name isEqualToString:@"Soundflower (2ch)"] || [(NSString*)name isEqualToString:@"WavTap"]))
 			{
-				audio_soundflower_id = devices[i];
+				audio_capture_id = devices[i];
 			}
 		}
 		
@@ -699,9 +699,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc appendFormat:@"videoconvert ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
 	[desc appendFormat:@"adder name=audio_mix ! osxaacencode bitrate=%d ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
-	if (audio_soundflower_id)
+	if (audio_capture_id)
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_soundflower_id];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id];
 	}
 	
 	if ([audio_device indexOfSelectedItem])
@@ -709,7 +709,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
 	}
 	
-	if (![audio_device indexOfSelectedItem] && !audio_soundflower_id)
+	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
 	{
 		[desc appendFormat:@"audiotestsrc is-live=true wave=silence ! audio_mix. "];
 	}
