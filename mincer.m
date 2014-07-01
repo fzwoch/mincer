@@ -699,14 +699,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc appendFormat:@"videoconvert ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
 	[desc appendFormat:@"adder name=audio_mix ! osxaacencode bitrate=%d ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
-	if (audio_capture_id)
-	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id];
-	}
-	
 	if ([audio_device indexOfSelectedItem])
 	{
 		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
+	}
+	
+	if (audio_capture_id)
+	{
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
