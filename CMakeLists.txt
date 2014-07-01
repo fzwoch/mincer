@@ -20,8 +20,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(Mincer)
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.7")
-
 find_library(COCOA_LIBRARY Cocoa)
 find_library(COREAUDIO_LIBRARY CoreAudio)
 find_library(AUDIOTOOLBOX_LIBRARY AudioToolBox)
