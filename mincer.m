@@ -925,6 +925,8 @@ int main(int argc, char *argv[])
 	gst_registry_fork_set_enabled(FALSE);
 	gst_init(&argc, &argv);
 	
+	signal(SIGPIPE, SIG_IGN);
+	
 	[NSApplication sharedApplication];
 	[NSApp setDelegate:[AppDelegate new]];
 	[NSApp run];
