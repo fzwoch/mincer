@@ -129,7 +129,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			gst_message_parse_warning(msg, &error, &debug);
 			g_free(debug);
 			
-			NSLog(@"%@", [NSString stringWithCString:error->message encoding:NSUTF8StringEncoding]);
+			NSLog(@"%@", [NSString stringWithUTF8String:error->message]);
 			g_error_free(error);
 		}
 		break;
@@ -139,12 +139,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			gst_message_parse_error(msg, &error, &debug);
 			g_free(debug);
 			
-			[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:window completionHandler:^(NSInteger result)
-			 {
-				 g_error_free(error);
-				 
-				 [[NSApp delegate] performSelectorOnMainThread:@selector(stopStream) withObject:nil waitUntilDone:YES];
-			 }];
+			[[NSApp delegate] performSelectorOnMainThread:@selector(handleError) withObject:[NSString stringWithUTF8String:error->message] waitUntilDone:YES];
+			g_error_free(error);
 		}
 		break;
 	default:
@@ -726,7 +722,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", mp4_recording_path, [date stringFromDate:[NSDate date]]];
 	}
 	
-	pipeline = gst_parse_launch([desc cStringUsingEncoding:NSUTF8StringEncoding], &error);
+	pipeline = gst_parse_launch([desc UTF8String], &error);
 	if (error)
 	{
 		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:window completionHandler:^(NSInteger result)
@@ -914,12 +910,18 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[date release];
 }
+- (void)handleError:(id)error
+{
+	[self stopStream];
+	
+	[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", error] beginSheetModalForWindow:window completionHandler:nil];
+}
 @end
 
 int main(int argc, char *argv[])
 {
 	g_setenv("LC_ALL", "en_US.UTF-8", TRUE);
-	g_setenv("GST_PLUGIN_SYSTEM_PATH", [[[[NSBundle mainBundle] bundlePath] stringByAppendingString:@"/Contents/MacOS/gstreamer-1.0"] cStringUsingEncoding:NSUTF8StringEncoding], TRUE);
+	g_setenv("GST_PLUGIN_SYSTEM_PATH", [[[[NSBundle mainBundle] bundlePath] stringByAppendingString:@"/Contents/MacOS/gstreamer-1.0"] UTF8String], TRUE);
 	
 	gst_registry_fork_set_enabled(FALSE);
 	gst_init(&argc, &argv);
