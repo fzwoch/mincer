@@ -695,7 +695,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	[desc appendFormat:@"osxdesktopsrc display-id=%ld ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 ! osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
+	[desc appendFormat:@"osxdesktopsrc display-id=%ld name=desktopsrc ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 ! osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	[desc appendFormat:@"videoconvert ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
 	[desc appendFormat:@"adder name=audio_mix ! osxaacencode bitrate=%d ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
@@ -886,7 +886,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (pipeline)
 	{
-		GstElement *elem = gst_bin_get_by_name(GST_BIN(pipeline), "osxdesktopsrc0");
+		GstElement *elem = gst_bin_get_by_name(GST_BIN(pipeline), "desktopsrc");
 		if (elem)
 		{
 			g_object_get(elem, "skipped-frames", &skipped, NULL);
