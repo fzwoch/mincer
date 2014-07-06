@@ -49,7 +49,7 @@ set_target_properties(gstosxdesktopsrc gstosxvideoscale gstosxaacencode PROPERTI
 
 set(MACOSX_BUNDLE_ICON_FILE mincer)
 set(MACOSX_BUNDLE_BUNDLE_NAME Mincer)
-set(MACOSX_BUNDLE_BUNDLE_VERSION 0.1.1)
+set(MACOSX_BUNDLE_BUNDLE_VERSION 0.1.2)
 set(MACOSX_BUNDLE_COPYRIGHT "© 2013-2014 Florian Zwoch")
 set(MACOSX_BUNDLE_GUI_IDENTIFIER zwoch.florian.mincer)
 
