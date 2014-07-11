@@ -26,7 +26,7 @@ fi
 bundle=$1
 
 function copy_deps {
-	for dep in $(otool -L $1 | grep /usr/local | cut -d " " -f1 | tr -d "\t"); do
+	for dep in $(otool -L $1 | grep local | cut -d " " -f1 | tr -d "\t"); do
 		if [ ! -f $bundle/Contents/Frameworks/$(basename $dep) ]; then
 			echo " CP $bundle/Contents/Frameworks/$(basename $dep)"
 			cp $dep $bundle/Contents/Frameworks/$(basename $dep)
@@ -38,7 +38,7 @@ function copy_deps {
 
 function fix_symbols {
 	echo " FX $1"
-	for dep in $(otool -L $1 | grep /usr/local | cut -d " " -f1 | tr -d "\t"); do
+	for dep in $(otool -L $1 | grep local | cut -d " " -f1 | tr -d "\t"); do
 		install_name_tool -change $dep @executable_path/../Frameworks/$(basename $dep) $1
 	done
 }

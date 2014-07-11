@@ -35,6 +35,7 @@ PLUGINS_FILES = \
 	libgstisomp4.so \
 	libgstrtmp.so
 
+PLUGINS_DIR=$(dir $(shell gst-inspect-1.0 coreelements | grep Filename | awk '{print $$2}'))
 PLUGINS=$(addprefix Mincer.app/Contents/Frameworks/gstreamer-1.0/, $(PLUGINS_FILES))
 
 all: Mincer.app
@@ -85,7 +86,7 @@ Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so: gstosxaacenc
 	@$(CC) $(CFLAGS) $(LDFLAGS) -shared $(shell pkg-config --cflags --libs gstreamer-audio-1.0) -framework AudioToolbox $< -o $@
 	@chmod 644 $@
 
-Mincer.app/Contents/Frameworks/%.so: /usr/local/lib/%.so
+Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so: $(PLUGINS_DIR)/%.so
 	@echo " CP $@"
 	@mkdir -p $(dir $@)
 	@cp $< $@
