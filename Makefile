@@ -94,7 +94,7 @@ Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so: $(PLUGINS_DIR)/%.so
 
 package: Mincer.app
 	@echo " ZP mincer.zip"
-	@zip -qr mincer.zip $<
+	@ditto -c -k --keepParent --arch x86_64 mincer.zip $<
 
 clean:
 	@echo " CLEAN"
