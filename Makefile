@@ -50,7 +50,7 @@ Mincer.app/Contents/Resources/mincer.icns: mincer.iconset/icon_512x512.png
 
 mincer.iconset/icon_512x512.png: mincer.svg
 	@echo " IM $<"
-	@mkdir $(dir $@)
+	@mkdir -p $(dir $@)
 	@convert -background transparent $< $@
 
 Mincer.app/Contents/Info.plist:
