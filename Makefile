@@ -24,7 +24,7 @@ PLUGINS_FILES = \
 	libgstcoreelements.so \
 	libgstaudiotestsrc.so \
 	libgstosxaudio.so \
-	libgstadder.so \
+	libgstaudiomixer.so \
 	libgstaudioconvert.so \
 	libgstaudioresample.so \
 	libgstvideoparsersbad.so \
