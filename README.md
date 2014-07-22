@@ -14,7 +14,7 @@ For compiling the application you require at least the following:
 
 * XCode (https://developer.apple.com)
 * ImageMagick (http://imagemagick.org)
-* GStreamer 1.x development files (http://gstreamer.freedesktop.org)
+* GStreamer 1.4.x development files (http://gstreamer.freedesktop.org)
 
 XCode can be directly installed from the App Store. Once installed you also have to install the XCode command line tools. Type this in your terminal:
 
