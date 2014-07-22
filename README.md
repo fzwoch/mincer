@@ -12,15 +12,15 @@ Build instructions
 
 For compiling the application you require at least the following:
 
-* XCode (https://developer.apple.com)
+* Xcode (https://developer.apple.com)
 * ImageMagick (http://imagemagick.org)
 * GStreamer 1.4.x development files (http://gstreamer.freedesktop.org)
 
-XCode can be directly installed from the App Store. Once installed you also have to install the XCode command line tools. Type this in your terminal:
+Xcode can be directly installed from the App Store. Once installed you also have to install the Xcode command line tools. Type this in your terminal:
 
     $ xcode-select --install
 
-The recommended way to install 3rd party libraries and tools on your system is via a packet manager. Recommended are one of these:
+The recommended way to install 3rd party libraries and tools on your system is via a packet manager. Recommended ones are:
 
 * Macports (http://macports.org)
 * Fink (http://finkproject.org)
