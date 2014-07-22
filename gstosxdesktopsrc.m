@@ -267,8 +267,6 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 			
 			if (cursor_img != nil)
 			{
-				NSArray *screens = [NSScreen screens];
-				
 				rect.size = [cursor_img size];
 				rect.origin = [NSEvent mouseLocation];
 				
@@ -284,7 +282,7 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 					rect.origin.y -= (ref_rect.size.height - adj_rect.size.height) - adj_rect.origin.y;
 				}
 				
-				for (NSScreen *screen in screens)
+				for (NSScreen *screen in [NSScreen screens])
 				{
 					if ([[[screen deviceDescription] objectForKey:@"NSScreenNumber"] intValue] == GST_OSX_DESKTOP_SRC(src)->display_id)
 					{
