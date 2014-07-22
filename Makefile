@@ -38,6 +38,8 @@ PLUGINS_FILES = \
 PLUGINS_DIR=$(dir $(shell gst-inspect-1.0 coreelements | grep Filename | awk '{print $$2}'))
 PLUGINS=$(addprefix Mincer.app/Contents/Frameworks/gstreamer-1.0/, $(PLUGINS_FILES))
 
+LDFLAGS+=-headerpad_max_install_names
+
 all: Mincer.app
 
 Mincer.app: Mincer.app/Contents/MacOS/mincer Mincer.app/Contents/Resources/mincer.icns Mincer.app/Contents/Info.plist $(PLUGINS)
