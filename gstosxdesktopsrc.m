@@ -389,7 +389,7 @@ GST_PLUGIN_DEFINE
 	osxdesktopsrc,
 	"OS X Desktop Source",
 	plugin_init,
-	"0.1.2",
+	"0.1.3",
 	"GPL",
 	"Mincer",
 	"https://github.com/fzwoch/mincer/"
