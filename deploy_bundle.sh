@@ -47,6 +47,6 @@ for bin in ${@:2}; do
 	copy_deps $bin
 done
 
-for bin in ${@:2} $(ls $bundle/Contents/Frameworks/*.dylib); do
+for bin in ${@:2} $bundle/Contents/Frameworks/*.dylib; do
 	fix_symbols $bin
 done
