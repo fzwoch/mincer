@@ -92,6 +92,7 @@ static int readDescrLen(UInt8 **buffer)
 		int c = *(*buffer)++;
 		
 		len = (len << 7) | (c & 0x7f);
+		
 		if (!(c & 0x80))
 		{
 			break;
@@ -108,7 +109,7 @@ static int readDescr(UInt8 **buffer, int *tag)
 	return readDescrLen(buffer);
 }
 
-static long ReadESDSDescExt(void* descExt, UInt8 **buffer, UInt32 *size, int versionFlags)
+static long ReadESDSDescExt(void *descExt, UInt8 **buffer, UInt32 *size, int versionFlags)
 {
 	UInt8 *esds = (UInt8*)descExt;
 	int tag, len;

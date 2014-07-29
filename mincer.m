@@ -263,7 +263,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[video_device setPullsDown:NO];
 	[video_device setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
-	CGDirectDisplayID* displays;
+	CGDirectDisplayID *displays;
 	unsigned int i, num;
 	
 	CGGetActiveDisplayList(0, NULL, &num);
@@ -686,7 +686,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		return;
 	}
 	
-	NSDateFormatter* date = [NSDateFormatter new];
+	NSDateFormatter *date = [NSDateFormatter new];
 	[date setDateFormat:@"yyyy-MM-dd_HH:mm:ss"];
 	
 	NSMutableString *desc = [NSMutableString new];
