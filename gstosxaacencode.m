@@ -256,6 +256,7 @@ static GstFlowReturn gst_osx_aac_encode_handle_frame(GstAudioEncoder *enc, GstBu
 	UInt32 desc_num = 1;
 	UInt32 max_out_buf;
 	UInt32 max_out_buf_size = sizeof(max_out_buf);
+	OSStatus err;
 	
 	if (!buf)
 	{
@@ -282,23 +283,21 @@ static GstFlowReturn gst_osx_aac_encode_handle_frame(GstAudioEncoder *enc, GstBu
 		},
 	};
 	
-	AudioConverterFillComplexBuffer(GST_OSX_AAC_ENCODE(enc)->encoder, aac_cb, &info_in, &desc_num, &list, NULL);
-	
-	gst_buffer_set_size(buf_out, list.mBuffers[0].mDataByteSize);
+	err = AudioConverterFillComplexBuffer(GST_OSX_AAC_ENCODE(enc)->encoder, aac_cb, &info_in, &desc_num, &list, NULL);
 	
 	gst_buffer_unmap(buf, &info_in);
 	gst_buffer_unmap(buf_out, &info_out);
 	
-	if (!list.mBuffers[0].mDataByteSize)
+	if (err != noErr)
 	{
 		gst_buffer_unref(buf_out);
 		
 		return GST_FLOW_OK;
 	}
 	
-	ret = gst_audio_encoder_finish_frame(enc, buf_out, 1024);
+	gst_buffer_set_size(buf_out, list.mBuffers[0].mDataByteSize);
 	
-	return ret;
+	return gst_audio_encoder_finish_frame(enc, buf_out, 1024);
 }
 
 static void gst_osx_aac_encode_class_init(GstOsxAacEncodeClass *class)
