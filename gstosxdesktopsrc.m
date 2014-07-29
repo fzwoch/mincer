@@ -58,7 +58,7 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE
 	GST_STATIC_CAPS
 	(
 		"video/x-raw, "
-		"format = RGBA, "
+		"format = BGRA, "
 		"width = [ 1, 2147483647 ], "
 		"height = [ 1, 2147483647 ], "
 		"framerate = [ 0/1, 2147483647/1 ]"
@@ -167,6 +167,7 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 {
 	GstMapInfo info;
 	CGImageRef img = NULL;
+	CFDataRef pixel_data;
 	size_t width;
 	size_t height;
 	
@@ -251,10 +252,14 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 		CGImageGetBitsPerComponent(img),
 		CGImageGetBytesPerRow(img),
 		CGImageGetColorSpace(img),
-		(CGBitmapInfo)kCGImageAlphaNoneSkipLast
+		kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little
 	);
 	
-	CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), img);
+	pixel_data = CGDataProviderCopyData(CGImageGetDataProvider(img));
+	
+	memcpy(info.data, CFDataGetBytePtr(pixel_data), width * height * 4);
+	
+	CFRelease(pixel_data);
 	CGImageRelease(img);
 	
 	if (GST_OSX_DESKTOP_SRC(src)->display_cursor == TRUE)
