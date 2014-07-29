@@ -53,7 +53,7 @@ static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE
 	GST_STATIC_CAPS
 	(
 		"video/x-raw, "
-		"format = RGBA, "
+		"format = BGRA, "
 		"width = [ 1, 2147483647 ], "
 		"height = [ 1, 2147483647 ], "
 		"framerate = [ 0/1, 2147483647/1 ]"
@@ -68,7 +68,7 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE
 	GST_STATIC_CAPS
 	(
 		"video/x-raw, "
-		"format = RGBA, "
+		"format = BGRA, "
 		"width = [ 1, 2147483647 ], "
 		"height = [ 1, 2147483647 ], "
 		"framerate = [ 0/1, 2147483647/1 ]"
@@ -171,7 +171,7 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 		8,
 		GST_OSX_VIDEOSCALE(trans)->width_in * 4,
 		CGColorSpaceCreateDeviceRGB(),
-		(CGBitmapInfo)kCGImageAlphaNoneSkipLast
+		kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little
 	);
 	
 	img = CGBitmapContextCreateImage(ctx_in);
@@ -184,7 +184,7 @@ static GstFlowReturn gst_osx_videoscale_transform(GstBaseTransform *trans, GstBu
 		8,
 		GST_OSX_VIDEOSCALE(trans)->width_out * 4,
 		CGColorSpaceCreateDeviceRGB(),
-		(CGBitmapInfo)kCGImageAlphaNoneSkipLast
+		kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little
 	);
 	
 	CGContextSetInterpolationQuality(ctx_out, GST_OSX_VIDEOSCALE(trans)->interpolation_mode);
