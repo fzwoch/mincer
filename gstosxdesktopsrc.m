@@ -257,7 +257,16 @@ static GstFlowReturn gst_osx_desktop_src_fill(GstPushSrc *src, GstBuffer *buf)
 	
 	pixel_data = CGDataProviderCopyData(CGImageGetDataProvider(img));
 	
-	memcpy(info.data, CFDataGetBytePtr(pixel_data), width * height * 4);
+	const guint8 *pix = CFDataGetBytePtr(pixel_data);
+	guint8 *dst = info.data;
+	
+	for (gint i = 0; i < height; i++)
+	{
+		memcpy(dst, pix, width * 4);
+		
+		pix += CGImageGetBytesPerRow(img);
+		dst += width * 4;
+	}
 	
 	CFRelease(pixel_data);
 	CGImageRelease(img);
