@@ -250,7 +250,6 @@ static OSStatus aac_cb(AudioConverterRef encoder, UInt32 *num, AudioBufferList *
 
 static GstFlowReturn gst_osx_aac_encode_handle_frame(GstAudioEncoder *enc, GstBuffer *buf)
 {
-	GstFlowReturn ret = GST_FLOW_OK;
 	GstMapInfo info_in;
 	GstMapInfo info_out;
 	GstBuffer *buf_out;

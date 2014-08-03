@@ -119,7 +119,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	gchar *debug;
 	GError *error;
-	NSWindow *window = data;
 	
 	switch (GST_MESSAGE_TYPE(msg))
 	{
@@ -743,7 +742,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc release];
 	
 	bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-	gst_bus_set_sync_handler(bus, bus_call, window, NULL);
+	gst_bus_set_sync_handler(bus, bus_call, NULL, NULL);
 	gst_object_unref(bus);
 	
 	[url_secret setStringValue:[url stringValue]];
