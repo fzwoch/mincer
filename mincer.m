@@ -310,7 +310,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		}
 		else
 		{
-			[resolution addItemWithTitle:[NSString stringWithFormat:@"%dx%d\t%s", resolutions[i].width, resolutions[i].height, resolutions[i].aspect_ratio]];
+			[resolution addItemWithTitle:[NSString stringWithFormat:@"%dx%-6d\t%s", resolutions[i].width, resolutions[i].height, resolutions[i].aspect_ratio]];
 		}
 	}
 	
