@@ -762,7 +762,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording setEnabled:NO];
 	
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
-	gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 	
 	start_date = [NSDate new];
 	timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(updateElapsedTime) userInfo:nil repeats:YES];
@@ -806,7 +805,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		gst_bus_poll(bus, GST_MESSAGE_EOS, GST_CLOCK_TIME_NONE);
 		
 		gst_element_set_state(pipeline, GST_STATE_NULL);
-		gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 	}
 	
 	gst_object_unref(pipeline);
