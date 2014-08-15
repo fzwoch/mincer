@@ -795,9 +795,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[self updateElapsedTime];
 	
-	bus = gst_element_get_bus(pipeline);
-	
+	bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
 	gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
+	gst_object_unref(bus);
 	
 	change = gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 	if (change == GST_STATE_CHANGE_SUCCESS)
