@@ -889,23 +889,23 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[frames_skipped setStringValue:[NSString stringWithFormat:@"%d frames skipped", skipped]];
 	
-	if (!timer)
+	if (timer)
+	{
+		NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start_date];
+		NSDate *time = [NSDate dateWithTimeIntervalSince1970:elapsed];
+		NSDateFormatter *date = [NSDateFormatter new];
+		
+		[date setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
+		[date setDateFormat:@"HH:mm:ss"];
+		
+		[elapsed_time setStringValue:[date stringFromDate:time]];
+		
+		[date release];
+	}
+	else
 	{
 		[elapsed_time setStringValue:@"--:--:--"];
-		
-		return;
 	}
-	
-	NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start_date];
-	NSDate *time = [NSDate dateWithTimeIntervalSince1970:elapsed];
-	NSDateFormatter *date = [NSDateFormatter new];
-	
-	[date setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
-	[date setDateFormat:@"HH:mm:ss"];
-	
-	[elapsed_time setStringValue:[date stringFromDate:time]];
-	
-	[date release];
 }
 - (void)handleError:(id)error
 {
