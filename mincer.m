@@ -361,6 +361,17 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[video_bitrate setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[video_bitrate setAction:@selector(updateVideoBitrate)];
 	
+	NSTextField *audio_system_device = [NSTextField new];
+	[audio_system_device setTextColor:[NSColor lightGrayColor]];
+	[audio_system_device setBezeled:NO];
+	[audio_system_device setDrawsBackground:NO];
+	[audio_system_device setEditable:NO];
+	[audio_system_device setSelectable:NO];
+	[audio_system_device setFont:[NSFont systemFontOfSize:9]];
+	[audio_system_device setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	[audio_system_device setStringValue:@"System audio capture not found"];
+	
 	NSTextField *audio_device_label = [NSTextField new];
 	[audio_device_label setStringValue:@"Audio Input"];
 	[audio_device_label setBezeled:NO];
@@ -401,7 +412,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	for (gint i = 0; i < device_count; i++)
 	{
-		CFStringRef name = NULL;
+		NSString *name = NULL;
 		
 		addr.mSelector = kAudioDevicePropertyDeviceNameCFString;
 		addr.mScope = kAudioObjectPropertyScopeGlobal;
@@ -416,18 +427,29 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		
 		if (size)
 		{
-			[audio_device addItemWithTitle:(NSString*)name];
+			[audio_device addItemWithTitle:name];
 			
 			audio_device_id[0] = devices[i];
 			audio_device_id++;
 			
-			if (!audio_capture_id && ([(NSString*)name isEqualToString:@"Soundflower (2ch)"] || [(NSString*)name isEqualToString:@"WavTap"]))
+			if (!audio_capture_id)
 			{
-				audio_capture_id = devices[i];
+				if ([name isEqualToString:@"Soundflower (2ch)"])
+				{
+					audio_capture_id = devices[i];
+					
+					[audio_system_device setStringValue:@"System audio capture via Soundflower"];
+				}
+				else if ([name isEqualToString:@"WavTap"])
+				{
+					audio_capture_id = devices[i];
+					
+					[audio_system_device setStringValue:@"System audio capture via WavTap"];
+				}
 			}
 		}
 		
-		CFRelease(name);
+		[name release];
 	}
 	
 	if (devices)
@@ -506,6 +528,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:encoder_speed];
 	[[window contentView] addSubview:video_bitrate_label];
 	[[window contentView] addSubview:video_bitrate];
+	[[window contentView] addSubview:audio_system_device];
 	[[window contentView] addSubview:audio_device_label];
 	[[window contentView] addSubview:audio_device];
 	[[window contentView] addSubview:audio_bitrate_label];
@@ -516,7 +539,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:frames_skipped];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, frames_skipped, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, frames_skipped, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -524,9 +547,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_secret]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url_label]-[url_secret]" options:0 metrics:nil views:views]];
 	
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device_label]-[frames_skipped]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device]-15-|" options:0 metrics:nil views:views]];
 	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[frames_skipped]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url]-18-[frames_skipped]" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution_label]-15-[framerate_label(==resolution_label)]-15-|" options:0 metrics:nil views:views]];
@@ -542,6 +566,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_device_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_device]-15-|" options:0 metrics:nil views:views]];
+	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[audio_system_device]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[video_bitrate]-18-[audio_system_device]" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_bitrate_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_bitrate]-15-|" options:0 metrics:nil views:views]];
