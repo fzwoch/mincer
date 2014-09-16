@@ -53,7 +53,7 @@ Mincer.app/Contents/Resources/mincer.icns: mincer.iconset/icon_512x512.png
 mincer.iconset/icon_512x512.png: mincer.svg
 	@echo " IM $<"
 	@mkdir -p $(dir $@)
-	@convert -background transparent $< $@
+	@rsvg-convert $< --width 512 --height 512 --keep-aspect-ratio -o $@
 
 Mincer.app/Contents/Info.plist:
 	@echo " PL $@"
