@@ -20,7 +20,7 @@ Xcode can be installed direcly from the Apple App Store. Once installed you also
 
     $ xcode-select --install
 
-The recommended way to install 3rd party libraries and tools on your system is using a packet manager. Recommended ones are:
+The recommended way to install 3rd party libraries and tools on your system is using a packet manager:
 
 * Macports (http://macports.org)
 * Fink (http://finkproject.org)
