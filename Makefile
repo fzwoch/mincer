@@ -51,7 +51,7 @@ Mincer.app/Contents/Resources/mincer.icns: mincer.iconset/icon_512x512.png
 	@iconutil -c icns $(dir $<) -o $@ &> /dev/null
 
 mincer.iconset/icon_512x512.png: mincer.svg
-	@echo " IM $<"
+	@echo " RS $<"
 	@mkdir -p $(dir $@)
 	@rsvg-convert $< --width 512 --height 512 --keep-aspect-ratio -o $@
 
