@@ -717,8 +717,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	[desc appendFormat:@"osxdesktopsrc display-id=%ld name=desktopsrc ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! osxvideoscale ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
-	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
+	[desc appendFormat:@"osxdesktopsrc display-id=%ld name=desktopsrc ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
+	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
 	[desc appendFormat:@"audiomixer name=audio_mix ! osxaacencode bitrate=%d ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
 	if ([audio_device indexOfSelectedItem])
@@ -738,13 +738,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([[url stringValue] length])
 	{
-		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 leaky=upstream ! flv_mux. "];
+		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! flv_mux. "];
 		[desc appendFormat:@"tee_264. ! queue ! flvmux streamable=true name=flv_mux ! rtmpsink location=\"%@\" ", [[url stringValue] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 	}
 	
 	if (mp4_recording_enabled)
 	{
-		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 leaky=upstream ! mp4_mux. "];
+		[desc appendFormat:@"tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! mp4_mux. "];
 		[desc appendFormat:@"tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%@/mincer_%@.mp4\" ", mp4_recording_path, [date stringFromDate:[NSDate date]]];
 	}
 	
