@@ -788,13 +788,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[audio_bitrate setEnabled:NO];
 	[mp4_recording setEnabled:NO];
 	
-	gst_element_set_state(pipeline, GST_STATE_PLAYING);
-	
-	start_date = [NSDate new];
-	timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(updateElapsedTime) userInfo:nil repeats:YES];
-	
-	[timer fire];
-	
 	[button setTitle:@"Stop"];
 	
 	if ([[NSProcessInfo processInfo] respondsToSelector:@selector(beginActivityWithOptions:reason:)])
@@ -802,40 +795,58 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		activity = [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiated reason:@"live capture in progress"];
 		[activity retain];
 	}
+	
+	start_date = [NSDate new];
+	
+	timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(updateElapsedTime) userInfo:nil repeats:YES];
+	[timer fire];
+	
+	gst_element_set_state(pipeline, GST_STATE_PLAYING);
 }
 - (void)stopStream
 {
-	GstStateChangeReturn change;
-	GstBus *bus;
-	
 	if (timer)
 	{
 		[timer invalidate];
 		timer = NULL;
 	}
 	
-	if (!pipeline)
+	if (start_date)
 	{
-		return;
+		[start_date release];
+		start_date = NULL;
+	}
+	
+	if (activity)
+	{
+		[[NSProcessInfo processInfo] endActivity:activity];
+		[activity release];
+		activity = NULL;
 	}
 	
 	[self updateElapsedTime];
 	
-	bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-	gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
-	gst_object_unref(bus);
-	
-	change = gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
-	if (change == GST_STATE_CHANGE_SUCCESS)
+	if (pipeline)
 	{
-		gst_element_send_event(pipeline, gst_event_new_eos());
-		gst_bus_poll(bus, GST_MESSAGE_EOS, GST_CLOCK_TIME_NONE);
+		GstStateChangeReturn change;
+		GstBus *bus;
 		
-		gst_element_set_state(pipeline, GST_STATE_NULL);
-	}
+		bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
+		gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
+		gst_object_unref(bus);
+		
+		change = gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
+		if (change == GST_STATE_CHANGE_SUCCESS)
+		{
+			gst_element_send_event(pipeline, gst_event_new_eos());
+			gst_bus_poll(bus, GST_MESSAGE_EOS, GST_CLOCK_TIME_NONE);
+			
+			gst_element_set_state(pipeline, GST_STATE_NULL);
+		}
 	
-	gst_object_unref(pipeline);
-	pipeline = NULL;
+		gst_object_unref(pipeline);
+		pipeline = NULL;
+	}
 	
 	[url setStringValue:[url_secret stringValue]];
 	[url setHidden:NO];
@@ -851,20 +862,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[audio_bitrate setEnabled:YES];
 	[mp4_recording setEnabled:YES];
 	
-	if (start_date)
-	{
-		[start_date release];
-		start_date = NULL;
-	}
-	
 	[button setTitle:@"Start"];
-	
-	if (activity != nil)
-	{
-		[[NSProcessInfo processInfo] endActivity:activity];
-		[activity release];
-		activity = nil;
-	}
 }
 - (void)updateEncoderSpeed
 {	
