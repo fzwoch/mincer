@@ -586,7 +586,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSPoint point = {0, 0};
 	
-	if ([NSEvent modifierFlags] & NSCommandKeyMask && [[NSAlert alertWithMessageText:@"Load Defaults" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Are you sure you want load defaults? All your personal settings will get lost."] runModal] == NSAlertDefaultReturn)
+	NSAlert *alert = [NSAlert new];
+	[alert setMessageText:@"Load Defaults"];
+	[alert setInformativeText:@"Are you sure you want load defaults? All your personal settings will get lost."];
+	[alert addButtonWithTitle:@"OK"];
+	[alert addButtonWithTitle:@"Cancel"];
+
+	if ([NSEvent modifierFlags] & NSCommandKeyMask && [alert runModal] == NSAlertFirstButtonReturn)
 	{
 		[url setStringValue:@"rtmp://live.twitch.tv/app/"];
 		[resolution selectItemAtIndex:0];
@@ -646,9 +652,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	if (pipeline)
 	{
-		[[NSAlert alertWithMessageText:@"Quit Mincer" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Mincer is currently running. Are you sure you want to stop processing and quit the application?"] beginSheetModalForWindow:window completionHandler:^(NSInteger result)
+		NSAlert *alert = [NSAlert new];
+		[alert setMessageText:@"Quit Mincer"];
+		[alert setInformativeText:@"Mincer is currently running. Are you sure you want to stop processing and quit the application?"];
+		[alert addButtonWithTitle:@"OK"];
+		[alert addButtonWithTitle:@"Cancel"];
+		[alert beginSheetModalForWindow:window completionHandler:^(NSInteger result)
 		 {
-			 if (result == NSAlertDefaultReturn)
+			 if (result == NSAlertFirstButtonReturn)
 			 {
 				 [self stopStream];
 				 [NSApp terminate:nil];
@@ -709,7 +720,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (![[url stringValue] length] && !mp4_recording_enabled)
 	{
-		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"No RTMP and no MP4 option set. Nothing to be done."] beginSheetModalForWindow:window completionHandler:nil];
+		NSAlert *alert = [NSAlert new];
+		[alert setMessageText:@"Mincer error"];
+		[alert setInformativeText:@"No RTMP and no MP4 option set. Nothing to be done."];
+		[alert beginSheetModalForWindow:window completionHandler:nil];
 		
 		return;
 	}
@@ -753,7 +767,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	pipeline = gst_parse_launch([desc UTF8String], &error);
 	if (error)
 	{
-		[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%s", error->message] beginSheetModalForWindow:window completionHandler:^(NSInteger result)
+		NSAlert *alert = [NSAlert new];
+		[alert setMessageText:@"Mincer error"];
+		[alert setInformativeText:[NSString stringWithUTF8String:error->message]];
+		[alert beginSheetModalForWindow:window completionHandler:^(NSInteger result)
 		 {
 			 g_error_free(error);
 			 
@@ -937,8 +954,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 - (void)handleError:(id)error
 {
 	[self stopStream];
-	
-	[[NSAlert alertWithMessageText:@"Mincer error" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", error] beginSheetModalForWindow:window completionHandler:nil];
+
+	NSAlert *alert = [NSAlert new];
+	[alert setMessageText:@"Mincer Error"];
+	[alert setInformativeText:error];
+	[alert beginSheetModalForWindow:window completionHandler:nil];
 }
 @end
 
