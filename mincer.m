@@ -115,6 +115,8 @@ static gint audio_bitrates[] =
 static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
 static glong audio_capture_id = 0;
 
+static NSObject<NSApplicationDelegate, NSWindowDelegate> *delegate;
+
 static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	gchar *debug;
@@ -138,7 +140,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			gst_message_parse_error(msg, &error, &debug);
 			g_free(debug);
 			
-			[[NSApp delegate] performSelectorOnMainThread:@selector(handleError) withObject:[NSString stringWithUTF8String:error->message] waitUntilDone:YES];
+			[delegate performSelectorOnMainThread:@selector(handleError:) withObject:[NSString stringWithUTF8String:error->message] waitUntilDone:NO];
 			g_error_free(error);
 		}
 		break;
@@ -149,7 +151,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	return GST_BUS_DROP;
 }
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
 {
 	NSWindow *window;
 	
@@ -625,7 +627,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[audio_device selectItemAtIndex:0];
 	}
 	
-	[window setDelegate:[NSApp delegate]];
+	[window setDelegate:delegate];
 	[window makeKeyAndOrderFront:nil];
 	
 	if (point.x || point.y)
@@ -950,8 +952,8 @@ int main(int argc, char *argv[])
 	
 	signal(SIGPIPE, SIG_IGN);
 	
-	[NSApplication sharedApplication];
-	[NSApp setDelegate:[AppDelegate new]];
+	delegate = [AppDelegate new];
+	[[NSApplication sharedApplication] setDelegate:delegate];
 	[NSApp run];
 	
 	return 0;
