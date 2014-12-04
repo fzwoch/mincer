@@ -68,7 +68,7 @@ Mincer.app/Contents/Info.plist:
 Mincer.app/Contents/MacOS/mincer: mincer.m
 	@echo " CC $@"
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $(LDFLAGS) $(shell pkg-config --cflags --libs gstreamer-1.0) -framework Cocoa -framework CoreAudio $< -o $@
+	@$(CC) $(CFLAGS) $(LDFLAGS) $(shell pkg-config --cflags --libs gstreamer-1.0) -framework Cocoa -framework CoreAudio -framework AVFoundation $< -o $@
 
 Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so: gstosxdesktopsrc.m
 	@echo " CC $@"

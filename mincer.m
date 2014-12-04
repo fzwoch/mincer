@@ -19,6 +19,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <CoreAudio/AudioHardware.h>
+#import <AVFoundation/AVFoundation.h>
 #import <gst/gst.h>
 
 #define MAX_AUDIO_DEVICES 32
@@ -111,6 +112,8 @@ static gint audio_bitrates[] =
 	288,
 	320
 };
+
+static unsigned int desktop_count = 0;
 
 static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
 static glong audio_capture_id = 0;
@@ -263,15 +266,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	video_device = [NSPopUpButton new];
 	[video_device setPullsDown:NO];
 	[video_device setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[video_device setAction:@selector(updateCaptureDevice)];
 	
 	CGDirectDisplayID *displays;
-	unsigned int i, num;
+	unsigned int i;
 	
-	CGGetActiveDisplayList(0, NULL, &num);
-	displays = malloc(num * sizeof(CGDirectDisplayID));
-	CGGetActiveDisplayList(num, displays, &num);
+	CGGetActiveDisplayList(0, NULL, &desktop_count);
+	displays = malloc(desktop_count * sizeof(CGDirectDisplayID));
+	CGGetActiveDisplayList(desktop_count, displays, &desktop_count);
 	
-	for (i = 0; i < num; i++)
+	for (i = 0; i < desktop_count; i++)
 	{
 		switch (i)
 		{
@@ -291,6 +295,18 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	free(displays);
+	
+	i = 0;
+	
+	for (AVCaptureDevice *device in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo])
+	{
+		if (i++ == 0)
+		{
+			[[video_device menu] addItem:[NSMenuItem separatorItem]];
+		}
+		
+		[video_device addItemWithTitle:[device localizedName]];
+	}
 	
 	NSTextField *resolution_label = [NSTextField new];
 	[resolution_label setStringValue:@"Video Resolution"];
@@ -623,6 +639,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		point.y = [defaults floatForKey:@"pos_y"];
 	}
 	
+	[self updateCaptureDevice];
 	[self updateEncoderSpeed];
 	[self updateVideoBitrate];
 	[self updateAudioBitrate];
@@ -733,7 +750,20 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	[desc appendFormat:@"osxdesktopsrc display-id=%ld name=desktopsrc ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
+	if ([video_device indexOfSelectedItem] > desktop_count)
+	{
+		NSAlert *alert = [NSAlert new];
+		[alert setMessageText:@"Mincer error"];
+		[alert setInformativeText:@"Not implemented"];
+		[alert beginSheetModalForWindow:window completionHandler:nil];
+		
+		return;
+	}
+	else
+	{
+		[desc appendFormat:@"osxdesktopsrc display-id=%ld name=desktopsrc ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
+	}
+	
 	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
 	[desc appendFormat:@"audiomixer name=audio_mix ! osxaacencode bitrate=%d ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
@@ -882,6 +912,19 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording setEnabled:YES];
 	
 	[button setTitle:@"Start"];
+}
+- (void)updateCaptureDevice
+{
+	if ([video_device indexOfSelectedItem] > desktop_count)
+	{
+		[resolution setEnabled:NO];
+		[framerate setEnabled:NO];
+	}
+	else
+	{
+		[resolution setEnabled:YES];
+		[framerate setEnabled:YES];
+	}
 }
 - (void)updateEncoderSpeed
 {	
