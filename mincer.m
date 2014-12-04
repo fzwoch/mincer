@@ -752,7 +752,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([video_device indexOfSelectedItem] > desktop_count)
 	{
-		[desc appendFormat:@"avfvideosrc device-index=%ld ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! ", [video_device indexOfSelectedItem] - desktop_count - 1];
+		[desc appendFormat:@"avfvideosrc device-index=%ld do-timestamp=true ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! ", [video_device indexOfSelectedItem] - desktop_count - 1];
 	}
 	else
 	{
