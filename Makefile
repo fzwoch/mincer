@@ -21,6 +21,7 @@ PLUGINS_FILES = \
 	libgstosxdesktopsrc.so \
 	libgstosxvideoscale.so \
 	libgstosxaacencode.so \
+	libgstapplemedia.so \
 	libgstcoreelements.so \
 	libgstaudiotestsrc.so \
 	libgstosxaudio.so \

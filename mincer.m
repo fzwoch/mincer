@@ -752,12 +752,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([video_device indexOfSelectedItem] > desktop_count)
 	{
-		NSAlert *alert = [NSAlert new];
-		[alert setMessageText:@"Mincer error"];
-		[alert setInformativeText:@"Not implemented"];
-		[alert beginSheetModalForWindow:window completionHandler:nil];
-		
-		return;
+		[desc appendFormat:@"avfvideosrc device-index=%ld ! ", [video_device indexOfSelectedItem] - 3];
 	}
 	else
 	{
