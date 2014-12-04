@@ -898,13 +898,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[url setEnabled:YES];
 	[video_device setEnabled:YES];
-	[resolution setEnabled:YES];
-	[framerate setEnabled:YES];
 	[encoder_speed setEnabled:YES];
 	[video_bitrate setEnabled:YES];
 	[audio_device setEnabled:YES];
 	[audio_bitrate setEnabled:YES];
 	[mp4_recording setEnabled:YES];
+	
+	[self updateCaptureDevice];
 	
 	[button setTitle:@"Start"];
 }
