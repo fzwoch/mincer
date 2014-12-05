@@ -362,6 +362,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	encoder_type = [NSPopUpButton new];
 	[encoder_type setPullsDown:NO];
 	[encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[encoder_type setAction:@selector(updateEncoderType)];
 	
 	[encoder_type addItemWithTitle:@"Software"];
 	[encoder_type addItemWithTitle:@"Hardware"];
@@ -662,6 +663,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	[self updateCaptureDevice];
+	[self updateEncoderType];
 	[self updateEncoderSpeed];
 	[self updateVideoBitrate];
 	[self updateAudioBitrate];
@@ -804,7 +806,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc appendFormat:@"osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! video/x-raw, format=I420 ! "];
 	
-	if ([encoder_type indexOfSelectedItem] == 1)
+	if ([encoder_type indexOfSelectedItem] > 0)
 	{
 		[desc appendFormat:@"vtenc_h264 bitrate=%d ! ", [video_bitrate intValue]];
 	}
@@ -963,6 +965,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording setEnabled:YES];
 	
 	[self updateCaptureDevice];
+	[self updateEncoderType];
 	
 	[button setTitle:@"Start"];
 }
@@ -977,6 +980,19 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[framerate setEnabled:YES];
 	}
 }
+
+- (void)updateEncoderType
+{
+	if ([encoder_type indexOfSelectedItem] > 0)
+	{
+		[encoder_speed setEnabled:NO];
+	}
+	else
+	{
+		[encoder_speed setEnabled:YES];
+	}
+}
+
 - (void)updateEncoderSpeed
 {	
 	[encoder_speed_label setStringValue:[NSString stringWithFormat:@"Video Encoder Speed - %s", encoder_speeds[[encoder_speed intValue]]]];
