@@ -16,7 +16,7 @@ For building the application you require at least the following:
 * RSVG (https://developer.gnome.org/rsvg)
 * GStreamer 1.4.x (http://gstreamer.freedesktop.org)
 
-Xcode command line tools can be installed direcly from the terminal:
+Xcode command line tools can be installed from the terminal:
 
     $ xcode-select --install
 
