@@ -166,6 +166,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSPopUpButton *resolution;
 	NSPopUpButton *framerate;
 	
+	NSPopUpButton *encoder_type;
+	
 	NSTextField *encoder_speed_label;
 	NSSlider *encoder_speed;
 	
@@ -348,6 +350,21 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		[framerate addItemWithTitle:[NSString stringWithFormat:@"%d", framerates[i]]];
 	}
+	
+	NSTextField *encoder_type_label = [NSTextField new];
+	[encoder_type_label setStringValue:@"Video Encoder Type"];
+	[encoder_type_label setBezeled:NO];
+	[encoder_type_label setDrawsBackground:NO];
+	[encoder_type_label setEditable:NO];
+	[encoder_type_label setSelectable:NO];
+	[encoder_type_label setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+	encoder_type = [NSPopUpButton new];
+	[encoder_type setPullsDown:NO];
+	[encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	[encoder_type addItemWithTitle:@"Software"];
+	[encoder_type addItemWithTitle:@"Hardware"];
 	
 	encoder_speed_label = [NSTextField new];
 	[encoder_speed_label setBezeled:NO];
@@ -542,6 +559,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:resolution];
 	[[window contentView] addSubview:framerate_label];
 	[[window contentView] addSubview:framerate];
+	[[window contentView] addSubview:encoder_type_label];
+	[[window contentView] addSubview:encoder_type];
 	[[window contentView] addSubview:encoder_speed_label];
 	[[window contentView] addSubview:encoder_speed];
 	[[window contentView] addSubview:video_bitrate_label];
@@ -557,7 +576,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:frames_skipped];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, frames_skipped, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, frames_skipped, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -575,6 +594,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution]-15-[framerate(==resolution)]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[video_device]-15-[framerate_label]-[framerate]" options:0 metrics:nil views:views]];
+	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_type_label]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_type]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed]-15-|" options:0 metrics:nil views:views]];
@@ -598,7 +620,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[elapsed_time]-[button]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[video_device_label]-[video_device]-15-[resolution_label]-[resolution]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[video_device_label]-[video_device]-15-[resolution_label]-[resolution]-15-[encoder_type_label]-[encoder_type]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
 	
 	NSPoint point = {0, 0};
 	
@@ -782,7 +804,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc appendFormat:@"osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! video/x-raw, format=I420 ! "];
 	
-	if (0)
+	if ([encoder_type indexOfSelectedItem] == 1)
 	{
 		[desc appendFormat:@"vtenc_h264 bitrate=%d ! ", [video_bitrate intValue]];
 	}
@@ -859,6 +881,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[video_device setEnabled:NO];
 	[resolution setEnabled:NO];
 	[framerate setEnabled:NO];
+	[encoder_type setEnabled:NO];
 	[encoder_speed setEnabled:NO];
 	[video_bitrate setEnabled:NO];
 	[audio_device setEnabled:NO];
@@ -932,6 +955,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url setEnabled:YES];
 	[video_device setEnabled:YES];
 	[resolution setEnabled:YES];
+	[encoder_type setEnabled:YES];
 	[encoder_speed setEnabled:YES];
 	[video_bitrate setEnabled:YES];
 	[audio_device setEnabled:YES];
