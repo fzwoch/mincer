@@ -734,6 +734,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	GError *error = NULL;
 	GstBus *bus;
+	gint key_interval = 0;
 	
 	if (![[url stringValue] length] && !mp4_recording_enabled)
 	{
@@ -752,14 +753,46 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([video_device indexOfSelectedItem] > desktop_count)
 	{
-		[desc appendFormat:@"avfvideosrc device-index=%ld do-timestamp=true ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! ", [video_device indexOfSelectedItem] - desktop_count - 1];
+		gint device_idx = [video_device indexOfSelectedItem] - desktop_count - 1;
+		gint max_framerate = 0;
+		
+		AVCaptureDevice *device = [[AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo] objectAtIndex:device_idx];
+		AVCaptureDeviceFormat *format = [device activeFormat];
+		
+		for (AVFrameRateRange *range in [format videoSupportedFrameRateRanges])
+		{
+			if (range.maxFrameRate > max_framerate)
+			{
+				max_framerate = range.maxFrameRate;
+			}
+		}
+		
+		key_interval = max_framerate * 2;
+		
+		[desc appendFormat:@"avfvideosrc device-index=%d do-timestamp=true ! ", device_idx];
 	}
 	else
 	{
-		[desc appendFormat:@"osxdesktopsrc display-id=%ld name=desktopsrc ! video/x-raw, framerate=%d/1 ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]], resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
+		key_interval = framerates[[framerate indexOfSelectedItem]] * 2;
+		
+		[desc appendFormat:@"osxdesktopsrc display-id=%ld name=desktopsrc ! video/x-raw, framerate=%d/1 ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]]];
 	}
 	
-	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! video/x-raw, format=I420 ! x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! h264parse ! tee name=tee_264 ", [video_bitrate intValue], [encoder_speed intValue], framerates[[framerate indexOfSelectedItem]] * 2];
+	[desc appendFormat:@"queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! "];
+	[desc appendFormat:@"osxvideoscale ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
+	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! video/x-raw, format=I420 ! "];
+	
+	if (0)
+	{
+		[desc appendFormat:@"vtenc_h264 bitrate=%d ! ", [video_bitrate intValue]];
+	}
+	else
+	{
+		[desc appendFormat:@"x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! ", [video_bitrate intValue], [encoder_speed intValue], key_interval];
+	}
+	
+	[desc appendFormat:@"h264parse ! tee name=tee_264 "];
+	
 	[desc appendFormat:@"audiomixer name=audio_mix ! osxaacencode bitrate=%d ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
 	if ([audio_device indexOfSelectedItem])
@@ -898,6 +931,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[url setEnabled:YES];
 	[video_device setEnabled:YES];
+	[resolution setEnabled:YES];
 	[encoder_speed setEnabled:YES];
 	[video_bitrate setEnabled:YES];
 	[audio_device setEnabled:YES];
@@ -912,12 +946,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	if ([video_device indexOfSelectedItem] > desktop_count)
 	{
-		[resolution setEnabled:NO];
 		[framerate setEnabled:NO];
 	}
 	else
 	{
-		[resolution setEnabled:YES];
 		[framerate setEnabled:YES];
 	}
 }
