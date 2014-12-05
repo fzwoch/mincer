@@ -12,11 +12,11 @@ Prerequisites
 
 For building the application you require at least the following:
 
-* Xcode (https://developer.apple.com)
+* Xcode command line tools (https://developer.apple.com)
 * RSVG (https://developer.gnome.org/rsvg)
 * GStreamer 1.4.x (http://gstreamer.freedesktop.org)
 
-Xcode can be installed direcly from the Apple App Store. Once installed you also have to install the Xcode command line tools:
+Xcode command line tools can be installed direcly from the terminal:
 
     $ xcode-select --install
 
