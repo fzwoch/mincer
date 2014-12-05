@@ -346,7 +346,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	NSTextField *encoder_type_label = [NSTextField new];
-	[encoder_type_label setStringValue:@"Video Encoder Type"];
+	[encoder_type_label setStringValue:@"Video Encoder"];
 	[encoder_type_label setBezeled:NO];
 	[encoder_type_label setDrawsBackground:NO];
 	[encoder_type_label setEditable:NO];
