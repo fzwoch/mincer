@@ -636,6 +636,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[url setStringValue:@"rtmp://live.twitch.tv/app/"];
 		[resolution selectItemAtIndex:0];
 		[framerate selectItemAtIndex:0];
+		[encoder_type selectItemAtIndex:0];
 		[encoder_speed setIntValue:[encoder_speed minValue]];
 		[video_bitrate setIntValue:[video_bitrate minValue]];
 		[audio_device selectItemAtIndex:0];
@@ -651,6 +652,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[video_device selectItemAtIndex:[defaults integerForKey:@"video_device"]];
 		[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
 		[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
+		[encoder_type selectItemAtIndex:[defaults integerForKey:@"encoder_type"]];
 		[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
 		[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
 		[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"] ? [defaults stringForKey:@"audio_device"] : [audio_device itemTitleAtIndex:0]];
@@ -731,6 +733,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[defaults setInteger:[video_device indexOfSelectedItem] forKey:@"video_device"];
 	[defaults setInteger:[resolution indexOfSelectedItem] forKey:@"resolution"];
 	[defaults setInteger:[framerate indexOfSelectedItem] forKey:@"framerate"];
+	[defaults setInteger:[encoder_type indexOfSelectedItem] forKey:@"encoder_type"];
 	[defaults setInteger:[encoder_speed integerValue] forKey:@"encoder_speed"];
 	[defaults setInteger:[video_bitrate integerValue] forKey:@"video_bitrate"];
 	[defaults setObject:[audio_device titleOfSelectedItem] forKey:@"audio_device"];
