@@ -699,13 +699,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[alert addButtonWithTitle:@"OK"];
 		[alert addButtonWithTitle:@"Cancel"];
 		[alert beginSheetModalForWindow:window completionHandler:^(NSInteger result)
-		 {
-			 if (result == NSAlertFirstButtonReturn)
-			 {
-				 [self stopStream];
-				 [NSApp terminate:nil];
-			 }
-		 }];
+		{
+			if (result == NSAlertFirstButtonReturn)
+			{
+				[self stopStream];
+				[NSApp terminate:nil];
+			}
+		}];
 		
 		return NO;
 	}
@@ -853,15 +853,15 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[alert setMessageText:@"Mincer error"];
 		[alert setInformativeText:[NSString stringWithUTF8String:error->message]];
 		[alert beginSheetModalForWindow:window completionHandler:^(NSInteger result)
-		 {
-			 g_error_free(error);
-			 
-			 if (pipeline)
-			 {
-				 gst_object_unref(pipeline);
-				 pipeline = NULL;
-			 }
-		 }];
+		{
+			g_error_free(error);
+			
+			if (pipeline)
+			{
+				gst_object_unref(pipeline);
+				pipeline = NULL;
+			}
+		}];
 		
 		return;
 	}
