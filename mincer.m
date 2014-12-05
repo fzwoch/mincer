@@ -271,13 +271,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[video_device setAction:@selector(updateCaptureDevice)];
 	
 	CGDirectDisplayID *displays;
-	unsigned int i;
 	
 	CGGetActiveDisplayList(0, NULL, &desktop_count);
 	displays = malloc(desktop_count * sizeof(CGDirectDisplayID));
 	CGGetActiveDisplayList(desktop_count, displays, &desktop_count);
 	
-	for (i = 0; i < desktop_count; i++)
+	for (gint i = 0; i < desktop_count; i++)
 	{
 		switch (i)
 		{
@@ -297,16 +296,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	free(displays);
-	
-	i = 0;
+
+	[[video_device menu] addItem:[NSMenuItem separatorItem]];
 	
 	for (AVCaptureDevice *device in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo])
 	{
-		if (i++ == 0)
-		{
-			[[video_device menu] addItem:[NSMenuItem separatorItem]];
-		}
-		
 		[video_device addItemWithTitle:[device localizedName]];
 	}
 	
