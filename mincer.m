@@ -359,7 +359,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[encoder_type setAction:@selector(updateEncoderType)];
 	
 	[encoder_type addItemWithTitle:@"Software"];
-	[encoder_type addItemWithTitle:@"Hardware"];
+//	[encoder_type addItemWithTitle:@"Hardware"];
 	
 	encoder_speed_label = [NSTextField new];
 	[encoder_speed_label setBezeled:NO];
