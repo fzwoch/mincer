@@ -253,7 +253,7 @@ GST_PLUGIN_DEFINE
 	osxvideoscale,
 	"OS X Videoscale",
 	plugin_init,
-	"0.1.7",
+	"0.1.8",
 	"GPL",
 	"Mincer",
 	"https://github.com/fzwoch/mincer/"
