@@ -805,7 +805,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([encoder_type indexOfSelectedItem] > 0)
 	{
-		[desc appendFormat:@"vtenc_h264 bitrate=%d ! ", [video_bitrate intValue]];
+		[desc appendFormat:@"vtenc_h264 bitrate=%d max-keyframe-interval=%d realtime=true allow-frame-reordering=false ! ", [video_bitrate intValue], key_interval];
 	}
 	else
 	{
