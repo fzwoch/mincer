@@ -13,7 +13,6 @@ Prerequisites
 For building the application you require at least the following:
 
 * Xcode command line tools (https://developer.apple.com)
-* RSVG (https://developer.gnome.org/rsvg)
 * GStreamer 1.4.x (http://gstreamer.freedesktop.org)
 
 Xcode command line tools can be installed from the terminal:
@@ -33,4 +32,4 @@ Build instructions
 
     $ git clone https://github.com/fzwoch/mincer.git
     $ cd mincer
-    $ make clean all
+    $ make
