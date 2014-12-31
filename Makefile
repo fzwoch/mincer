@@ -96,4 +96,4 @@ package: Mincer.app
 
 clean:
 	@echo " CLEAN"
-	@rm -rf Mincer.app mincer.zip mincer.iconset
+	@rm -rf Mincer.app mincer.zip
