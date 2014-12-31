@@ -5,10 +5,9 @@ The poor man's streaming app for OS X.
 
 Mincer is a simple RTMP broadcast application for OS X. It can be used to stream to public live broadcasting sites like Twitch, Hitbox, Ustream or YouTube. Mincer is released under the GNU General Public License.
 
-Download binaries at Google+
+Download binaries here:
 
-<div><a href="//plus.google.com/u/0/106302080469674598966?prsrc=3" rel="publisher" target="_top" style="text-decoration:none;"><img src="//ssl.gstatic.com/images/icons/gplus-64.png" alt="Google+" style="border:0;width:64px;height:64px;"/>
-</a></div>
+<div><a href="https://plus.google.com/106302080469674598966" rel="publisher">Google+</a></div>
 
 Prerequisites
 -------------
