@@ -1,7 +1,7 @@
 #
 # Mincer
 #
-# Copyright (C) 2013-2014 Florian Zwoch <fzwoch@gmail.com>
+# Copyright (C) 2013-2015 Florian Zwoch <fzwoch@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ Mincer.app/Contents/Info.plist:
 	@/usr/libexec/PlistBuddy -c 'Add :CFBundleIconFile string "mincer.icns"' $@
 	@/usr/libexec/PlistBuddy -c 'Add :CFBundleIdentifier string "zwoch.florian.mincer"' $@
 	@/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string "0.1.8"' $@
-	@/usr/libexec/PlistBuddy -c 'Add :NSHumanReadableCopyright string "© 2013-2014 Florian Zwoch"' $@
+	@/usr/libexec/PlistBuddy -c 'Add :NSHumanReadableCopyright string "© 2013-2015 Florian Zwoch"' $@
 
 Mincer.app/Contents/MacOS/mincer: mincer.m
 	@echo " CC $@"
