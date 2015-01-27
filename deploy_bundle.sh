@@ -25,6 +25,13 @@ fi
 
 bundle=$1
 
+if [ ! -d $bundle ]; then
+	echo "error: bundle directory '$1' does not exist"
+	exit 1
+fi
+
+mkdir -p $bundle/Contents/Frameworks
+
 function copy_deps {
 	for dep in $(otool -L $1 | grep local | awk '{print $1}'); do
 		if [ ! -f $bundle/Contents/Frameworks/$(basename $dep) ]; then
