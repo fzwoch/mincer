@@ -44,7 +44,8 @@ LDFLAGS+=-headerpad_max_install_names
 all: Mincer.app
 
 Mincer.app: Mincer.app/Contents/MacOS/mincer Mincer.app/Contents/Resources/mincer.icns Mincer.app/Contents/Info.plist $(PLUGINS)
-	@sh deploy_bundle.sh $@ $< $(PLUGINS)
+	@echo " FX $@"
+	@sh fixbundle.sh $@ $(PLUGINS)
 
 Mincer.app/Contents/Resources/mincer.icns: mincer.iconset/icon_512x512.png
 	@echo " IC $@"
