@@ -49,7 +49,7 @@ if [ ! -f "$EXECUTABLE" ]; then
 	exit 1
 fi
 
-for BINARY in ${@:2}; do
+for BINARY in "${@:2}"; do
 	if [[ "$BINARY" != "$BUNDLE/"* ]]; then
 		echo "ERROR: Binary '$BINARY' is not inside '$BUNDLE'"
 		exit 1
@@ -67,7 +67,7 @@ if [ ! -d "$FRAMEWORK_DIR" ]; then
 fi
 
 function get_deps {
-	echo $(otool -L $1 | grep local | awk '{print $1}')
+	echo $(otool -L "$1" | grep local | awk '{print $1}')
 }
 
 # readlink -f
@@ -85,29 +85,29 @@ function realpath {
 }
 
 function copy_deps {
-	for DEP in $(get_deps $1); do
+	for DEP in $(get_deps "$1"); do
 		REAL_DEP=$(realpath $DEP)
 
-		if [ ! -f $FRAMEWORK_DIR/$(basename $REAL_DEP) ]; then
-			cp $DEP $FRAMEWORK_DIR/$(basename $REAL_DEP)
-			chmod 644 $FRAMEWORK_DIR/$(basename $REAL_DEP)
-			copy_deps $FRAMEWORK_DIR/$(basename $REAL_DEP)
+		if [ ! -f "$FRAMEWORK_DIR/$(basename $REAL_DEP)" ]; then
+			cp "$DEP" "$FRAMEWORK_DIR/$(basename $REAL_DEP)"
+			chmod 644 "$FRAMEWORK_DIR/$(basename $REAL_DEP)"
+			copy_deps "$FRAMEWORK_DIR/$(basename $REAL_DEP)"
 		fi
 	done
 }
 
-for BINARY in $EXECUTABLE ${@:2}; do
-	copy_deps $BINARY
+for BINARY in "$EXECUTABLE" "${@:2}"; do
+	copy_deps "$BINARY"
 done
 
 function fix_symbols {
-	for DEP in $(get_deps $1); do
-		install_name_tool -change $DEP @executable_path/../Frameworks/$(basename $(realpath $DEP)) $1
+	for DEP in $(get_deps "$1"); do
+		install_name_tool -change "$DEP" "@executable_path/../Frameworks/$(basename $(realpath $DEP))" "$1"
 	done
 }
 
 shopt -s nullglob
 
-for BINARY in $EXECUTABLE ${@:2} $FRAMEWORK_DIR/*.dylib FRAMEWORK_DIR/*.so; do
-	fix_symbols $BINARY
+for BINARY in "$EXECUTABLE" "${@:2}" "$FRAMEWORK_DIR/"*.dylib "$FRAMEWORK_DIR/"*.so; do
+	fix_symbols "$BINARY"
 done
