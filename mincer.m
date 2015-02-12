@@ -175,6 +175,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSSlider *video_bitrate;
 	
 	NSPopUpButton *audio_device;
+	NSButton *audio_mute;
 	
 	NSTextField *audio_bitrate_label;
 	NSSlider *audio_bitrate;
@@ -487,6 +488,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		free(devices);
 	}
 	
+	audio_mute = [NSButton new];
+	[audio_mute setTitle:@"Mute"];
+	[audio_mute setEnabled:NO];
+	[audio_mute setBezelStyle:NSRoundedBezelStyle];
+	[audio_mute setAction:@selector(toggleMute)];
+	[audio_mute setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
 	audio_bitrate_label = [NSTextField new];
 	[audio_bitrate_label setBezeled:NO];
 	[audio_bitrate_label setDrawsBackground:NO];
@@ -563,6 +571,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:audio_system_device];
 	[[window contentView] addSubview:audio_device_label];
 	[[window contentView] addSubview:audio_device];
+	[[window contentView] addSubview:audio_mute];
 	[[window contentView] addSubview:audio_bitrate_label];
 	[[window contentView] addSubview:audio_bitrate];
 	[[window contentView] addSubview:mp4_recording_label];
@@ -571,7 +580,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:frames_skipped];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, frames_skipped, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_mute, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, frames_skipped, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -600,7 +609,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_bitrate]-15-|" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_device_label]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_device]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[audio_device]-15-[audio_mute(==100)]-15-|" options:0 metrics:nil views:views]];
+	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[audio_device_label]-[audio_mute]" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[audio_system_device]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[video_bitrate]-18-[audio_system_device]" options:0 metrics:nil views:views]];
@@ -747,6 +758,28 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[defaults setFloat:[window frame].origin.x forKey:@"pos_x"];
 	[defaults setFloat:[window frame].origin.y forKey:@"pos_y"];
 }
+- (void)toggleMute
+{
+	gboolean mute = false;
+	GstElement *elem = gst_bin_get_by_name(GST_BIN(pipeline), "volume");
+	
+	if (elem)
+	{
+		g_object_get(elem, "mute", &mute, NULL);
+		mute = !mute;
+		g_object_set(elem, "mute", &mute, NULL);
+		g_object_unref(elem);
+	}
+	
+	if (mute)
+	{
+		[audio_mute setTitle:@"Unmute"];
+	}
+	else
+	{
+		[audio_mute setTitle:@"Mute"];
+	}
+}
 - (void)toggleStream
 {
 	pipeline ? [self stopStream] : [self startStream];
@@ -823,7 +856,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (audio_capture_id)
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! volume name=volume ! audio_mix. ", audio_capture_id];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
@@ -884,6 +917,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[encoder_speed setEnabled:NO];
 	[video_bitrate setEnabled:NO];
 	[audio_device setEnabled:NO];
+	[audio_mute setEnabled:YES];
 	[audio_bitrate setEnabled:NO];
 	[mp4_recording setEnabled:NO];
 	
@@ -958,12 +992,14 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[encoder_speed setEnabled:YES];
 	[video_bitrate setEnabled:YES];
 	[audio_device setEnabled:YES];
+	[audio_mute setEnabled:NO];
 	[audio_bitrate setEnabled:YES];
 	[mp4_recording setEnabled:YES];
 	
 	[self updateCaptureDevice];
 	[self updateEncoderType];
 	
+	[audio_mute setTitle:@"Mute"];
 	[button setTitle:@"Start"];
 }
 - (void)updateCaptureDevice

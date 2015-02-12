@@ -25,6 +25,7 @@ PLUGINS_FILES = \
 	libgstcoreelements.so \
 	libgstaudiotestsrc.so \
 	libgstosxaudio.so \
+	libgstvolume.so \
 	libgstaudiomixer.so \
 	libgstaudioconvert.so \
 	libgstaudioresample.so \
