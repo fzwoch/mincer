@@ -851,12 +851,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([audio_device indexOfSelectedItem])
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! volume name=volume ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
 	}
 	
 	if (audio_capture_id)
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! volume name=volume ! audio_mix. ", audio_capture_id];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
