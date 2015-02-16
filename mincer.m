@@ -917,7 +917,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[encoder_speed setEnabled:NO];
 	[video_bitrate setEnabled:NO];
 	[audio_device setEnabled:NO];
-	[audio_mute setEnabled:YES];
+	if ([audio_device indexOfSelectedItem])
+	{
+		[audio_mute setEnabled:YES];
+	}
 	[audio_bitrate setEnabled:NO];
 	[mp4_recording setEnabled:NO];
 	
