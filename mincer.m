@@ -771,14 +771,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		g_object_unref(elem);
 	}
 	
-	if (mute)
-	{
-		[audio_mute setTitle:@"Unmute"];
-	}
-	else
-	{
-		[audio_mute setTitle:@"Mute"];
-	}
+	[audio_mute setTitle: mute ? @"Unmute" : @"Mute"];
 }
 - (void)toggleStream
 {
