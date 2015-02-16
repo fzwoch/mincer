@@ -767,7 +767,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		g_object_get(elem, "mute", &mute, NULL);
 		mute = !mute;
-		g_object_set(elem, "mute", &mute, NULL);
+		g_object_set(elem, "mute", mute ? true : false, NULL);
 		g_object_unref(elem);
 	}
 	
