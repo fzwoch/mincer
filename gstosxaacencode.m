@@ -56,7 +56,7 @@ static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE
 	(
 		"audio/x-raw, "
 		"format = S32LE, "
-		"rate = 44100, "
+		"rate = 48000, "
 		"channels = 2, "
 		"layout = interleaved"
 	)
@@ -71,7 +71,7 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE
 	(
 		"audio/mpeg, "
 		"mpegversion = 4, "
-		"rate = 44100, "
+		"rate = 48000, "
 		"channels = 2, "
 		"stream-format = raw, "
 		"base-profile = lc"
@@ -194,7 +194,7 @@ static gboolean gst_osx_aac_encode_set_format(GstAudioEncoder *enc, GstAudioInfo
 	memset(&fmt_in, 0, sizeof(AudioStreamBasicDescription));
 	memset(&fmt_out, 0, sizeof(AudioStreamBasicDescription));
 	
-	fmt_in.mSampleRate = 44100;
+	fmt_in.mSampleRate = 48000;
 	fmt_in.mFormatID = kAudioFormatLinearPCM;
 	fmt_in.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian;
 	fmt_in.mBytesPerPacket = 4 * 2;
@@ -204,7 +204,7 @@ static gboolean gst_osx_aac_encode_set_format(GstAudioEncoder *enc, GstAudioInfo
 	fmt_in.mBitsPerChannel = 32;
 	
 	fmt_out.mFormatID = kAudioFormatMPEG4AAC;
-	fmt_out.mSampleRate = 44100;
+	fmt_out.mSampleRate = 48000;
 	fmt_out.mChannelsPerFrame = 2;
 	
 	AudioConverterNew(&fmt_in, &fmt_out, &GST_OSX_AAC_ENCODE(enc)->encoder);
