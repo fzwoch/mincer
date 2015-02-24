@@ -18,7 +18,6 @@
 #
 
 PLUGINS_FILES = \
-	libgstosxdesktopsrc.so \
 	libgstvideoscale.so \
 	libgstfaac.so \
 	libgstapplemedia.so \
