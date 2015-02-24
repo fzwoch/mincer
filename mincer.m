@@ -117,7 +117,6 @@ static unsigned int desktop_count = 0;
 
 static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
 static glong audio_capture_id = 0;
-static glong audio_capture_rate = 0;
 
 static NSObject<NSApplicationDelegate, NSWindowDelegate> *delegate;
 
@@ -443,16 +442,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	for (gint i = 0; i < device_count; i++)
 	{
-		AudioStreamBasicDescription format;
 		NSString *name = NULL;
 		
-		addr.mSelector = kAudioDevicePropertyStreamFormat;
-		addr.mScope = kAudioObjectPropertyScopeGlobal;
-		
-		size = sizeof(AudioStreamBasicDescription);
-		AudioObjectGetPropertyData(devices[i], &addr, 0, NULL, &size, &format);
-		
 		addr.mSelector = kAudioDevicePropertyDeviceNameCFString;
+		addr.mScope = kAudioObjectPropertyScopeGlobal;
 		
 		size = sizeof(CFStringRef);
 		AudioObjectGetPropertyData(devices[i], &addr, 0, NULL, &size, &name);
@@ -482,11 +475,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 					audio_capture_id = devices[i];
 					
 					[audio_system_device setStringValue:@"System audio capture via WavTap"];
-				}
-				
-				if (audio_capture_id)
-				{
-					audio_capture_rate = (glong)format.mSampleRate;
 				}
 			}
 		}
@@ -847,7 +835,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (audio_capture_id)
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audio/x-raw, rate=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id, audio_capture_rate];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
