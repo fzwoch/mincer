@@ -802,13 +802,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		
 		key_interval = max_framerate * 2;
 		
-		[desc appendFormat:@"avfvideosrc device-index=%d do-timestamp=true ! ", device_idx];
+		[desc appendFormat:@"avfvideosrc device-index=%d do-timestamp=true ! videorate ! ", device_idx];
 	}
 	else
 	{
 		key_interval = framerates[[framerate indexOfSelectedItem]] * 2;
 		
-		[desc appendFormat:@"avfvideosrc device-index=%ld do-timestamp=true capture-screen=true capture-screen-cursor=true ! video/x-raw, framerate=%d/1 ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]]];
+		[desc appendFormat:@"avfvideosrc device-index=%ld do-timestamp=true capture-screen=true capture-screen-cursor=true ! video/x-raw, framerate=%d/1 ! videorate ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]]];
 	}
 	
 	[desc appendFormat:@"queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! "];

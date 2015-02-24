@@ -20,6 +20,7 @@
 PLUGINS_FILES = \
 	libgstvideoscale.so \
 	libgstfaac.so \
+	libgstvideorate.so \
 	libgstapplemedia.so \
 	libgstcoreelements.so \
 	libgstaudiotestsrc.so \
