@@ -20,7 +20,7 @@
 PLUGINS_FILES = \
 	libgstosxdesktopsrc.so \
 	libgstvideoscale.so \
-	libgstosxaacencode.so \
+	libgstfaac.so \
 	libgstapplemedia.so \
 	libgstcoreelements.so \
 	libgstaudiotestsrc.so \
@@ -73,12 +73,6 @@ Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so: gstosxdeskt
 	@echo " CC $@"
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(LDFLAGS) -shared $(shell pkg-config --cflags --libs gstreamer-base-1.0) -framework AppKit $< -o $@
-	@chmod 644 $@
-
-Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so: gstosxaacencode.m
-	@echo " CC $@"
-	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $(LDFLAGS) -shared $(shell pkg-config --cflags --libs gstreamer-audio-1.0) -framework AudioToolbox $< -o $@
 	@chmod 644 $@
 
 Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so: $(PLUGINS_DIR)/%.so
