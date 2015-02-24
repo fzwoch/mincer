@@ -190,7 +190,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSDate *start_date;
 	NSTimer *timer;
 	NSTextField *elapsed_time;
-	NSTextField *frames_skipped;
 	
 	GstElement *pipeline;
 	id<NSObject> activity;
@@ -548,15 +547,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	start_date = NULL;
 	timer = NULL;
 	
-	frames_skipped = [NSTextField new];
-	[frames_skipped setTextColor:[NSColor lightGrayColor]];
-	[frames_skipped setBezeled:NO];
-	[frames_skipped setDrawsBackground:NO];
-	[frames_skipped setEditable:NO];
-	[frames_skipped setSelectable:NO];
-	[frames_skipped setFont:[NSFont systemFontOfSize:9]];
-	[frames_skipped setTranslatesAutoresizingMaskIntoConstraints:NO];
-	
 	[self updateElapsedTime];
 	
 	button = [NSButton new];
@@ -589,10 +579,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:mp4_recording_label];
 	[[window contentView] addSubview:mp4_recording];
 	[[window contentView] addSubview:elapsed_time];
-	[[window contentView] addSubview:frames_skipped];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_mute, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, frames_skipped, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_mute, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -602,9 +591,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device]-15-|" options:0 metrics:nil views:views]];
-	
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[frames_skipped]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url]-18-[frames_skipped]" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution_label]-15-[framerate_label(==resolution_label)]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution]-15-[framerate(==resolution)]-15-|" options:0 metrics:nil views:views]];
@@ -1070,20 +1056,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 }
 - (void)updateElapsedTime
 {
-	gint skipped = 0;
-	
-	if (pipeline)
-	{
-		GstElement *elem = gst_bin_get_by_name(GST_BIN(pipeline), "desktopsrc");
-		if (elem)
-		{
-			g_object_get(elem, "skipped-frames", &skipped, NULL);
-			g_object_unref(elem);
-		}
-	}
-	
-	[frames_skipped setStringValue:[NSString stringWithFormat:@"%d frames skipped", skipped]];
-	
 	if (timer)
 	{
 		NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start_date];
