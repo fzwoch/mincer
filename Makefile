@@ -19,7 +19,7 @@
 
 PLUGINS_FILES = \
 	libgstosxdesktopsrc.so \
-	libgstosxvideoscale.so \
+	libgstvideoscale.so \
 	libgstosxaacencode.so \
 	libgstapplemedia.so \
 	libgstcoreelements.so \
@@ -73,12 +73,6 @@ Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxdesktopsrc.so: gstosxdeskt
 	@echo " CC $@"
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(LDFLAGS) -shared $(shell pkg-config --cflags --libs gstreamer-base-1.0) -framework AppKit $< -o $@
-	@chmod 644 $@
-
-Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxvideoscale.so: gstosxvideoscale.m
-	@echo " CC $@"
-	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $(LDFLAGS) -shared $(shell pkg-config --cflags --libs gstreamer-base-1.0) -framework CoreGraphics $< -o $@
 	@chmod 644 $@
 
 Mincer.app/Contents/Frameworks/gstreamer-1.0/libgstosxaacencode.so: gstosxaacencode.m
