@@ -18,24 +18,24 @@
 #
 
 PLUGINS_FILES = \
-	libgstvideoscale.so \
-	libgstfaac.so \
-	libgstvideorate.so \
 	libgstapplemedia.so \
-	libgstcoreelements.so \
-	libgstaudiotestsrc.so \
-	libgstosxaudio.so \
-	libgstvolume.so \
-	libgstaudiomixer.so \
 	libgstaudioconvert.so \
-	libgstaudioresample.so \
-	libgstvideoparsersbad.so \
+	libgstaudiomixer.so \
 	libgstaudioparsers.so \
-	libgstvideoconvert.so \
-	libgstx264.so \
+	libgstaudioresample.so \
+	libgstaudiotestsrc.so \
+	libgstcoreelements.so \
+	libgstfaac.so \
 	libgstflv.so \
 	libgstisomp4.so \
-	libgstrtmp.so
+	libgstosxaudio.so \
+	libgstrtmp.so \
+	libgstvideoconvert.so \
+	libgstvideoparsersbad.so \
+	libgstvideorate.so \
+	libgstvideoscale.so \
+	libgstvolume.so \
+	libgstx264.so
 
 PLUGINS_DIR=$(dir $(shell gst-inspect-1.0 coreelements | grep Filename | awk '{print $$2}'))
 PLUGINS=$(addprefix Mincer.app/Contents/Frameworks/gstreamer-1.0/, $(PLUGINS_FILES))
