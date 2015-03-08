@@ -491,6 +491,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[audio_mute setTitle:@"Mute"];
 	[audio_mute setEnabled:NO];
 	[audio_mute setBezelStyle:NSRoundedBezelStyle];
+	[audio_mute setButtonType:NSOnOffButton];
 	[audio_mute setAction:@selector(toggleMute)];
 	[audio_mute setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
@@ -746,18 +747,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 }
 - (void)toggleMute
 {
-	gboolean mute = false;
 	GstElement *elem = gst_bin_get_by_name(GST_BIN(pipeline), "volume");
 	
 	if (elem)
 	{
-		g_object_get(elem, "mute", &mute, NULL);
-		mute = !mute;
-		g_object_set(elem, "mute", mute ? true : false, NULL);
+		g_object_set(elem, "mute", [audio_mute state] ? true : false, NULL);
 		g_object_unref(elem);
 	}
-	
-	[audio_mute setTitle: mute ? @"Unmute" : @"Mute"];
 }
 - (void)toggleStream
 {
@@ -981,7 +977,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[self updateCaptureDevice];
 	[self updateEncoderType];
 	
-	[audio_mute setTitle:@"Mute"];
+	if ([audio_mute state] == NSOnState)
+	{
+		[audio_mute setNextState];
+	}
+	
 	[button setTitle:@"Start"];
 }
 - (void)updateCaptureDevice
