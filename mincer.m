@@ -823,7 +823,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[desc appendFormat:@"h264parse ! tee name=tee_264 "];
 	
-	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
+	[desc appendFormat:@"adder name=audio_mix ! audioconvert ! audioresample ! faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
 	if ([audio_device indexOfSelectedItem])
 	{

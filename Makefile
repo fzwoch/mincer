@@ -18,9 +18,9 @@
 #
 
 PLUGINS_FILES = \
+	libgstadder.so \
 	libgstapplemedia.so \
 	libgstaudioconvert.so \
-	libgstaudiomixer.so \
 	libgstaudioparsers.so \
 	libgstaudioresample.so \
 	libgstaudiotestsrc.so \
