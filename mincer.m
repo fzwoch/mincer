@@ -244,6 +244,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url_label setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	url = [NSTextField new];
+	[url setPlaceholderString:@"rtmp://live.twitch.tv/app/<streamkey>"];
 	[url setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	url_secret = [NSSecureTextField new];
@@ -625,7 +626,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 
 	if ([NSEvent modifierFlags] & NSCommandKeyMask && [alert runModal] == NSAlertFirstButtonReturn)
 	{
-		[url setStringValue:@"rtmp://live.twitch.tv/app/"];
+		[url setStringValue:@""];
 		[resolution selectItemAtIndex:0];
 		[framerate selectItemAtIndex:0];
 		[encoder_type selectItemAtIndex:0];
@@ -640,7 +641,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		
-		[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @"rtmp://live.twitch.tv/app/"];
+		[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @""];
 		[video_device selectItemAtIndex:[defaults integerForKey:@"video_device"]];
 		[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
 		[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
