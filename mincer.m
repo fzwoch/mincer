@@ -162,6 +162,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSSecureTextField *url_secret;
 	
 	NSPopUpButton *video_device;
+	NSTextField *video_fps;
 	
 	NSPopUpButton *resolution;
 	NSPopUpButton *framerate;
@@ -304,6 +305,15 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		[video_device addItemWithTitle:[device localizedName]];
 	}
+	
+	video_fps = [NSTextField new];
+	[video_fps setTextColor:[NSColor lightGrayColor]];
+	[video_fps setBezeled:NO];
+	[video_fps setDrawsBackground:NO];
+	[video_fps setEditable:NO];
+	[video_fps setSelectable:NO];
+	[video_fps setFont:[NSFont systemFontOfSize:9]];
+	[video_fps setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	NSTextField *resolution_label = [NSTextField new];
 	[resolution_label setStringValue:@"Video Resolution"];
@@ -550,6 +560,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:url_secret];
 	[[window contentView] addSubview:video_device_label];
 	[[window contentView] addSubview:video_device];
+	[[window contentView] addSubview:video_fps];
 	[[window contentView] addSubview:resolution_label];
 	[[window contentView] addSubview:resolution];
 	[[window contentView] addSubview:framerate_label];
@@ -571,7 +582,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:elapsed_time];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_mute, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, video_fps, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_mute, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -581,6 +592,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_device]-15-|" options:0 metrics:nil views:views]];
+	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[video_fps]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[url]-18-[video_fps]" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution_label]-15-[framerate_label(==resolution_label)]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[resolution]-15-[framerate(==resolution)]-15-|" options:0 metrics:nil views:views]];
@@ -799,13 +813,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		
 		key_interval = max_framerate * 2;
 		
-		[desc appendFormat:@"avfvideosrc device-index=%d do-timestamp=true ! videorate ! ", device_idx];
+		[desc appendFormat:@"avfvideosrc name=video_src do-stats=true device-index=%d do-timestamp=true ! videorate ! ", device_idx];
 	}
 	else
 	{
 		key_interval = framerates[[framerate indexOfSelectedItem]] * 2;
 		
-		[desc appendFormat:@"avfvideosrc device-index=%ld do-timestamp=true capture-screen=true capture-screen-cursor=true ! video/x-raw, framerate=%d/1 ! videorate ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]]];
+		[desc appendFormat:@"avfvideosrc name=video_src do-stats=true device-index=%ld do-timestamp=true capture-screen=true capture-screen-cursor=true ! video/x-raw, framerate=%d/1 ! videorate ! ", [video_device indexOfSelectedItem] , framerates[[framerate indexOfSelectedItem]]];
 	}
 	
 	[desc appendFormat:@"queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! "];
@@ -1047,6 +1061,17 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	if (timer)
 	{
+		gint fps = 0;
+		GstElement *elem = gst_bin_get_by_name(GST_BIN(pipeline), "video_src");
+		
+		if (elem)
+		{
+			g_object_get(elem, "fps", &fps, NULL);
+			g_object_unref(elem);
+		}
+		
+		[video_fps setStringValue:[NSString stringWithFormat:@"%i frames per second", fps]];
+		
 		NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start_date];
 		NSDate *time = [NSDate dateWithTimeIntervalSince1970:elapsed];
 		NSDateFormatter *date = [NSDateFormatter new];
@@ -1060,6 +1085,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	else
 	{
+		[video_fps setStringValue:@"0 frames per second"];
 		[elapsed_time setStringValue:@"--:--:--"];
 	}
 }
