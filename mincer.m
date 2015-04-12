@@ -122,7 +122,6 @@ static NSObject<NSApplicationDelegate, NSWindowDelegate> *delegate;
 
 static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
-	gchar *debug;
 	GError *error;
 	
 	switch (GST_MESSAGE_TYPE(msg))
@@ -130,8 +129,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	case GST_MESSAGE_WARNING:
 		@autoreleasepool
 		{
-			gst_message_parse_warning(msg, &error, &debug);
-			g_free(debug);
+			gst_message_parse_warning(msg, &error, NULL);
 			
 			NSLog(@"%@", [NSString stringWithUTF8String:error->message]);
 			g_error_free(error);
@@ -140,8 +138,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	case GST_MESSAGE_ERROR:
 		@autoreleasepool
 		{
-			gst_message_parse_error(msg, &error, &debug);
-			g_free(debug);
+			gst_message_parse_error(msg, &error, NULL);
 			
 			[delegate performSelectorOnMainThread:@selector(handleError:) withObject:[NSString stringWithUTF8String:error->message] waitUntilDone:NO];
 			g_error_free(error);
