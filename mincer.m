@@ -637,7 +637,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 
 	if ([NSEvent modifierFlags] & NSCommandKeyMask && [alert runModal] == NSAlertFirstButtonReturn)
 	{
-		[url setStringValue:@""];
 		[resolution selectItemAtIndex:0];
 		[framerate selectItemAtIndex:0];
 		[encoder_type selectItemAtIndex:0];
@@ -652,7 +651,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		
-		[url setStringValue:[defaults stringForKey:@"url"] ? [defaults stringForKey:@"url"] : @""];
+		[url setStringValue:[defaults stringForKey:@"url"]];
 		[video_device selectItemAtIndex:[defaults integerForKey:@"video_device"]];
 		[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
 		[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
