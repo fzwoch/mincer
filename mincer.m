@@ -1068,6 +1068,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		{
 			g_object_get(elem, "fps", &fps, NULL);
 			g_object_unref(elem);
+			
+			if (fps < 0)
+			{
+				fps = 0;
+			}
 		}
 		
 		[video_fps setStringValue:[NSString stringWithFormat:@"%i frames per second", fps]];
