@@ -833,16 +833,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[desc appendFormat:@"h264parse ! tee name=tee_264 "];
 	
-	[desc appendFormat:@"adder name=audio_mix ! audioconvert ! audioresample ! faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
-	
-	if ([audio_device indexOfSelectedItem])
-	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! volume name=volume ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]]];
-	}
+	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
 	
 	if (audio_capture_id)
 	{
 		[desc appendFormat:@"osxaudiosrc device=%ld ! audio_mix. ", audio_capture_id];
+	}
+	
+	if ([audio_device indexOfSelectedItem])
+	{
+		[desc appendFormat:@"osxaudiosrc device=%ld provide-clock=%s ! volume name=volume ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]], audio_capture_id ? "false" : "true"];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
