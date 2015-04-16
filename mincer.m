@@ -819,8 +819,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	[desc appendFormat:@"queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! "];
-	[desc appendFormat:@"videoscale method=bilinear2 ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
-	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! video/x-raw, format=I420 ! "];
+	[desc appendFormat:@"videoconvert ! video/x-raw, format=I420 ! queue max-size-bytes=0 ! "];
+	[desc appendFormat:@"videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	
 	if ([encoder_type indexOfSelectedItem] > 0)
 	{
