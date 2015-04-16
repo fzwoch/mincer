@@ -837,17 +837,17 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (audio_capture_id)
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! audio_mix. ", audio_capture_id];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! queue ! audio_mix. ", audio_capture_id];
 	}
 	
 	if ([audio_device indexOfSelectedItem])
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld provide-clock=%s ! volume name=volume ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]], audio_capture_id ? "false" : "true"];
+		[desc appendFormat:@"osxaudiosrc device=%ld provide-clock=%s ! queue ! volume name=volume ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]], audio_capture_id ? "false" : "true"];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
 	{
-		[desc appendFormat:@"audiotestsrc is-live=true wave=silence ! audio_mix. "];
+		[desc appendFormat:@"audiotestsrc is-live=true wave=silence ! queue ! audio_mix. "];
 	}
 	
 	if ([[url stringValue] length])
