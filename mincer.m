@@ -837,12 +837,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if (audio_capture_id)
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld ! queue ! audio_mix. ", audio_capture_id];
+		[desc appendFormat:@"osxaudiosrc device=%ld ! queue ! audioconvert ! audioresample ! audio_mix. ", audio_capture_id];
 	}
 	
 	if ([audio_device indexOfSelectedItem])
 	{
-		[desc appendFormat:@"osxaudiosrc device=%ld provide-clock=%s ! queue ! volume name=volume ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]], audio_capture_id ? "false" : "true"];
+		[desc appendFormat:@"osxaudiosrc device=%ld provide-clock=%s ! queue ! volume name=volume ! audioconvert ! audioresample ! audio_mix. ", audio_device_ids[[audio_device indexOfSelectedItem]], audio_capture_id ? "false" : "true"];
 	}
 	
 	if (![audio_device indexOfSelectedItem] && !audio_capture_id)
