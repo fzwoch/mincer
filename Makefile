@@ -32,7 +32,6 @@ PLUGINS_FILES = \
 	libgstrtmp.so \
 	libgstvideoconvert.so \
 	libgstvideoparsersbad.so \
-	libgstvideorate.so \
 	libgstvideoscale.so \
 	libgstvolume.so \
 	libgstx264.so
