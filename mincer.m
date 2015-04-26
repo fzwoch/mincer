@@ -96,23 +96,6 @@ static gchar *encoder_speeds[] =
 	"Placebo"
 };
 
-static gint audio_bitrates[] =
-{
-	64,
-	72,
-	80,
-	96,
-	112,
-	128,
-	144,
-	160,
-	192,
-	224,
-	256,
-	288,
-	320
-};
-
 static unsigned int desktop_count = 0;
 
 static glong audio_device_ids[MAX_AUDIO_DEVICES] = {0};
@@ -511,9 +494,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[audio_bitrate_label setTranslatesAutoresizingMaskIntoConstraints:NO];
 	
 	audio_bitrate = [NSSlider new];
-	[audio_bitrate setMinValue:0];
-	[audio_bitrate setMaxValue:sizeof(audio_bitrates) / sizeof(audio_bitrates[0]) - 1];
-	[audio_bitrate setNumberOfTickMarks:sizeof(audio_bitrates) / sizeof(audio_bitrates[0])];
+	[audio_bitrate setMinValue:32000];
+	[audio_bitrate setMaxValue:320000];
+	[audio_bitrate setNumberOfTickMarks:([audio_bitrate maxValue] - [audio_bitrate minValue]) / 16000 + 1];
 	[audio_bitrate setAllowsTickMarkValuesOnly:YES];
 	[audio_bitrate setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[audio_bitrate setAction:@selector(updateAudioBitrate)];
@@ -833,7 +816,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[desc appendFormat:@"h264parse ! tee name=tee_264 "];
 	
-	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", audio_bitrates[[audio_bitrate intValue]] * 1000];
+	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", [audio_bitrate intValue]];
 	
 	if (audio_capture_id)
 	{
@@ -1029,7 +1012,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 }
 - (void)updateAudioBitrate
 {
-	[audio_bitrate_label setStringValue:[NSString stringWithFormat:@"Audio Bitrate - %d kbps", audio_bitrates[[audio_bitrate intValue]]]];
+	[audio_bitrate_label setStringValue:[NSString stringWithFormat:@"Audio Bitrate - %d kbps", [audio_bitrate intValue] / 1000]];
 }
 - (void)updateRecordingDirectory
 {
