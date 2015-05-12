@@ -10,22 +10,20 @@ Download binaries at <a href="https://plus.google.com/106302080469674598966?rel=
 Prerequisites
 -------------
 
-For building the application you require at least the following:
+For building the application you require:
 
 * Xcode command line tools (https://developer.apple.com)
-* GStreamer 1.4.x (http://gstreamer.freedesktop.org)
+* GStreamer 1.6 (http://gstreamer.freedesktop.org)
 
 Xcode command line tools can be installed from the terminal:
 
     $ xcode-select --install
 
-The recommended way to install 3rd party libraries and tools on your system is using a packet manager:
+The recommended way to install GStreamer libraries is using a packet manager:
 
 * Macports (http://macports.org)
 * Fink (http://finkproject.org)
 * Homebrew (http://brew.sh)
-
-Consult the manual of your packet manager of choice on how to install the required libraries and tools.
 
 Build instructions
 ------------------
