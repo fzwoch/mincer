@@ -59,7 +59,7 @@ Mincer.app/Contents/Info.plist:
 	@/usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string "mincer"' $@
 	@/usr/libexec/PlistBuddy -c 'Add :CFBundleIconFile string "mincer.icns"' $@
 	@/usr/libexec/PlistBuddy -c 'Add :CFBundleIdentifier string "zwoch.florian.mincer"' $@
-	@/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string "0.1.8"' $@
+	@/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string "0.1.9"' $@
 	@/usr/libexec/PlistBuddy -c 'Add :NSHighResolutionCapable bool YES' $@
 	@/usr/libexec/PlistBuddy -c 'Add :NSHumanReadableCopyright string "© 2013-2015 Florian Zwoch"' $@
 
