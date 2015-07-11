@@ -28,6 +28,7 @@ PLUGINS_FILES = \
 	libgstfaac.so \
 	libgstflv.so \
 	libgstisomp4.so \
+	libgstlame.so \
 	libgstosxaudio.so \
 	libgstrtmp.so \
 	libgstvideoconvert.so \

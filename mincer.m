@@ -820,7 +820,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[desc appendFormat:@"h264parse ! tee name=tee_264 "];
 	
-	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", [audio_bitrate intValue]];
+	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! "];
+	 
+	if (0)
+	{
+		[desc appendFormat:@"lamemp3enc bitrate=%d target=bitrate ! mpegaudioparse  ! tee name=tee_aac ", [audio_bitrate intValue] / 1000];
+	}
+	else
+	{
+		[desc appendFormat:@"faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", [audio_bitrate intValue]];
+	}
 	
 	if (audio_capture_id)
 	{
