@@ -147,7 +147,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	NSPopUpButton *resolution;
 	NSPopUpButton *framerate;
 	
-	NSPopUpButton *encoder_type;
+	NSPopUpButton *video_encoder_type;
+	NSPopUpButton *audio_encoder_type;
 	
 	NSTextField *encoder_speed_label;
 	NSSlider *encoder_speed;
@@ -340,21 +341,37 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[framerate addItemWithTitle:[NSString stringWithFormat:@"%d", framerates[i]]];
 	}
 	
-	NSTextField *encoder_type_label = [NSTextField new];
-	[encoder_type_label setStringValue:@"Video Encoder"];
-	[encoder_type_label setBezeled:NO];
-	[encoder_type_label setDrawsBackground:NO];
-	[encoder_type_label setEditable:NO];
-	[encoder_type_label setSelectable:NO];
-	[encoder_type_label setTranslatesAutoresizingMaskIntoConstraints:NO];
+	NSTextField *video_encoder_type_label = [NSTextField new];
+	[video_encoder_type_label setStringValue:@"Video Encoder"];
+	[video_encoder_type_label setBezeled:NO];
+	[video_encoder_type_label setDrawsBackground:NO];
+	[video_encoder_type_label setEditable:NO];
+	[video_encoder_type_label setSelectable:NO];
+	[video_encoder_type_label setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-	encoder_type = [NSPopUpButton new];
-	[encoder_type setPullsDown:NO];
-	[encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
-	[encoder_type setAction:@selector(updateEncoderType)];
+	video_encoder_type = [NSPopUpButton new];
+	[video_encoder_type setPullsDown:NO];
+	[video_encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[video_encoder_type setAction:@selector(updateEncoderType)];
 	
-	[encoder_type addItemWithTitle:@"Software"];
-	[encoder_type addItemWithTitle:@"Hardware"];
+	[video_encoder_type addItemWithTitle:@"Software"];
+	[video_encoder_type addItemWithTitle:@"Hardware"];
+	
+	NSTextField *audio_encoder_type_label = [NSTextField new];
+	[audio_encoder_type_label setStringValue:@"Audio Encoder"];
+	[audio_encoder_type_label setBezeled:NO];
+	[audio_encoder_type_label setDrawsBackground:NO];
+	[audio_encoder_type_label setEditable:NO];
+	[audio_encoder_type_label setSelectable:NO];
+	[audio_encoder_type_label setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	audio_encoder_type = [NSPopUpButton new];
+	[audio_encoder_type setPullsDown:NO];
+	[audio_encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[audio_encoder_type setAction:@selector(updateEncoderType)];
+	
+	[audio_encoder_type addItemWithTitle:@"AAC"];
+	[audio_encoder_type addItemWithTitle:@"MP3"];
 	
 	encoder_speed_label = [NSTextField new];
 	[encoder_speed_label setBezeled:NO];
@@ -549,8 +566,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:resolution];
 	[[window contentView] addSubview:framerate_label];
 	[[window contentView] addSubview:framerate];
-	[[window contentView] addSubview:encoder_type_label];
-	[[window contentView] addSubview:encoder_type];
+	[[window contentView] addSubview:video_encoder_type_label];
+	[[window contentView] addSubview:video_encoder_type];
+	[[window contentView] addSubview:audio_encoder_type_label];
+	[[window contentView] addSubview:audio_encoder_type];
 	[[window contentView] addSubview:encoder_speed_label];
 	[[window contentView] addSubview:encoder_speed];
 	[[window contentView] addSubview:video_bitrate_label];
@@ -566,7 +585,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addSubview:elapsed_time];
 	[[window contentView] addSubview:button];
 	
-	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, video_fps, resolution_label, resolution, framerate_label, framerate, encoder_type_label, encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_mute, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
+	NSDictionary *views = NSDictionaryOfVariableBindings(url_label, url, url_secret, video_device_label, video_device, video_fps, resolution_label, resolution, framerate_label, framerate, video_encoder_type_label, video_encoder_type, audio_encoder_type_label, audio_encoder_type, encoder_speed_label, encoder_speed, video_bitrate_label, video_bitrate, audio_system_device, audio_device_label, audio_device, audio_mute, audio_bitrate_label, audio_bitrate, mp4_recording_label, mp4_recording, elapsed_time, button);
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[url]-15-|" options:0 metrics:nil views:views]];
@@ -585,8 +604,10 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[video_device]-15-[framerate_label]-[framerate]" options:0 metrics:nil views:views]];
 	
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_type_label]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_type]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_encoder_type_label]-15-[audio_encoder_type_label(==video_encoder_type_label)]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[video_encoder_type]-15-[audio_encoder_type(==video_encoder_type)]-15-|" options:0 metrics:nil views:views]];
+	
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[framerate]-15-[audio_encoder_type_label]-[audio_encoder_type]" options:0 metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed_label]-15-|" options:0 metrics:nil views:views]];
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-15-[encoder_speed]-15-|" options:0 metrics:nil views:views]];
@@ -612,7 +633,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[elapsed_time]-[button]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 	
 	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button(==100)]-15-|" options:0 metrics:nil views:views]];
-	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[video_device_label]-[video_device]-15-[resolution_label]-[resolution]-15-[encoder_type_label]-[encoder_type]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
+	[[window contentView] addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15-[url_label]-[url]-15-[video_device_label]-[video_device]-15-[resolution_label]-[resolution]-15-[video_encoder_type_label]-[video_encoder_type]-15-[encoder_speed_label]-[encoder_speed(>=25)]-15-[video_bitrate_label]-[video_bitrate(>=25)]-15-[audio_device_label]-[audio_device]-15-[audio_bitrate_label]-[audio_bitrate(>=25)]-15-[mp4_recording_label]-[mp4_recording]-[button]-15-|" options:0 metrics:nil views:views]];
 	
 	NSPoint point = {0, 0};
 	
@@ -626,7 +647,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		[resolution selectItemAtIndex:0];
 		[framerate selectItemAtIndex:0];
-		[encoder_type selectItemAtIndex:0];
+		[video_encoder_type selectItemAtIndex:0];
+		[audio_encoder_type selectItemAtIndex:0];
 		[encoder_speed setIntValue:[encoder_speed minValue]];
 		[video_bitrate setIntValue:[video_bitrate minValue]];
 		[audio_device selectItemAtIndex:0];
@@ -642,7 +664,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[video_device selectItemAtIndex:[defaults integerForKey:@"video_device"]];
 		[resolution selectItemAtIndex:[defaults integerForKey:@"resolution"]];
 		[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
-		[encoder_type selectItemAtIndex:[defaults integerForKey:@"encoder_type"]];
+		[video_encoder_type selectItemAtIndex:[defaults integerForKey:@"video_encoder_type"]];
+		[audio_encoder_type selectItemAtIndex:[defaults integerForKey:@"audio_encoder_type"]];
 		[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
 		[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
 		[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"] ? [defaults stringForKey:@"audio_device"] : [audio_device itemTitleAtIndex:0]];
@@ -723,7 +746,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[defaults setInteger:[video_device indexOfSelectedItem] forKey:@"video_device"];
 	[defaults setInteger:[resolution indexOfSelectedItem] forKey:@"resolution"];
 	[defaults setInteger:[framerate indexOfSelectedItem] forKey:@"framerate"];
-	[defaults setInteger:[encoder_type indexOfSelectedItem] forKey:@"encoder_type"];
+	[defaults setInteger:[video_encoder_type indexOfSelectedItem] forKey:@"video_encoder_type"];
+	[defaults setInteger:[audio_encoder_type indexOfSelectedItem] forKey:@"audio_encoder_type"];
 	[defaults setInteger:[encoder_speed integerValue] forKey:@"encoder_speed"];
 	[defaults setInteger:[video_bitrate integerValue] forKey:@"video_bitrate"];
 	[defaults setObject:[audio_device titleOfSelectedItem] forKey:@"audio_device"];
@@ -809,7 +833,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc appendFormat:@"videoconvert ! video/x-raw, format=I420 ! queue max-size-bytes=0 ! "];
 	[desc appendFormat:@"videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	
-	if ([encoder_type indexOfSelectedItem] > 0)
+	if ([video_encoder_type indexOfSelectedItem] > 0)
 	{
 		[desc appendFormat:@"vtenc_h264 bitrate=%d max-keyframe-interval=%d realtime=true allow-frame-reordering=false ! ", [video_bitrate intValue], key_interval];
 	}
@@ -822,9 +846,9 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! "];
 	 
-	if (0)
+	if ([audio_encoder_type indexOfSelectedItem] > 0)
 	{
-		[desc appendFormat:@"lamemp3enc bitrate=%d target=bitrate ! mpegaudioparse  ! tee name=tee_aac ", [audio_bitrate intValue] / 1000];
+		[desc appendFormat:@"lamemp3enc bitrate=%d target=bitrate ! mpegaudioparse ! tee name=tee_aac ", [audio_bitrate intValue] / 1000];
 	}
 	else
 	{
@@ -895,7 +919,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[video_device setEnabled:NO];
 	[resolution setEnabled:NO];
 	[framerate setEnabled:NO];
-	[encoder_type setEnabled:NO];
+	[video_encoder_type setEnabled:NO];
+	[audio_encoder_type setEnabled:NO];
 	[encoder_speed setEnabled:NO];
 	[video_bitrate setEnabled:NO];
 	[audio_device setEnabled:NO];
@@ -973,7 +998,8 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[url setEnabled:YES];
 	[video_device setEnabled:YES];
 	[resolution setEnabled:YES];
-	[encoder_type setEnabled:YES];
+	[video_encoder_type setEnabled:YES];
+	[audio_encoder_type setEnabled:YES];
 	[encoder_speed setEnabled:YES];
 	[video_bitrate setEnabled:YES];
 	[audio_device setEnabled:YES];
@@ -1005,7 +1031,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 
 - (void)updateEncoderType
 {
-	if ([encoder_type indexOfSelectedItem] > 0)
+	if ([video_encoder_type indexOfSelectedItem] > 0)
 	{
 		[encoder_speed setEnabled:NO];
 	}
