@@ -352,7 +352,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	video_encoder_type = [NSPopUpButton new];
 	[video_encoder_type setPullsDown:NO];
 	[video_encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
-	[video_encoder_type setAction:@selector(updateEncoderType)];
+	[video_encoder_type setAction:@selector(updateVideoEncoderType)];
 	
 	[video_encoder_type addItemWithTitle:@"Software"];
 	[video_encoder_type addItemWithTitle:@"Hardware"];
@@ -368,7 +368,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	audio_encoder_type = [NSPopUpButton new];
 	[audio_encoder_type setPullsDown:NO];
 	[audio_encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
-	[audio_encoder_type setAction:@selector(updateEncoderType)];
 	
 	[audio_encoder_type addItemWithTitle:@"AAC"];
 	[audio_encoder_type addItemWithTitle:@"MP3"];
@@ -678,7 +677,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	[self updateCaptureDevice];
-	[self updateEncoderType];
+	[self updateVideoEncoderType];
 	[self updateEncoderSpeed];
 	[self updateVideoBitrate];
 	[self updateAudioBitrate];
@@ -850,11 +849,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	{
 		int rate = 44100;
 		
-		if ([audio_bitrate intValue] / 1000 < 80)
+		if ([audio_bitrate intValue] / 1000 < 64)
 		{
 			rate = 11025;
 		}
-		else if ([audio_bitrate intValue] / 1000 < 128)
+		else if ([audio_bitrate intValue] / 1000 < 112)
 		{
 			rate = 22050;
 		}
@@ -1019,7 +1018,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording setEnabled:YES];
 	
 	[self updateCaptureDevice];
-	[self updateEncoderType];
+	[self updateVideoEncoderType];
 	
 	if ([audio_mute state] == NSOnState)
 	{
@@ -1040,7 +1039,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 }
 
-- (void)updateEncoderType
+- (void)updateVideoEncoderType
 {
 	if ([video_encoder_type indexOfSelectedItem] > 0)
 	{
