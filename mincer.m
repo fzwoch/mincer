@@ -848,7 +848,18 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	 
 	if ([audio_encoder_type indexOfSelectedItem] > 0)
 	{
-		[desc appendFormat:@"lamemp3enc bitrate=%d target=bitrate ! mpegaudioparse ! tee name=tee_aac ", [audio_bitrate intValue] / 1000];
+		int rate = 44100;
+		
+		if ([audio_bitrate intValue] / 1000 < 80)
+		{
+			rate = 11025;
+		}
+		else if ([audio_bitrate intValue] / 1000 < 128)
+		{
+			rate = 22050;
+		}
+		
+		[desc appendFormat:@"lamemp3enc bitrate=%d target=bitrate ! audio/mpeg, rate=%d ! mpegaudioparse ! tee name=tee_aac ", [audio_bitrate intValue] / 1000, rate];
 	}
 	else
 	{
