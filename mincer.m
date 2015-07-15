@@ -643,26 +643,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSPoint point = {0, 0};
 	
+	[mp4_recording_path setString:[[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0] relativePath]];
+	mp4_recording_enabled = 0;
+	
 	NSAlert *alert = [NSAlert new];
 	[alert setMessageText:@"Load Defaults"];
 	[alert setInformativeText:@"Are you sure you want load defaults? All your personal settings will get lost."];
 	[alert addButtonWithTitle:@"OK"];
 	[alert addButtonWithTitle:@"Cancel"];
-
-	if ([NSEvent modifierFlags] & NSCommandKeyMask && [alert runModal] == NSAlertFirstButtonReturn)
-	{
-		[resolution selectItemAtIndex:0];
-		[framerate selectItemAtIndex:0];
-		[video_encoder_type selectItemAtIndex:0];
-		[audio_encoder_type selectItemAtIndex:0];
-		[encoder_speed setIntValue:[encoder_speed minValue]];
-		[video_bitrate setIntValue:[video_bitrate minValue]];
-		[audio_device selectItemAtIndex:0];
-		[audio_bitrate setIntValue:[audio_bitrate minValue]];
-		[mp4_recording_path setString:[[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0] relativePath]];
-		mp4_recording_enabled = 0;
-	}
-	else
+	
+	if ([NSEvent modifierFlags] & NSCommandKeyMask && [alert runModal] != NSAlertFirstButtonReturn)
 	{
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		
@@ -672,11 +662,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[framerate selectItemAtIndex:[defaults integerForKey:@"framerate"]];
 		[video_encoder_type selectItemAtIndex:[defaults integerForKey:@"video_encoder_type"]];
 		[audio_encoder_type selectItemAtIndex:[defaults integerForKey:@"audio_encoder_type"]];
-		[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"] ? [defaults integerForKey:@"encoder_speed"] : [encoder_speed minValue]];
-		[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"] ? [defaults integerForKey:@"video_bitrate"] : [video_bitrate minValue]];
-		[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"] ? [defaults stringForKey:@"audio_device"] : [audio_device itemTitleAtIndex:0]];
-		[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"] ? [defaults integerForKey:@"audio_bitrate"] : [audio_bitrate minValue]];
-		[mp4_recording_path setString:[defaults URLForKey:@"mp4_recording_path"] ? [defaults stringForKey:@"mp4_recording_path"] : [[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0] relativePath]];
+		[encoder_speed setIntValue:[defaults integerForKey:@"encoder_speed"]];
+		[video_bitrate setIntValue:[defaults integerForKey:@"video_bitrate"]];
+		[audio_device selectItemWithTitle:[defaults stringForKey:@"audio_device"]];
+		[audio_bitrate setIntValue:[defaults integerForKey:@"audio_bitrate"]];
+		[mp4_recording_path setString:[defaults URLForKey:@"mp4_recording_path"] ? [defaults stringForKey:@"mp4_recording_path"] : mp4_recording_path];
 		mp4_recording_enabled = [defaults integerForKey:@"mp4_recording_enabled"];
 		
 		point.x = [defaults floatForKey:@"pos_x"];
