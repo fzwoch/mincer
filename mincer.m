@@ -652,7 +652,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[alert addButtonWithTitle:@"OK"];
 	[alert addButtonWithTitle:@"Cancel"];
 	
-	if ([NSEvent modifierFlags] & NSCommandKeyMask && [alert runModal] != NSAlertFirstButtonReturn)
+	if (!([NSEvent modifierFlags] & NSCommandKeyMask && [alert runModal] == NSAlertFirstButtonReturn))
 	{
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		
