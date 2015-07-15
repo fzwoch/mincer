@@ -287,6 +287,13 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[video_device addItemWithTitle:[device localizedName]];
 	}
 	
+	if ([video_device numberOfItems] > desktop_count)
+	{
+		[[video_device menu] addItem:[NSMenuItem separatorItem]];
+	}
+	
+	[video_device addItemWithTitle:@"Decklink Device"];
+	
 	video_fps = [NSTextField new];
 	[video_fps setTextColor:[NSColor lightGrayColor]];
 	[video_fps setBezeled:NO];
@@ -801,7 +808,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	if ([video_device indexOfSelectedItem] > desktop_count)
+	if ([video_device indexOfSelectedItem] == [video_device numberOfItems])
+	{
+		[desc appendFormat:@"decklinkvideosrc name=video_src ! "];
+	}
+	else if ([video_device indexOfSelectedItem] > desktop_count)
 	{
 		gint device_idx = [video_device indexOfSelectedItem] - desktop_count - 1;
 		gint max_framerate = 0;

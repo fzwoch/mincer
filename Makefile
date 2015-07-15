@@ -25,6 +25,7 @@ PLUGINS_FILES = \
 	libgstaudioresample.so \
 	libgstaudiotestsrc.so \
 	libgstcoreelements.so \
+	libgstdecklink.so \
 	libgstfaac.so \
 	libgstflv.so \
 	libgstisomp4.so \
