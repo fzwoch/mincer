@@ -798,7 +798,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	NSMutableString *desc = [NSMutableString new];
 	
-	if ([video_device indexOfSelectedItem] == [video_device numberOfItems])
+	if ([video_device indexOfSelectedItem] == [video_device numberOfItems] - 1)
 	{
 		[desc appendFormat:@"decklinkvideosrc name=video_src ! "];
 	}
