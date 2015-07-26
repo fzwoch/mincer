@@ -835,11 +835,11 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([video_encoder_type indexOfSelectedItem] > 0)
 	{
-		[desc appendFormat:@"vtenc_h264 bitrate=%d max-keyframe-interval=%d realtime=true allow-frame-reordering=false ! ", [video_bitrate intValue], key_interval];
+		[desc appendFormat:@"vtenc_h264 bitrate=%d max-keyframe-interval=%d realtime=true ! ", [video_bitrate intValue], key_interval];
 	}
 	else
 	{
-		[desc appendFormat:@"x264enc bitrate=%d speed-preset=%d bframes=0 key-int-max=%d ! ", [video_bitrate intValue], [encoder_speed intValue], key_interval];
+		[desc appendFormat:@"x264enc bitrate=%d speed-preset=%d key-int-max=%d ! ", [video_bitrate intValue], [encoder_speed intValue], key_interval];
 	}
 	
 	[desc appendFormat:@"h264parse ! tee name=tee_264 "];
