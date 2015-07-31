@@ -103,7 +103,7 @@ static glong audio_capture_id = 0;
 
 static NSObject<NSApplicationDelegate, NSWindowDelegate> *delegate;
 
-static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
+static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	GError *error;
 	
@@ -117,7 +117,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			NSLog(@"%@", [NSString stringWithUTF8String:error->message]);
 			g_error_free(error);
 		}
-		break;
+		return FALSE;
 	case GST_MESSAGE_ERROR:
 		@autoreleasepool
 		{
@@ -126,12 +126,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			[delegate performSelectorOnMainThread:@selector(handleError:) withObject:[NSString stringWithUTF8String:error->message] waitUntilDone:NO];
 			g_error_free(error);
 		}
-		break;
+		return FALSE;
 	default:
 		break;
 	}
 	
-	return GST_BUS_DROP;
+	return TRUE;
 }
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
@@ -917,7 +917,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[desc release];
 	
 	bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-	gst_bus_set_sync_handler(bus, bus_call, NULL, NULL);
+	gst_bus_add_watch(bus, bus_call, NULL);
 	gst_object_unref(bus);
 	
 	[url_secret setStringValue:[url stringValue]];
@@ -983,17 +983,20 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	if (pipeline)
 	{
 		GstStateChangeReturn change;
-		GstBus *bus;
-		
-		bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-		gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
-		gst_object_unref(bus);
 		
 		change = gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 		if (change == GST_STATE_CHANGE_SUCCESS)
 		{
+			GstBus *bus;
+			GstMessage *msg;
+			
 			gst_element_send_event(pipeline, gst_event_new_eos());
-			gst_bus_poll(bus, GST_MESSAGE_EOS, GST_CLOCK_TIME_NONE);
+			
+			bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
+			msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_EOS);
+			
+			gst_message_unref(msg);
+			gst_object_unref(bus);
 			
 			gst_element_set_state(pipeline, GST_STATE_NULL);
 		}
