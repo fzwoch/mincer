@@ -117,7 +117,7 @@ static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 			NSLog(@"%@", [NSString stringWithUTF8String:error->message]);
 			g_error_free(error);
 		}
-		return FALSE;
+		return TRUE;
 	case GST_MESSAGE_ERROR:
 		@autoreleasepool
 		{
