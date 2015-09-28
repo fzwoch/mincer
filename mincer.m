@@ -253,6 +253,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[video_device setPullsDown:NO];
 	[video_device setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[video_device setAction:@selector(updateCaptureDevice)];
+	[video_device setAutoenablesItems:NO];
 	
 	CGDirectDisplayID *displays;
 	
@@ -294,6 +295,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	[video_device addItemWithTitle:@"Decklink Device"];
+	[[video_device itemAtIndex:[video_device numberOfItems] - 1] setEnabled:NO];
 	
 	video_fps = [NSTextField new];
 	[video_fps setTextColor:[NSColor lightGrayColor]];
