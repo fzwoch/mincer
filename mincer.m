@@ -866,7 +866,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	else
 	{
-		[desc appendFormat:@"faac bitrate=%d rate-control=ABR ! aacparse ! tee name=tee_aac ", [audio_bitrate intValue]];
+		[desc appendFormat:@"voaacenc bitrate=%d ! aacparse ! tee name=tee_aac ", [audio_bitrate intValue]];
 	}
 	
 	if (audio_capture_id)

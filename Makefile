@@ -26,7 +26,6 @@ PLUGINS_FILES = \
 	libgstaudiotestsrc.so \
 	libgstcoreelements.so \
 	libgstdecklink.so \
-	libgstfaac.so \
 	libgstflv.so \
 	libgstisomp4.so \
 	libgstlame.so \
@@ -35,10 +34,11 @@ PLUGINS_FILES = \
 	libgstvideoconvert.so \
 	libgstvideoparsersbad.so \
 	libgstvideoscale.so \
+	libgstvoaacenc.so \
 	libgstvolume.so \
 	libgstx264.so
 
-PLUGINS_DIR=$(dir $(shell gst-inspect-1.0 coreelements | grep Filename | awk '{print $$2}'))
+PLUGINS_DIR=/Library/Frameworks/GStreamer.framework/Libraries/gstreamer-1.0
 PLUGINS=$(addprefix Mincer.app/Contents/Frameworks/gstreamer-1.0/, $(PLUGINS_FILES))
 
 LDFLAGS+=-headerpad_max_install_names
@@ -68,7 +68,7 @@ Mincer.app/Contents/Info.plist:
 Mincer.app/Contents/MacOS/mincer: mincer.m
 	@echo " CC $@"
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $(LDFLAGS) $(shell pkg-config --cflags --libs gstreamer-1.0) -framework Cocoa -framework CoreAudio -framework AVFoundation $< -o $@
+	@$(CC) $(CFLAGS) $(LDFLAGS) -F /Library/Frameworks -I/Library/Frameworks/GStreamer.framework/Headers -framework Cocoa -framework CoreAudio -framework AVFoundation -framework GStreamer $< -o $@
 
 Mincer.app/Contents/Frameworks/gstreamer-1.0/%.so: $(PLUGINS_DIR)/%.so
 	@echo " CP $@"
