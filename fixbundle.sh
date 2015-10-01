@@ -67,31 +67,17 @@ if [ ! -d "$FRAMEWORK_DIR" ]; then
 fi
 
 function get_deps {
-	echo $(otool -L "$1" | grep local | awk '{print $1}')
-}
-
-# readlink -f
-function realpath {
-	cd $(dirname $1)
-	FILE=$(basename $1)
-
-	while [ -L "$FILE" ]; do
-		FILE=$(readlink $FILE)
-		cd $(dirname $FILE)
-		FILE=$(basename $FILE)
-	done
-
-	echo $(pwd -P)/$FILE
+	echo $(otool -L "$1" | awk '{print $1}' | grep ^/Library/Frameworks)
 }
 
 function copy_deps {
 	for DEP in $(get_deps "$1"); do
-		REAL_DEP=$(realpath $DEP)
 
-		if [ ! -f "$FRAMEWORK_DIR/$(basename $REAL_DEP)" ]; then
-			cp "$DEP" "$FRAMEWORK_DIR/$(basename $REAL_DEP)"
-			chmod 644 "$FRAMEWORK_DIR/$(basename $REAL_DEP)"
-			copy_deps "$FRAMEWORK_DIR/$(basename $REAL_DEP)"
+		if [ ! -f "$FRAMEWORK_DIR/$(basename $DEP)" ]; then
+			cp "$DEP" "$FRAMEWORK_DIR/$(basename $DEP)"
+			chmod 644 "$FRAMEWORK_DIR/$(basename $DEP)"
+			strip -x "$FRAMEWORK_DIR/$(basename $DEP)"
+			copy_deps "$FRAMEWORK_DIR/$(basename $DEP)"
 		fi
 	done
 }
@@ -102,7 +88,7 @@ done
 
 function fix_symbols {
 	for DEP in $(get_deps "$1"); do
-		install_name_tool -change "$DEP" "@executable_path/../Frameworks/$(basename $(realpath $DEP))" "$1"
+		install_name_tool -change "$DEP" "@executable_path/../Frameworks/$(basename $DEP)" "$1"
 	done
 }
 
