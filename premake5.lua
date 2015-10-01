@@ -55,7 +55,7 @@ workspace "mincer"
 
 			-- FIXME: copy debug/release
 			-- copy application
-			"{COPY} bin/debug/mincer Mincer.app/Contents/MacOS",
+			"{COPY} bin/release/mincer Mincer.app/Contents/MacOS",
 
 			-- create icon file
 			"iconutil -c icns mincer.iconset -o Mincer.app/Contents/Resources/mincer.icns",

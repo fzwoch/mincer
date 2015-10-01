@@ -26,4 +26,4 @@ Build instructions
     $ git clone https://github.com/fzwoch/mincer.git
     $ cd mincer
     $ premake5 gmake
-    $ make
+    $ make config=release
