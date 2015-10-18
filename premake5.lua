@@ -32,7 +32,7 @@ workspace "mincer"
 		language "C"
 		files "*.m"
 		includedirs "/Library/Frameworks/GStreamer.framework/Headers"
-		libdirs "/Library/Frameworks/GStreamer.framework/Libraries"
+		linkoptions "-L/Library/Frameworks/GStreamer.framework/Libraries"
 
 		links {
 			"Cocoa.framework",
@@ -65,7 +65,7 @@ workspace "mincer"
 			"/usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string mincer' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :CFBundleIconFile string mincer.icns' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :CFBundleIdentifier string zwoch.florian.mincer' Mincer.app/Contents/Info.plist",
-			"/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 0.1.9' Mincer.app/Contents/Info.plist",
+			"/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 0.2.0' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :NSHighResolutionCapable bool YES' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :NSHumanReadableCopyright string © 2013-2015 Florian Zwoch' Mincer.app/Contents/Info.plist",
 
