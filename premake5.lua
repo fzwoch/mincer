@@ -33,6 +33,8 @@ workspace "mincer"
 		files "*.m"
 		includedirs "/Library/Frameworks/GStreamer.framework/Headers"
 		linkoptions "-L/Library/Frameworks/GStreamer.framework/Libraries"
+		linkoptions "-mmacosx-version-min=10.8"
+		buildoptions "-mmacosx-version-min=10.8"
 
 		links {
 			"Cocoa.framework",
