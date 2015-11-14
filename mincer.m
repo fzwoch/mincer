@@ -497,6 +497,12 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 					
 					[audio_system_device setStringValue:@"System audio capture via WavTap"];
 				}
+				else if ([name isEqualToString:@"iShowU Audio Capture"])
+				{
+					audio_capture_id = devices[i];
+					
+					[audio_system_device setStringValue:@"System audio capture via iShowU"];
+				}
 			}
 		}
 		
