@@ -839,7 +839,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	[desc appendFormat:@"queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! "];
-	[desc appendFormat:@"videoconvert ! video/x-raw, format=I420 ! queue max-size-bytes=0 ! "];
+	[desc appendFormat:@"videoconvert ! queue max-size-bytes=0 ! "];
 	[desc appendFormat:@"videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", resolutions[[resolution indexOfSelectedItem]].width, resolutions[[resolution indexOfSelectedItem]].height];
 	
 	if ([video_encoder_type indexOfSelectedItem] > 0)
@@ -851,7 +851,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 		[desc appendFormat:@"x264enc bitrate=%d speed-preset=%d key-int-max=%d ! ", [video_bitrate intValue], [encoder_speed intValue], key_interval];
 	}
 	
-	[desc appendFormat:@"h264parse ! tee name=tee_264 "];
+	[desc appendFormat:@"video/x-h264, profile=main ! h264parse ! tee name=tee_264 "];
 	
 	[desc appendFormat:@"audiomixer name=audio_mix ! audioconvert ! audioresample ! "];
 	 
