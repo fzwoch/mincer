@@ -362,7 +362,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	video_encoder_type = [NSPopUpButton new];
 	[video_encoder_type setPullsDown:NO];
 	[video_encoder_type setTranslatesAutoresizingMaskIntoConstraints:NO];
-	[video_encoder_type setAction:@selector(updateVideoEncoderType)];
+	[video_encoder_type setAction:@selector(updateEncoderSpeed)];
 	
 	[video_encoder_type addItemWithTitle:@"Software"];
 	[video_encoder_type addItemWithTitle:@"Hardware"];
@@ -683,7 +683,6 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 	
 	[self updateCaptureDevice];
-	[self updateVideoEncoderType];
 	[self updateEncoderSpeed];
 	[self updateVideoBitrate];
 	[self updateAudioBitrate];
@@ -844,7 +843,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	
 	if ([video_encoder_type indexOfSelectedItem] > 0)
 	{
-		[desc appendFormat:@"vtenc_h264 bitrate=%d max-keyframe-interval=%d realtime=true ! ", [video_bitrate intValue], key_interval];
+		[desc appendFormat:@"vtenc_h264 bitrate=%d quality=%.1f max-keyframe-interval=%d realtime=true ! ", [video_bitrate intValue], [encoder_speed intValue] * 0.1, key_interval];
 	}
 	else
 	{
@@ -1031,7 +1030,7 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	[mp4_recording setEnabled:YES];
 	
 	[self updateCaptureDevice];
-	[self updateVideoEncoderType];
+	[self updateEncoderSpeed];
 	
 	if ([audio_mute state] == NSOnState)
 	{
@@ -1052,21 +1051,16 @@ static GstBusSyncReply bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 	}
 }
 
-- (void)updateVideoEncoderType
-{
-	if ([video_encoder_type indexOfSelectedItem] > 0)
-	{
-		[encoder_speed setEnabled:NO];
-	}
-	else
-	{
-		[encoder_speed setEnabled:YES];
-	}
-}
-
 - (void)updateEncoderSpeed
-{	
-	[encoder_speed_label setStringValue:[NSString stringWithFormat:@"Video Encoder Speed - %s", encoder_speeds[[encoder_speed intValue]]]];
+{
+    if ([video_encoder_type indexOfSelectedItem] > 0)
+    {
+        [encoder_speed_label setStringValue:[NSString stringWithFormat:@"Video Encoder Quality - %.1f", [encoder_speed intValue] * 0.1]];
+    }
+    else
+    {
+        [encoder_speed_label setStringValue:[NSString stringWithFormat:@"Video Encoder Speed - %s", encoder_speeds[[encoder_speed intValue]]]];
+    }
 }
 - (void)updateVideoBitrate
 {
