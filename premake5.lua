@@ -67,7 +67,7 @@ workspace "mincer"
 			"/usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string mincer' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :CFBundleIconFile string mincer.icns' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :CFBundleIdentifier string zwoch.florian.mincer' Mincer.app/Contents/Info.plist",
-			"/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 0.2.0' Mincer.app/Contents/Info.plist",
+			"/usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 0.2.0' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :NSHighResolutionCapable bool YES' Mincer.app/Contents/Info.plist",
 			"/usr/libexec/PlistBuddy -c 'Add :NSHumanReadableCopyright string © 2013-2015 Florian Zwoch' Mincer.app/Contents/Info.plist",
 
