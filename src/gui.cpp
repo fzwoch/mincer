@@ -94,13 +94,13 @@ myFrame::myFrame()
 	
 	m_video_speed->Bind(wxEVT_SLIDER, &myFrame::OnVideoSpeed, this);
 	m_video_bitrate->Bind(wxEVT_SLIDER, &myFrame::OnVideoBitrate, this);
-	m_mute->Bind(wxEVT_BUTTON, &myApp::OnMute, wxGetApp());
+	m_mute->Bind(wxEVT_BUTTON, &myApp::OnMute, &wxGetApp());
 	m_audio_bitrate->Bind(wxEVT_SLIDER, &myFrame::OnAudioBitrate, this);
 	m_recordings->Bind(wxEVT_BUTTON, &myFrame::OnRecordings, this);
-	m_start->Bind(wxEVT_BUTTON, &myApp::StartStream, wxGetApp());
+	m_start->Bind(wxEVT_BUTTON, &myApp::StartStream, &wxGetApp());
 	
 	Bind(wxEVT_TIMER, &myFrame::OnTimer, this);
-	Bind(wxEVT_CLOSE_WINDOW, &myApp::CloseGui, wxGetApp());
+	Bind(wxEVT_CLOSE_WINDOW, &myApp::CloseGui, &wxGetApp());
 	
 	/*
 	 * customize
@@ -157,10 +157,10 @@ myFrame::myFrame()
 	m_audio_encoder->Append("AAC");
 	m_audio_encoder->Append("MP3");
 	
-	m_audio_capture_id = 0;
 	m_audio->Append("None");
 	
 #ifdef __APPLE__
+	m_audio_capture_id = 0;
 	unsigned int size = 0;
 	AudioDeviceID *audio_device_id = m_audio_device_ids;
 	
@@ -460,8 +460,8 @@ void myFrame::Start()
 	
 	m_start->SetLabel("Stop");
 	
-	m_start->Unbind(wxEVT_BUTTON, &myApp::StartStream, wxGetApp());
-	m_start->Bind(wxEVT_BUTTON, &myApp::StopStream, wxGetApp());
+	m_start->Unbind(wxEVT_BUTTON, &myApp::StartStream, &wxGetApp());
+	m_start->Bind(wxEVT_BUTTON, &myApp::StopStream, &wxGetApp());
 }
 
 void myFrame::Stop()
@@ -488,8 +488,8 @@ void myFrame::Stop()
 	
 	m_start->SetLabel("Start");
 	
-	m_start->Unbind(wxEVT_BUTTON, &myApp::StopStream, wxGetApp());
-	m_start->Bind(wxEVT_BUTTON, &myApp::StartStream, wxGetApp());
+	m_start->Unbind(wxEVT_BUTTON, &myApp::StopStream, &wxGetApp());
+	m_start->Bind(wxEVT_BUTTON, &myApp::StartStream, &wxGetApp());
 	
 	m_elapsed->SetLabel("--:--:--");
 }

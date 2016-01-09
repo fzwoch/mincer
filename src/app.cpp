@@ -114,13 +114,4 @@ void myApp::CloseGuiFinish(wxWindowModalDialogEvent &event)
 	m_frame->Destroy();
 }
 
-int main(int argc, char **argv)
-{
-	wxDISABLE_DEBUG_SUPPORT();
-	
-	myApp *app = new myApp();
-	wxApp::SetInstance(app);
-	wxEntry(argc, argv);
-	
-	return 0;
-}
+IMPLEMENT_APP(myApp)

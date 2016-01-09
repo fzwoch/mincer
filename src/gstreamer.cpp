@@ -34,7 +34,7 @@ static GstBusSyncReply bus_callback(GstBus *bus, GstMessage *msg, gpointer data)
 		case GST_MESSAGE_ERROR:
 			gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
 			gst_message_parse_error(msg, &error, NULL);
-			wxGetApp()->CallAfter(&myApp::GStreamerError, error->message);
+			wxGetApp().CallAfter(&myApp::GStreamerError, error->message);
 			g_error_free(error);
 			break;
 		default:

@@ -24,8 +24,6 @@
 #include "gui.h"
 #include "gstreamer.h"
 
-#define wxGetApp() dynamic_cast<myApp*>(wxTheApp)
-
 class myApp: public wxApp
 {
 	virtual bool OnInit();
@@ -43,5 +41,7 @@ public:
 	void CloseGui(wxCloseEvent &event);
 	void CloseGuiFinish(wxWindowModalDialogEvent &event);
 };
+
+DECLARE_APP(myApp)
 
 #endif // __APP_H__
