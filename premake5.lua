@@ -77,6 +77,20 @@ solution "mincer"
 				"zip -9 -r mincer_osx.zip Mincer.app"
 			}
 
+		filter "system:windows"
+			buildoptions "`wx-config --cflags`"
+			linkoptions "`wx-config --libs`"
+
+			buildoptions "`pkg-config --cflags gstreamer-1.0`"
+			linkoptions "`pkg-config --libs gstreamer-1.0`"
+
+			includedirs "/mingw64/include/wx-3.0"
+
+			prebuildcommands "echo '#include \"wx/msw/wx.rc\"' > mincer.rc"
+			files "mincer.rc"
+
+			links "d3d9"
+
 		filter "system:linux"
 			buildoptions "`wx-config --cflags`"
 			linkoptions "`wx-config --libs`"

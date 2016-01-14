@@ -152,6 +152,13 @@ myFrame::myFrame()
 #if defined __APPLE__
 	CGGetActiveDisplayList(0, NULL, &device_count);
 #elif defined _WIN32
+	IDirect3D9 *d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
+	
+	if (d3d9 != NULL)
+	{
+		device_count = IDirect3D9_GetAdapterCount(d3d9);
+		IDirect3D9_Release(d3d9);
+	}
 #else
 	Display *disp = XOpenDisplay(NULL);
 	

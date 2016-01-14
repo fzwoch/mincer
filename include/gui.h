@@ -28,6 +28,7 @@
 	#include <AudioToolBox/AudioToolbox.h>
 	#include <wx/osx/core/cfstring.h>
 #elif defined _WIN32
+	#include <d3d9.h>
 #else
 	#include <X11/Xlib.h>
 #endif
