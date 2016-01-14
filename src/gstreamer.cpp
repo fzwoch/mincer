@@ -117,7 +117,7 @@ GStreamer::~GStreamer()
 	Stop();
 }
 
-void GStreamer::Start(const struct gstreamer_config &config)
+void GStreamer::Start(myFrame *frame)
 {
 	GError *err = NULL;
 	GString *desc = g_string_new(NULL);
@@ -130,68 +130,69 @@ void GStreamer::Start(const struct gstreamer_config &config)
 	}
 	
 #if defined __APPLE__
-	g_string_append_printf(desc, "avfvideosrc name=video_src do-stats=true device-index=%d capture-screen=true capture-screen-cursor=true ! ", config.video_device);
+	g_string_append_printf(desc, "avfvideosrc name=video_src do-stats=true device-index=%d capture-screen=true capture-screen-cursor=true ! ", frame->GetVideoDevice());
 #elif defined _WIN32
-	g_string_append_printf(desc, "dx9screencapsrc monitor=%d ! ", config.video_device);
+	g_string_append_printf(desc, "dx9screencapsrc monitor=%d ! ", frame->GetVideoDevice());
 #else
-	g_string_append_printf(desc, "ximagesrc use-damage=false show-pointer=true display-name=:0.%d ! ", config.video_device);
+	g_string_append_printf(desc, "ximagesrc use-damage=false show-pointer=true display-name=:0.%d ! ", frame->GetVideoDevice());
 #endif
 	
-	g_string_append_printf(desc, "video/x-raw, framerate=%d/1 ! ", config.framerate);
+	g_string_append_printf(desc, "video/x-raw, framerate=%d/1 ! ", frame->GetFramerate());
 	g_string_append_printf(desc, "queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! ");
 	g_string_append_printf(desc, "videoconvert ! queue max-size-bytes=0 ! ");
-	g_string_append_printf(desc, "videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", config.width, config.height);
+	g_string_append_printf(desc, "videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", frame->GetWidth(), frame->GetHeight());
 	
-	g_string_append_printf(desc, "x264enc bitrate=%d speed-preset=%d key-int-max=%d ! ", config.video_bitrate, config.video_speed, config.framerate * 2);
+	g_string_append_printf(desc, "x264enc bitrate=%d speed-preset=%d key-int-max=%d ! ", frame->GetVideoBitrate(), frame->GetVideoEncoderSpeed(), frame->GetFramerate() * 2);
 	g_string_append_printf(desc, "video/x-h264, profile=main ! h264parse ! tee name=tee_264 ");
 	
 	g_string_append_printf(desc, "audiomixer name=audio_mix ! audioconvert ! audioresample ! ");
 	
-	if (config.audio_encoder == GST_AUDIO_ENCODER_MP3)
+	if (frame->GetAudioEncoder() > 0)
 	{
 		int rate = 44100;
 		
-		if (config.audio_bitrate / 1000 < 64)
+		if (frame->GetAudioBitrate() / 1000 < 64)
 		{
 			rate = 11025;
 		}
-		else if (config.audio_bitrate / 1000 < 112)
+		else if (frame->GetAudioBitrate() / 1000 < 112)
 		{
 			rate = 22050;
 		}
 		
-		g_string_append_printf(desc, "lamemp3enc bitrate=%d target=bitrate ! audio/mpeg, rate=%d ! mpegaudioparse ! tee name=tee_aac ", config.audio_bitrate, rate);
+		g_string_append_printf(desc, "lamemp3enc bitrate=%d target=bitrate ! audio/mpeg, rate=%d ! mpegaudioparse ! tee name=tee_aac ", frame->GetAudioBitrate(), rate);
 	}
-	else // GST_AUDIO_ENCODER_AAC
+	else
 	{
-		g_string_append_printf(desc, "voaacenc bitrate=%d ! audio/mpeg, channels=2 ! aacparse ! tee name=tee_aac ", config.audio_bitrate);
+		g_string_append_printf(desc, "voaacenc bitrate=%d ! audio/mpeg, channels=2 ! aacparse ! tee name=tee_aac ", frame->GetAudioBitrate());
 	}
 	
-	if (config.audio_system_device != 0)
+	if (frame->GetAudioSystemDevice() != 0)
 	{
-		g_string_append_printf(desc, "osxaudiosrc device=%d ! queue ! audioconvert ! audioresample ! audio_mix. ", config.audio_system_device);
+		g_string_append_printf(desc, "osxaudiosrc device=%d ! queue ! audioconvert ! audioresample ! audio_mix. ", frame->GetAudioSystemDevice());
 	}
 	
-	if (config.audio_device != 0)
+	if (frame->GetAudioDevice() != 0)
 	{
-		g_string_append_printf(desc, "osxaudiosrc device=%d provide-clock=%s ! queue ! volume name=volume ! audioconvert ! audioresample ! audio_mix. ", config.audio_device, "");
+		g_string_append_printf(desc, "osxaudiosrc device=%d provide-clock=%s ! queue ! volume name=volume ! audioconvert ! audioresample ! audio_mix. ", frame->GetAudioDevice(), frame->GetAudioSystemDevice() != 0 ? "false" : "true");
 	}
 	
-	if (config.audio_system_device == 0 && config.audio_device == 0)
+	if (frame->GetAudioSystemDevice() == 0 && frame->GetAudioDevice() == 0)
 	{
 		g_string_append_printf(desc, "audiotestsrc is-live=true wave=silence ! queue ! audio_mix. ");
 	}
 	
-	if (config.url != NULL)
+	if (frame->GetUrl() != NULL)
 	{
 		g_string_append_printf(desc, "tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! flv_mux. ");
-		g_string_append_printf(desc, "tee_264. ! queue ! flvmux streamable=true name=flv_mux ! rtmpsink location=\"%s\" ", config.url);
+		g_string_append_printf(desc, "tee_264. ! queue ! flvmux streamable=true name=flv_mux ! rtmpsink location=\"%s\" ", frame->GetUrl());
 	}
 	
-	if (config.recording != NULL)
+	if (frame->GetRecordingDirectory() != NULL)
 	{
+		printf("wtf-43> %s\n", frame->GetRecordingDirectory());
 		g_string_append_printf(desc, "tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! mp4_mux. ");
-		g_string_append_printf(desc, "tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%s/mincer_%s.mp4\"", config.recording, g_date_time_format(date, "%Y-%m-%d_%H:%M:%S"));
+		g_string_append_printf(desc, "tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%s/mincer_%s.mp4\"", frame->GetRecordingDirectory(), g_date_time_format(date, "%Y-%m-%d_%H:%M:%S"));
 	}
 	
 	g_date_time_unref(date);

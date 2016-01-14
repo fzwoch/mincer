@@ -30,9 +30,7 @@ bool myApp::OnInit()
 
 void myApp::StartStream(wxCommandEvent &event)
 {
-	struct gstreamer_config config;
-	
-	if (m_frame->m_url->GetValue().empty() & m_frame->m_recordings->GetLabel() == "-- Disabled --")
+	if (m_frame->GetUrl() == NULL && m_frame->GetRecordingDirectory() == NULL)
 	{
 		wxMessageDialog *dialog = new wxMessageDialog(m_frame, "No URL or recording option is set.", "Nothing to do", wxOK | wxCENTRE);
 		
@@ -41,28 +39,8 @@ void myApp::StartStream(wxCommandEvent &event)
 		return;
 	}
 	
-	config.url = m_frame->m_url->GetValue().IsEmpty() ? NULL : strdup(m_frame->m_url->GetValue().mb_str().data());
-	config.video_device = m_frame->m_video->GetSelection();
-	config.width = resolutions[m_frame->m_resolution->GetSelection()].width;
-	config.height = resolutions[m_frame->m_resolution->GetSelection()].height;
-	config.framerate = wxAtoi(m_frame->m_framerate->GetString(m_frame->m_framerate->GetSelection()));
-	config.video_encoder = m_frame->m_video_encoder->GetString(m_frame->m_video_encoder->GetSelection()) == "Software" ? GST_VIDEO_ENCODER_X264 : GST_VIDEO_ENCODER_HW;
-	config.audio_encoder = m_frame->m_audio_encoder->GetString(m_frame->m_audio_encoder->GetSelection()) == "AAC" ? GST_AUDIO_ENCODER_AAC : GST_AUDIO_ENCODER_MP3;
-	config.video_speed = m_frame->m_video_speed->GetValue();
-	config.video_bitrate = m_frame->m_video_bitrate->GetValue();
-	config.audio_system_device = m_frame->m_audio_capture_id;
-	config.audio_device = m_frame->m_audio_device_ids[m_frame->m_audio->GetSelection()];
-	config.audio_bitrate = m_frame->m_audio_bitrate->GetValue() * 16000;
-	config.recording = m_frame->m_recordings->GetLabel() == "-- Disabled --" ? NULL : strdup(m_frame->m_recordings->GetLabel().mb_str().data());
-	
 	m_frame->Start();
-	m_gstreamer.Start(config);
-	
-	if (config.url)
-		free(config.url);
-	
-	if (config.recording)
-		free(config.recording);
+	m_gstreamer.Start(m_frame);
 }
 
 void myApp::StopStream(wxCommandEvent &event)
@@ -73,7 +51,7 @@ void myApp::StopStream(wxCommandEvent &event)
 
 void myApp::OnMute(wxCommandEvent &event)
 {
-	m_gstreamer.SetMute(m_frame->m_mute->GetValue());
+	m_gstreamer.SetMute(m_frame->GetMute());
 }
 
 void myApp::GStreamerError(const wxString &message)

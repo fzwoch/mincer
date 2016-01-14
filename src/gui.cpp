@@ -21,6 +21,43 @@
 #include "app.h"
 #include <wx/config.h>
 
+struct resolution_pair {
+	int width;
+	int height;
+	wxString aspect_ratio;
+};
+
+const struct resolution_pair resolutions[] =
+{
+	{640, 360, "16:9"},
+	{854, 480, "16:9"},
+	{960, 540, "16:9"},
+	{1024, 576, "16:9"},
+	{1152, 648, "16:9"},
+	{1280, 720, "16:9"},
+	{1366, 768, "16:9"},
+	{1600, 900, "16:9"},
+	{1920, 1080, "16:9"},
+	
+	{640, 400, "16:10"},
+	{800, 500, "16:10"},
+	{960, 600, "16:10"},
+	{1024, 640, "16:10"},
+	{1152, 720, "16:10"},
+	{1280, 800, "16:10"},
+	{1440, 900, "16:10"},
+	{1680, 1050, "16:10"},
+	{1920, 1200, "16:10"},
+	
+	{640, 480, "4:3"},
+	{800, 600, "4:3"},
+	{1024, 768, "4:3"},
+	{1152, 864, "4:3"},
+	{1280, 960, "4:3"},
+	{1400, 1050, "4:3"},
+	{1600, 1200, "4:3"}
+};
+
 static const wxString encoder_speeds[] =
 {
 	"",
@@ -492,4 +529,78 @@ void myFrame::Stop()
 	m_start->Bind(wxEVT_BUTTON, &myApp::StartStream, &wxGetApp());
 	
 	m_elapsed->SetLabel("--:--:--");
+}
+
+const char* myFrame::GetUrl()
+{
+	strncpy(m_url_buffer, (const char*)m_url->GetLabel().mb_str(), sizeof(m_url_buffer));
+	
+	return m_url->GetValue().empty() ? NULL : m_url_buffer;
+}
+
+int myFrame::GetWidth()
+{
+	return resolutions[m_resolution->GetSelection()].width;
+}
+
+int myFrame::GetHeight()
+{
+	return resolutions[m_resolution->GetSelection()].height;
+}
+
+int myFrame::GetFramerate()
+{
+	return wxAtoi(m_framerate->GetString(m_framerate->GetSelection()));
+}
+
+int myFrame::GetVideoDevice()
+{
+	return m_video->GetSelection();
+}
+
+int myFrame::GetVideoEncoder()
+{
+	return m_video_encoder->GetSelection();
+}
+
+int myFrame::GetVideoEncoderSpeed()
+{
+	return m_video_speed->GetValue();
+}
+
+int myFrame::GetVideoBitrate()
+{
+	return m_video_bitrate->GetValue();
+}
+
+int myFrame::GetAudioEncoder()
+{
+	return m_audio_encoder->GetSelection();
+}
+
+int myFrame::GetAudioSystemDevice()
+{
+	return m_audio_capture_id;
+}
+
+int myFrame::GetAudioDevice()
+{
+	return m_audio_device_ids[m_audio->GetSelection()];
+}
+
+int myFrame::GetAudioBitrate()
+{
+	return m_audio_bitrate->GetValue() * 16000;
+}
+
+const char* myFrame::GetRecordingDirectory()
+{
+	strncpy(m_recordings_buffer, (const char*)m_recordings->GetLabel().mb_str(), sizeof(m_recordings_buffer));
+	
+	return m_recordings->GetLabel() == "-- Disabled --" ? NULL : m_recordings_buffer;
+}
+
+bool myFrame::GetMute()
+{
+	return m_mute->GetValue();
 }

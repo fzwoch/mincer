@@ -21,32 +21,7 @@
 #define __GSTREAMER_H__
 
 #include <gst/gst.h>
-
-typedef enum {
-	GST_VIDEO_ENCODER_X264 = 1,
-	GST_VIDEO_ENCODER_HW
-} video_encoder_t;
-
-typedef enum {
-	GST_AUDIO_ENCODER_AAC = 1,
-	GST_AUDIO_ENCODER_MP3
-} audio_encoder_t;
-
-struct gstreamer_config {
-	char *url;
-	int video_device;
-	int width;
-	int height;
-	int framerate;
-	video_encoder_t video_encoder;
-	audio_encoder_t audio_encoder;
-	int video_speed;
-	int video_bitrate;
-	int audio_system_device;
-	int audio_device;
-	int audio_bitrate;
-	char *recording;
-};
+#include "gui.h"
 
 class GStreamer
 {
@@ -56,7 +31,7 @@ public:
 	GStreamer();
 	virtual ~GStreamer();
 	
-	void Start(const struct gstreamer_config &config);
+	void Start(myFrame *frame);
 	void Stop();
 	
 	void SetMute(bool mute);

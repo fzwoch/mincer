@@ -57,8 +57,6 @@ solution "mincer"
 			links "QTKit.framework"
 			links "VideoToolBox.framework"
 
-			linkoptions "-mmacosx-version-min=10.8"
-			buildoptions "-mmacosx-version-min=10.8"
 
 			postbuildcommands {
 				"{DELETE} -r Mincer.app",
