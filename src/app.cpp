@@ -28,7 +28,7 @@ bool myApp::OnInit()
 	menu->Append(wxID_ABOUT, "About");
 	menubar->Append(menu, "&Help");
 	
-	menubar->Bind(wxEVT_COMMAND_MENU_SELECTED, &myApp::OnMenu, this);
+	menubar->Bind(wxEVT_COMMAND_MENU_SELECTED, &myApp::OnMenu, this, wxID_ABOUT);
 	
 	m_frame = new myFrame();
 	
@@ -42,14 +42,7 @@ void myApp::OnMenu(wxCommandEvent &event)
 {
 	wxAboutDialogInfo info;
 	
-	switch (event.GetId())
-	{
-		case wxID_ABOUT:
-			wxAboutBox(info);
-			break;
-		default:
-			break;
-	}
+	wxAboutBox(info);
 }
 
 void myApp::StartStream(wxCommandEvent &event)
