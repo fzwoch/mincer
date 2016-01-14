@@ -203,6 +203,8 @@ myFrame::myFrame()
 	m_audio_encoder->Append("AAC");
 	m_audio_encoder->Append("MP3");
 	
+	m_video_bitrate->SetTickFreq(100);
+	
 	m_audio->Append("None");
 	
 #ifdef __APPLE__
