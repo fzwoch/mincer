@@ -190,7 +190,6 @@ void GStreamer::Start(myFrame *frame)
 	
 	if (frame->GetRecordingDirectory() != NULL)
 	{
-		printf("wtf-43> %s\n", frame->GetRecordingDirectory());
 		g_string_append_printf(desc, "tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! mp4_mux. ");
 		g_string_append_printf(desc, "tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%s/mincer_%s.mp4\"", frame->GetRecordingDirectory(), g_date_time_format(date, "%Y-%m-%d_%H:%M:%S"));
 	}
