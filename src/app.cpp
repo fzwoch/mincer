@@ -18,14 +18,38 @@
  */
 
 #include "app.h"
+#include <wx/aboutdlg.h>
 
 bool myApp::OnInit()
 {
+	wxMenuBar *menubar = new wxMenuBar();
+	wxMenu *menu = new wxMenu();
+	
+	menu->Append(wxID_ABOUT, "About");
+	menubar->Append(menu, "&Help");
+	
+	menubar->Bind(wxEVT_COMMAND_MENU_SELECTED, &myApp::OnMenu, this);
+	
 	m_frame = new myFrame();
 	
+	m_frame->SetMenuBar(menubar);
 	m_frame->Show();
 	
 	return true;
+}
+
+void myApp::OnMenu(wxCommandEvent &event)
+{
+	wxAboutDialogInfo info;
+	
+	switch (event.GetId())
+	{
+		case wxID_ABOUT:
+			wxAboutBox(info);
+			break;
+		default:
+			break;
+	}
 }
 
 void myApp::StartStream(wxCommandEvent &event)

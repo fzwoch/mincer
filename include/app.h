@@ -32,6 +32,8 @@ class myApp: public wxApp
 	GStreamer m_gstreamer;
 	
 public:
+	void OnMenu(wxCommandEvent &event);
+	
 	void StartStream(wxCommandEvent &event);
 	void StopStream(wxCommandEvent &event);
 	
