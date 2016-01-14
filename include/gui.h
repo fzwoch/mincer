@@ -23,10 +23,13 @@
 #include <wx/wx.h>
 #include <wx/tglbtn.h>
 
-#ifdef __APPLE__
+#if defined __APPLE__
 	#include <CoreGraphics/CoreGraphics.h>
 	#include <AudioToolBox/AudioToolbox.h>
 	#include <wx/osx/core/cfstring.h>
+#elif defined _WIN32
+#else
+	#include <X11/Xlib.h>
 #endif
 
 class myFrame: public wxFrame
@@ -79,6 +82,9 @@ class myFrame: public wxFrame
 #ifdef __APPLE__
 	AudioDeviceID m_audio_capture_id;
 	AudioDeviceID m_audio_device_ids[32];
+#else
+	int m_audio_capture_id;
+	int m_audio_device_ids[32];
 #endif
 	
 	void OnVideoSpeed(wxCommandEvent &event);

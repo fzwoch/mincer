@@ -83,3 +83,5 @@ solution "mincer"
 
 			buildoptions "`pkg-config --cflags gstreamer-1.0`"
 			linkoptions "`pkg-config --libs gstreamer-1.0`"
+
+			links "X11"

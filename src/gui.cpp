@@ -147,10 +147,20 @@ myFrame::myFrame()
 	m_url_hidden->Hide();
 	m_url_hidden->Disable();
 	
-#ifdef __APPLE__
-	unsigned int device_count;
+	unsigned int device_count = 0;
 	
+#if defined __APPLE__
 	CGGetActiveDisplayList(0, NULL, &device_count);
+#elif defined _WIN32
+#else
+	Display *disp = XOpenDisplay(NULL);
+	
+	if (disp != NULL)
+	{
+		device_count = XScreenCount(disp);
+		XCloseDisplay(disp);
+	}
+#endif
 	
 	for (int i = 0; i < device_count; i++)
 	{
@@ -170,7 +180,6 @@ myFrame::myFrame()
 				break;
 		}
 	}
-#endif
 	
 	for (int i = 0; i < sizeof(resolutions) / sizeof(resolution_pair); i++)
 	{
