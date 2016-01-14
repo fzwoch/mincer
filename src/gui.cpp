@@ -20,6 +20,7 @@
 #include "gui.h"
 #include "app.h"
 #include <wx/config.h>
+#include <wx/filename.h>
 
 struct resolution_pair {
 	int width;
@@ -613,7 +614,12 @@ int myFrame::GetAudioBitrate()
 
 const char* myFrame::GetRecordingDirectory()
 {
-	strncpy(m_recordings_buffer, (const char*)m_recordings->GetLabel().mb_str(), sizeof(m_recordings_buffer));
+	wxString tmp = m_recordings->GetLabel();
+	
+	tmp.Append(wxFileName::GetPathSeparator());
+	tmp.Replace("\\", "\\\\");
+	
+	strncpy(m_recordings_buffer, (const char*)tmp.mb_str(), sizeof(m_recordings_buffer));
 	
 	return m_recordings->GetLabel() == "-- Disabled --" ? NULL : m_recordings_buffer;
 }
