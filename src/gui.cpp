@@ -78,6 +78,24 @@ myFrame::myFrame()
 	: wxFrame(NULL, wxID_ANY, "Mincer", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 	, m_timer(this)
 {
+	/*
+	 * menu
+	 */
+	
+	wxMenuBar *menubar = new wxMenuBar();
+	wxMenu *menu = new wxMenu();
+	
+	menu->Append(wxID_ABOUT, "About");
+	menubar->Append(menu, "&Help");
+	
+	menubar->Bind(wxEVT_COMMAND_MENU_SELECTED, &myApp::OnMenu, &wxGetApp(), wxID_ABOUT);
+	
+	SetMenuBar(menubar);
+	
+	/*
+	 * gui
+	 */
+	
 	wxBoxSizer *sizer;
 	wxBoxSizer *sizer_tmp;
 	

@@ -22,17 +22,7 @@
 
 bool myApp::OnInit()
 {
-	wxMenuBar *menubar = new wxMenuBar();
-	wxMenu *menu = new wxMenu();
-	
-	menu->Append(wxID_ABOUT, "About");
-	menubar->Append(menu, "&Help");
-	
-	menubar->Bind(wxEVT_COMMAND_MENU_SELECTED, &myApp::OnMenu, this, wxID_ABOUT);
-	
 	m_frame = new myFrame();
-	
-	m_frame->SetMenuBar(menubar);
 	m_frame->Show();
 	
 	return true;
@@ -41,6 +31,12 @@ bool myApp::OnInit()
 void myApp::OnMenu(wxCommandEvent &event)
 {
 	wxAboutDialogInfo info;
+	
+#ifndef __APPLE__
+	info.SetName("Mincer");
+	info.SetVersion("0.2.0");
+	info.SetCopyright("(C) 2013-2016 Florian Zwoch");
+#endif
 	
 	wxAboutBox(info);
 }
