@@ -88,7 +88,10 @@ solution "mincer"
 
 			includedirs "/mingw64/include/wx-3.0"
 
-			prebuildcommands "echo '#include \"wx/msw/wx.rc\"' > mincer.rc"
+			prebuildcommands {
+				"echo '#include \"wx/msw/wx.rc\"' > mincer.rc",
+				"echo 'APPICON ICON \"mincer.ico\"' >> mincer.rc"
+			}
 			files "mincer.rc"
 
 			links "d3d9"

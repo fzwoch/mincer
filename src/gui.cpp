@@ -438,6 +438,10 @@ myFrame::myFrame()
 	OnVideoSpeed(event);
 	OnVideoBitrate(event);
 	OnAudioBitrate(event);
+	
+#ifdef _WIN32
+	SetIcon(wxIcon("APPICON"));
+#endif
 }
 
 myFrame::~myFrame()
