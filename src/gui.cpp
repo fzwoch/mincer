@@ -209,11 +209,7 @@ myFrame::myFrame()
 	
 	for (int i = 0; i < sizeof(resolutions) / sizeof(resolution_pair); i++)
 	{
-		char tmp[32];
-		
-		snprintf(tmp, sizeof(tmp), "%dx%d", resolutions[i].width, resolutions[i].height);
-		
-		m_resolution->Append(wxString::Format("%-12s\t%s", tmp, resolutions[i].aspect_ratio));
+		m_resolution->Append(wxString::Format("%dx%d - %s", resolutions[i].width, resolutions[i].height, resolutions[i].aspect_ratio));
 	}
 	
 	for (int i = 5; i <= 60; i += 5)
