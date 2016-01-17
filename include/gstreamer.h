@@ -36,6 +36,7 @@ public:
 	
 	void SetMute(bool mute);
 	bool IsRunning();
+	float GetFps();
 };
 
 #endif // __GSTREAMER_H__

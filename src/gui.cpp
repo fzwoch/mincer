@@ -106,7 +106,7 @@ myFrame::myFrame()
 	m_url_hidden = new wxTextCtrl(m_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
 	
 	m_video_label = new wxStaticText(m_panel, wxID_ANY, "Video Input");
-	m_video_performance_label = new wxStaticText(m_panel, wxID_ANY, "0 frames per second");
+	m_video_performance_label = new wxStaticText(m_panel, wxID_ANY, "0.0 frames per second", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
 	m_video = new wxChoice(m_panel, wxID_ANY);
 
 	m_resolution_label = new wxStaticText(m_panel, wxID_ANY, "Video Resolution");
@@ -330,8 +330,8 @@ myFrame::myFrame()
 	
 	sizer = new wxBoxSizer(wxHORIZONTAL);
 	
-		sizer->Add(m_video_label, 1);
-		sizer->Add(m_video_performance_label, 0, wxALIGN_CENTER_VERTICAL);
+		sizer->Add(m_video_label, 0);
+		sizer->Add(m_video_performance_label, 1, wxALIGN_CENTER_VERTICAL);
 	
 	m_sizer->Add(sizer, 0, wxEXPAND | wxBOTTOM, 5);
 	m_sizer->Add(m_video, 0, wxEXPAND | wxBOTTOM, 15);
@@ -502,6 +502,7 @@ void myFrame::OnTimer(wxTimerEvent &event)
 	wxTimeSpan duration = wxDateTime::Now() - m_datetime;
 	
 	m_elapsed->SetLabel(duration.Format("%H:%M:%S"));
+	m_video_performance_label->SetLabel(wxString::Format("%.1f frames per second", wxGetApp().GetFps()));
 }
 
 void myFrame::Start()
@@ -566,6 +567,7 @@ void myFrame::Stop()
 	m_start->Bind(wxEVT_BUTTON, &myApp::StartStream, &wxGetApp());
 	
 	m_elapsed->SetLabel("--:--:--");
+	m_video_performance_label->SetLabel("0.0 frames per second");
 }
 
 const char* myFrame::GetUrl()

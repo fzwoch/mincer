@@ -78,6 +78,11 @@ void myApp::GStreamerError(const wxString &message)
 	dialog->ShowWindowModal();
 }
 
+float myApp::GetFps()
+{
+	return m_gstreamer.GetFps();
+}
+
 void myApp::CloseGui(wxCloseEvent &event)
 {
 	if (m_gstreamer.IsRunning())

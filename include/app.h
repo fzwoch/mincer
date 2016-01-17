@@ -40,6 +40,8 @@ public:
 	void OnMute(wxCommandEvent &event);
 	void GStreamerError(const wxString &message);
 	
+	float GetFps();
+	
 	void CloseGui(wxCloseEvent &event);
 	void CloseGuiFinish(wxWindowModalDialogEvent &event);
 };

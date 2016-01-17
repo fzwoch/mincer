@@ -247,3 +247,22 @@ bool GStreamer::IsRunning()
 {
 	return m_pipeline != NULL ? true : false;
 }
+
+float GStreamer::GetFps()
+{
+	GstElement *elem = gst_bin_get_by_name(GST_BIN(m_pipeline), "video_src");
+	gint fps = 0;
+	
+	if (elem)
+	{
+		g_object_get(elem, "fps", &fps, NULL);
+		g_object_unref(elem);
+		
+		if (fps < 0)
+		{
+			fps = 0;
+		}
+	}
+	
+	return fps;
+}
