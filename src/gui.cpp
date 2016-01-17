@@ -306,13 +306,13 @@ myFrame::myFrame()
 	
 	m_mute->Disable();
 	
-	wxFont font = m_system_audio_label->GetFont();
-	font.SetPointSize(font.GetPointSize() - 2);
+	wxFont font = wxSystemSettings::GetFont(wxSYS_SYSTEM_FONT);
+	font.SetPointSize(font.GetPointSize() - 1);
 	
 	m_elapsed->SetFont(font);
 	m_elapsed->SetForegroundColour(wxTheColourDatabase->Find("GREY"));
 	
-	font.SetPointSize(font.GetPointSize() - 2);
+	font.SetPointSize(font.GetPointSize() - 1);
 	
 	m_video_performance_label->SetFont(font);
 	m_video_performance_label->SetForegroundColour(wxTheColourDatabase->Find("LIGHT GREY"));
