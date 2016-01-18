@@ -306,7 +306,7 @@ myFrame::myFrame()
 	
 	m_mute->Disable();
 	
-	wxFont font = wxSystemSettings::GetFont(wxSYS_SYSTEM_FONT);
+	wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 	font.SetPointSize(font.GetPointSize() - 1);
 	
 	m_elapsed->SetFont(font);
