@@ -169,12 +169,26 @@ void GStreamer::Start(myFrame *frame)
 	
 	if (frame->GetAudioSystemDevice() != 0)
 	{
-		g_string_append_printf(desc, "osxaudiosrc device=%d ! queue ! audioconvert ! audioresample ! audio_mix. ", frame->GetAudioSystemDevice());
+#if defined __APPLE__
+		g_string_append_printf(desc, "osxaudiosrc device=%d ! ", frame->GetAudioSystemDevice());
+#elif defined _WIN32
+		g_string_append_printf(desc, "directsoundsrc device-name=\"%s\" ! ", frame->GetAudioSystemDeviceName());
+#else
+		g_string_append_printf(desc, "osxaudiosrc device=%d ! ", frame->GetAudioSystemDevice());
+#endif
+		g_string_append_printf(desc, "queue ! audioconvert ! audioresample ! audio_mix. ");
 	}
 	
 	if (frame->GetAudioDevice() != 0)
 	{
-		g_string_append_printf(desc, "osxaudiosrc device=%d provide-clock=%s ! queue ! volume name=volume ! audioconvert ! audioresample ! audio_mix. ", frame->GetAudioDevice(), frame->GetAudioSystemDevice() != 0 ? "false" : "true");
+#if defined __APPLE__
+		g_string_append_printf(desc, "osxaudiosrc device=%d ", frame->GetAudioDevice());
+#elif defined _WIN32
+		g_string_append_printf(desc, "directsoundsrc device-name=\"%s\" ", frame->GetAudioDeviceName());
+#else
+		g_string_append_printf(desc, "osxaudiosrc device=%d ", frame->GetAudioDevice());
+#endif
+		g_string_append_printf(desc, "provide-clock=%s ! queue ! volume name=volume ! audioconvert ! audioresample ! audio_mix. ", frame->GetAudioSystemDevice() != 0 ? "false" : "true");
 	}
 	
 	if (frame->GetAudioSystemDevice() == 0 && frame->GetAudioDevice() == 0)
