@@ -228,9 +228,9 @@ myFrame::myFrame()
 	m_video_bitrate->SetTickFreq(100);
 	
 	m_audio->Append("None");
+	m_audio_capture_id = 0;
 	
 #ifdef __APPLE__
-	m_audio_capture_id = 0;
 	unsigned int size = 0;
 	AudioDeviceID *audio_device_id = m_audio_device_ids;
 	
