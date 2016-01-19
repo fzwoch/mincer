@@ -99,6 +99,7 @@ class myFrame: public wxFrame
 	wxDateTime m_datetime;
 	
 	char m_url_buffer[1024];
+	char m_audio_device_name[1024];
 	char m_recordings_buffer[1024];
 	
 public:
@@ -119,6 +120,7 @@ public:
 	int GetAudioEncoder();
 	int GetAudioSystemDevice();
 	int GetAudioDevice();
+	const char* GetAudioDeviceName();
 	int GetAudioBitrate();
 	const char* GetRecordingDirectory();
 	bool GetMute();

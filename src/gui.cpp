@@ -626,6 +626,13 @@ int myFrame::GetAudioDevice()
 	return m_audio_device_ids[m_audio->GetSelection()];
 }
 
+const char* myFrame::GetAudioDeviceName()
+{
+	strncpy(m_audio_device_name, (const char*)m_audio->GetString(m_audio->GetSelection()).mb_str(), sizeof(m_audio_device_name));
+	
+	return m_audio_device_name;
+}
+
 int myFrame::GetAudioBitrate()
 {
 	return m_audio_bitrate->GetValue() * 16000;
