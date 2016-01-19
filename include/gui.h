@@ -98,9 +98,7 @@ class myFrame: public wxFrame
 	wxTimer m_timer;
 	wxDateTime m_datetime;
 	
-	char m_url_buffer[1024];
-	char m_audio_device_name[1024];
-	char m_recordings_buffer[1024];
+	char m_char_buffer[1024];
 	
 public:
 	myFrame();
@@ -119,6 +117,7 @@ public:
 	int GetVideoBitrate();
 	int GetAudioEncoder();
 	int GetAudioSystemDevice();
+	const char* GetAudioSystemDeviceName();
 	int GetAudioDevice();
 	const char* GetAudioDeviceName();
 	int GetAudioBitrate();

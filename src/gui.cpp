@@ -571,9 +571,9 @@ void myFrame::Stop()
 
 const char* myFrame::GetUrl()
 {
-	strncpy(m_url_buffer, (const char*)m_url->GetLabel().mb_str(), sizeof(m_url_buffer));
+	strncpy(m_char_buffer, (const char*)m_url->GetLabel().mb_str(), sizeof(m_char_buffer));
 	
-	return m_url->GetValue().empty() ? NULL : m_url_buffer;
+	return m_url->GetValue().empty() ? NULL : m_char_buffer;
 }
 
 int myFrame::GetWidth()
@@ -621,6 +621,13 @@ int myFrame::GetAudioSystemDevice()
 	return m_audio_capture_id;
 }
 
+const char* myFrame::GetAudioSystemDeviceName()
+{
+	strncpy(m_char_buffer, (const char*)m_audio->GetString(m_audio_capture_id).mb_str(), sizeof(m_char_buffer));
+	
+	return m_char_buffer;
+}
+
 int myFrame::GetAudioDevice()
 {
 	return m_audio_device_ids[m_audio->GetSelection()];
@@ -628,9 +635,9 @@ int myFrame::GetAudioDevice()
 
 const char* myFrame::GetAudioDeviceName()
 {
-	strncpy(m_audio_device_name, (const char*)m_audio->GetString(m_audio->GetSelection()).mb_str(), sizeof(m_audio_device_name));
+	strncpy(m_char_buffer, (const char*)m_audio->GetString(m_audio->GetSelection()).mb_str(), sizeof(m_char_buffer));
 	
-	return m_audio_device_name;
+	return m_char_buffer;
 }
 
 int myFrame::GetAudioBitrate()
@@ -645,9 +652,9 @@ const char* myFrame::GetRecordingDirectory()
 	tmp.Append(wxFileName::GetPathSeparator());
 	tmp.Replace("\\", "\\\\");
 	
-	strncpy(m_recordings_buffer, (const char*)tmp.mb_str(), sizeof(m_recordings_buffer));
+	strncpy(m_char_buffer, (const char*)tmp.mb_str(), sizeof(m_char_buffer));
 	
-	return m_recordings->GetLabel() == "-- Disabled --" ? NULL : m_recordings_buffer;
+	return m_recordings->GetLabel() == "-- Disabled --" ? NULL : m_char_buffer;
 }
 
 bool myFrame::GetMute()
