@@ -22,20 +22,20 @@
 
 static GstBusSyncReply bus_callback(GstBus *bus, GstMessage *msg, gpointer data)
 {
-	GError *error;
+	GError *err;
 	
 	switch (GST_MESSAGE_TYPE(msg))
 	{
 		case GST_MESSAGE_WARNING:
-			gst_message_parse_warning(msg, &error, NULL);
-			wxLogVerbose("%s", error->message);
-			g_error_free(error);
+			gst_message_parse_warning(msg, &err, NULL);
+			wxLogVerbose("%s", err->message);
+			g_error_free(err);
 			break;
 		case GST_MESSAGE_ERROR:
 			gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
-			gst_message_parse_error(msg, &error, NULL);
-			wxGetApp().CallAfter(&myApp::GStreamerError, error->message);
-			g_error_free(error);
+			gst_message_parse_error(msg, &err, NULL);
+			wxGetApp().CallAfter(&myApp::GStreamerError, err->message);
+			g_error_free(err);
 			break;
 		default:
 			break;
@@ -212,6 +212,17 @@ void GStreamer::Start(myFrame *frame)
 	
 	m_pipeline = gst_parse_launch(desc->str, &err);
 	g_string_free(desc, TRUE);
+	
+	if (err != NULL)
+	{
+		wxGetApp().CallAfter(&myApp::GStreamerError, err->message);
+		g_error_free(err);
+		
+		gst_object_unref(m_pipeline);
+		m_pipeline = NULL;
+		
+		return;
+	}
 	
 	bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
 	gst_bus_set_sync_handler(bus, bus_callback, NULL, NULL);
