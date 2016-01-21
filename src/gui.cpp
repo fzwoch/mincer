@@ -106,7 +106,7 @@ myFrame::myFrame()
 	m_url_hidden = new wxTextCtrl(m_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
 	
 	m_video_label = new wxStaticText(m_panel, wxID_ANY, "Video Input");
-	m_video_performance_label = new wxStaticText(m_panel, wxID_ANY, "0.0 frames per second", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
+	m_video_performance_label = new wxStaticText(m_panel, wxID_ANY, "0.0 frames per second", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE | wxST_ELLIPSIZE_END);
 	m_video = new wxChoice(m_panel, wxID_ANY);
 
 	m_resolution_label = new wxStaticText(m_panel, wxID_ANY, "Video Resolution");
