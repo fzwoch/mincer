@@ -85,7 +85,7 @@ myFrame::myFrame()
 	wxMenuBar *menubar = new wxMenuBar();
 	wxMenu *menu = new wxMenu();
 	
-	menu->Append(wxID_ABOUT, "About");
+	menu->Append(wxID_ABOUT, "About Mincer");
 	menubar->Append(menu, "&Help");
 	
 	menubar->Bind(wxEVT_COMMAND_MENU_SELECTED, &myApp::OnMenu, &wxGetApp(), wxID_ABOUT);
