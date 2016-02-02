@@ -399,10 +399,6 @@ myFrame::myFrame()
 	
 	Fit();
 	
-#ifdef __APPLE__
-	SetBackgroundColour(wxColour(0xe8, 0xe8, 0xe8));
-#endif
-	
 	/*
 	 * load config
 	 */
