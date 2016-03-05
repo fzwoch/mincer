@@ -567,7 +567,7 @@ void myFrame::Stop()
 
 const char* myFrame::GetUrl()
 {
-	strncpy(m_char_buffer, (const char*)m_url->GetLabel().mb_str(), sizeof(m_char_buffer));
+	strncpy(m_char_buffer, m_url->GetValue().mb_str(), sizeof(m_char_buffer));
 	
 	return m_url->GetValue().empty() ? NULL : m_char_buffer;
 }
