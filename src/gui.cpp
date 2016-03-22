@@ -207,11 +207,6 @@ myFrame::myFrame()
 		}
 	}
 	
-	for (int i = 0; i < sizeof(resolutions) / sizeof(resolution_pair); i++)
-	{
-		m_resolution->Append(wxString::Format("%dx%d - %s", resolutions[i].width, resolutions[i].height, resolutions[i].aspect_ratio));
-	}
-	
 	for (int i = 5; i <= 60; i += 5)
 	{
 		m_framerate->Append(wxString::Format("%d", i));
@@ -398,6 +393,11 @@ myFrame::myFrame()
 	m_panel->SetSizerAndFit(m_main_sizer);
 	
 	Fit();
+	
+	for (int i = 0; i < sizeof(resolutions) / sizeof(resolution_pair); i++)
+	{
+		m_resolution->Append(wxString::Format("%dx%d - %s", resolutions[i].width, resolutions[i].height, resolutions[i].aspect_ratio));
+	}
 	
 	/*
 	 * load config
