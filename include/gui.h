@@ -91,6 +91,7 @@ class myFrame: public wxFrame
 	int m_audio_device_ids[32];
 #endif
 	
+	void OnVideoInput(wxCommandEvent &event);
 	void OnVideoSpeed(wxCommandEvent &event);
 	void OnVideoBitrate(wxCommandEvent &event);
 	void OnAudioBitrate(wxCommandEvent &event);

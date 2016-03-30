@@ -131,16 +131,24 @@ void GStreamer::Start(myFrame *frame)
 	
 #if defined __APPLE__
 	if (frame->GetVideoDevice() < frame->GetScreenCount())
+	{
 		g_string_append_printf(desc, "avfvideosrc name=video_src do-stats=true device-index=%d capture-screen=true capture-screen-cursor=true ! ", frame->GetVideoDevice());
+	}
 	else
+	{
 		g_string_append_printf(desc, "avfvideosrc name=video_src do-stats=true device-index=%d ! ", frame->GetVideoDevice() - frame->GetScreenCount());
+	}
 #elif defined _WIN32
 	g_string_append_printf(desc, "dx9screencapsrc monitor=%d ! ", frame->GetVideoDevice());
 #else
 	g_string_append_printf(desc, "ximagesrc use-damage=false show-pointer=true display-name=:0.%d ! ", frame->GetVideoDevice());
 #endif
 	
-	g_string_append_printf(desc, "video/x-raw, framerate=%d/1 ! ", frame->GetFramerate());
+	if (frame->GetVideoDevice() < frame->GetScreenCount())
+	{
+		g_string_append_printf(desc, "video/x-raw, framerate=%d/1 ! ", frame->GetFramerate());
+	}
+
 	g_string_append_printf(desc, "queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! ");
 	g_string_append_printf(desc, "videoconvert ! queue max-size-bytes=0 ! ");
 	g_string_append_printf(desc, "videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", frame->GetWidth(), frame->GetHeight());

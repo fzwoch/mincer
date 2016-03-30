@@ -148,6 +148,7 @@ myFrame::myFrame()
 	 * events
 	 */
 	
+	m_video->Bind(wxEVT_CHOICE, &myFrame::OnVideoInput, this);
 	m_video_speed->Bind(wxEVT_SLIDER, &myFrame::OnVideoSpeed, this);
 	m_video_bitrate->Bind(wxEVT_SLIDER, &myFrame::OnVideoBitrate, this);
 	m_mute->Bind(wxEVT_BUTTON, &myApp::OnMute, &wxGetApp());
@@ -433,6 +434,7 @@ myFrame::myFrame()
 	
 	wxCommandEvent event;
 	
+	OnVideoInput(event);
 	OnVideoSpeed(event);
 	OnVideoBitrate(event);
 	OnAudioBitrate(event);
@@ -460,6 +462,18 @@ myFrame::~myFrame()
 	
 	config.Write("pos_x", GetPosition().x);
 	config.Write("pos_y", GetPosition().y);
+}
+
+void myFrame::OnVideoInput(wxCommandEvent &event)
+{
+	if (m_video->GetSelection() < m_screen_count)
+	{
+		m_framerate->Enable();
+	}
+	else
+	{
+		m_framerate->Disable();
+	}
 }
 
 void myFrame::OnVideoSpeed(wxCommandEvent &event)
@@ -552,7 +566,10 @@ void myFrame::Stop()
 	
 	m_video->Enable();
 	m_resolution->Enable();
-	m_framerate->Enable();
+	if (m_video->GetSelection() < m_screen_count)
+	{
+		m_framerate->Enable();
+	}
 	m_video_encoder->Enable();
 	m_audio_encoder->Enable();
 	m_video_speed->Enable();
