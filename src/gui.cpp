@@ -222,7 +222,7 @@ myFrame::myFrame()
 	
 	m_video_encoder->Append("Software");
 #ifdef __APPLE__
-	m_video_encoder->Append("Hardware");
+//	m_video_encoder->Append("Hardware");
 #endif
 	
 	m_audio_encoder->Append("AAC");
