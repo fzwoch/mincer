@@ -130,7 +130,10 @@ void GStreamer::Start(myFrame *frame)
 	}
 	
 #if defined __APPLE__
-	g_string_append_printf(desc, "avfvideosrc name=video_src do-stats=true device-index=%d capture-screen=true capture-screen-cursor=true ! ", frame->GetVideoDevice());
+	if (frame->GetVideoDevice() < frame->GetScreenCount())
+		g_string_append_printf(desc, "avfvideosrc name=video_src do-stats=true device-index=%d capture-screen=true capture-screen-cursor=true ! ", frame->GetVideoDevice());
+	else
+		g_string_append_printf(desc, "avfvideosrc name=video_src do-stats=true device-index=%d ! ", frame->GetVideoDevice() - frame->GetScreenCount());
 #elif defined _WIN32
 	g_string_append_printf(desc, "dx9screencapsrc monitor=%d ! ", frame->GetVideoDevice());
 #else

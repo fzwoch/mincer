@@ -29,6 +29,7 @@ solution "mincer"
 
 	filter "system:macosx"
 		toolset "clang"
+		buildoptions "-x objective-c++"
 
 	project "mincer"
 		kind "WindowedApp"

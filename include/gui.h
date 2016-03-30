@@ -26,6 +26,7 @@
 #if defined __APPLE__
 	#include <CoreGraphics/CoreGraphics.h>
 	#include <AudioToolBox/AudioToolbox.h>
+	#include <AVFoundation/AVFoundation.h>
 	#include <wx/osx/core/cfstring.h>
 #elif defined _WIN32
 	#include <d3d9.h>
@@ -80,6 +81,8 @@ class myFrame: public wxFrame
 	wxBoxSizer *m_main_sizer;
 	wxBoxSizer *m_sizer;
 	
+	unsigned int m_screen_count;
+	
 #ifdef __APPLE__
 	AudioDeviceID m_audio_capture_id;
 	AudioDeviceID m_audio_device_ids[32];
@@ -123,6 +126,7 @@ public:
 	int GetAudioBitrate();
 	const char* GetRecordingDirectory();
 	bool GetMute();
+	int GetScreenCount();
 };
 
 #endif // __GUI_H__

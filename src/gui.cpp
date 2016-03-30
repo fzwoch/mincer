@@ -166,16 +166,16 @@ myFrame::myFrame()
 	m_url_hidden->Hide();
 	m_url_hidden->Disable();
 	
-	unsigned int device_count = 0;
+	m_screen_count = 0;
 	
 #if defined __APPLE__
-	CGGetActiveDisplayList(0, NULL, &device_count);
+	CGGetActiveDisplayList(0, NULL, &m_screen_count);
 #elif defined _WIN32
 	IDirect3D9 *d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
 	
 	if (d3d9 != NULL)
 	{
-		device_count = IDirect3D9_GetAdapterCount(d3d9);
+		m_screen_count = IDirect3D9_GetAdapterCount(d3d9);
 		IDirect3D9_Release(d3d9);
 	}
 #else
@@ -183,12 +183,12 @@ myFrame::myFrame()
 	
 	if (disp != NULL)
 	{
-		device_count = XScreenCount(disp);
+		m_screen_count = XScreenCount(disp);
 		XCloseDisplay(disp);
 	}
 #endif
 	
-	for (int i = 0; i < device_count; i++)
+	for (int i = 0; i < m_screen_count; i++)
 	{
 		switch (i)
 		{
@@ -206,6 +206,13 @@ myFrame::myFrame()
 				break;
 		}
 	}
+	
+#ifdef __APPLE__
+	for (AVCaptureDevice *device in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo])
+	{
+		m_video->Append(wxCFStringRef::AsString([device localizedName]));
+	}
+#endif
 	
 	for (int i = 5; i <= 60; i += 5)
 	{
@@ -243,7 +250,7 @@ myFrame::myFrame()
 	AudioDeviceID *devices = (AudioDeviceID*)malloc(size);
 	AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr, 0, NULL, &size, devices);
 	
-	device_count = size / sizeof(AudioDeviceID);
+	unsigned int device_count = size / sizeof(AudioDeviceID);
 	
 	for (gint i = 0; i < device_count && i < sizeof(m_audio_device_ids) / sizeof(AudioDeviceID); i++)
 	{
@@ -656,4 +663,9 @@ const char* myFrame::GetRecordingDirectory()
 bool myFrame::GetMute()
 {
 	return m_mute->GetValue();
+}
+
+int myFrame::GetScreenCount()
+{
+	return m_screen_count;
 }
