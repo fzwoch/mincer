@@ -158,8 +158,8 @@ a.button span {
 #download-tar-gz span {
   background: transparent url(../images/tar-gz-icon.png) 12px 50% no-repeat;
 }
-#download-osx span {
-	background: transparent url(../images/osx-icon.png) 12px 50% no-repeat;
+#download-macos span {
+	background: transparent url(../images/macos-icon.png) 12px 50% no-repeat;
 }
 #download-win span {
 	background: transparent url(../images/win-icon.png) 12px 50% no-repeat;
