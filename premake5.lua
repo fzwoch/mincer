@@ -64,7 +64,7 @@ solution "mincer"
 
 			postbuildcommands {
 				"{DELETE} -r Mincer.app",
-				"{DELETE} mincer_osx.zip",
+				"{DELETE} mincer_macos.zip",
 				"{MKDIR} Mincer.app/Contents/MacOS",
 				"{MKDIR} Mincer.app/Contents/Resources",
 				"{COPY} %{cfg.buildtarget.abspath} Mincer.app/Contents/MacOS/mincer",
@@ -78,7 +78,7 @@ solution "mincer"
 				"/usr/libexec/PlistBuddy -c 'Add :NSHighResolutionCapable bool YES' Mincer.app/Contents/Info.plist",
 				"/usr/libexec/PlistBuddy -c 'Add :NSHumanReadableCopyright string © 2013-2016 Florian Zwoch' Mincer.app/Contents/Info.plist",
 
-				"zip -9 -r mincer_osx.zip Mincer.app"
+				"ditto -c -k --keepParent --arch x86_64 Mincer.app mincer_macos.zip"
 			}
 
 		filter "system:windows"
