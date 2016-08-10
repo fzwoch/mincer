@@ -153,7 +153,14 @@ void GStreamer::Start(myFrame *frame)
 	g_string_append_printf(desc, "videoconvert ! queue max-size-bytes=0 ! ");
 	g_string_append_printf(desc, "videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", frame->GetWidth(), frame->GetHeight());
 	
-	g_string_append_printf(desc, "x264enc bitrate=%d speed-preset=%d key-int-max=%d ! ", frame->GetVideoBitrate(), frame->GetVideoEncoderSpeed(), frame->GetFramerate() * 2);
+	if (frame->GetVideoEncoder() == 0)
+	{
+		g_string_append_printf(desc, "x264enc bitrate=%d speed-preset=%d key-int-max=%d ! ", frame->GetVideoBitrate(), frame->GetVideoEncoderSpeed(), frame->GetFramerate() * 2);
+	}
+	else
+	{
+		g_string_append_printf(desc, "vtenc_h264 bitrate=%d quality=%f max-keyframe-interval=%d realtime=true ! ", frame->GetVideoBitrate(), frame->GetVideoEncoderSpeed() / 10.0, frame->GetFramerate() * 2);
+	}
 	g_string_append_printf(desc, "video/x-h264, profile=main ! h264parse ! tee name=tee_264 ");
 	
 	g_string_append_printf(desc, "audiomixer name=audio_mix ! audioconvert ! audioresample ! ");
