@@ -149,6 +149,7 @@ myFrame::myFrame()
 	 */
 	
 	m_video->Bind(wxEVT_CHOICE, &myFrame::OnVideoInput, this);
+	m_video_encoder->Bind(wxEVT_CHOICE, &myFrame::OnVideoSpeed, this);
 	m_video_speed->Bind(wxEVT_SLIDER, &myFrame::OnVideoSpeed, this);
 	m_video_bitrate->Bind(wxEVT_SLIDER, &myFrame::OnVideoBitrate, this);
 	m_mute->Bind(wxEVT_BUTTON, &myApp::OnMute, &wxGetApp());
@@ -478,7 +479,14 @@ void myFrame::OnVideoInput(wxCommandEvent &event)
 
 void myFrame::OnVideoSpeed(wxCommandEvent &event)
 {
-	m_video_speed_label->SetLabel(wxString::Format("Video Encoder Speed - %s", encoder_speeds[m_video_speed->GetValue()]));
+	if (GetVideoEncoder() == 0)
+	{
+		m_video_speed_label->SetLabel(wxString::Format("Video Encoder Speed - %s", encoder_speeds[m_video_speed->GetValue()]));
+	}
+	else
+	{
+		m_video_speed_label->SetLabel(wxString::Format("Video Encoder Speed - %.1f", m_video_speed->GetValue() / 10.0));
+	}
 }
 
 void myFrame::OnVideoBitrate(wxCommandEvent &event)
