@@ -24,20 +24,20 @@ bool myApp::OnInit()
 {
 	m_frame = new myFrame();
 	m_frame->Show();
-	
+
 	return true;
 }
 
 void myApp::OnMenu(wxCommandEvent &event)
 {
 	wxAboutDialogInfo info;
-	
+
 #ifndef __APPLE__
 	info.SetName("Mincer");
 	info.SetVersion("0.2.0");
 	info.SetCopyright("(C) 2013-2016 Florian Zwoch");
 #endif
-	
+
 	wxAboutBox(info);
 }
 
@@ -46,12 +46,12 @@ void myApp::StartStream(wxCommandEvent &event)
 	if (m_frame->GetUrl() == NULL && m_frame->GetRecordingDirectory() == NULL)
 	{
 		wxMessageDialog *dialog = new wxMessageDialog(m_frame, "No URL or recording option is set.", "Nothing to do", wxOK | wxCENTRE);
-		
+
 		dialog->ShowWindowModal();
-		
+
 		return;
 	}
-	
+
 	m_frame->Start();
 	m_gstreamer.Start(m_frame);
 }
@@ -70,11 +70,11 @@ void myApp::OnMute(wxCommandEvent &event)
 void myApp::GStreamerError(const wxString &message)
 {
 	wxCommandEvent event;
-	
+
 	StopStream(event);
-	
+
 	wxMessageDialog *dialog = new wxMessageDialog(m_frame, message, "Mincer error", wxOK | wxCENTRE);
-	
+
 	dialog->ShowWindowModal();
 }
 
@@ -88,15 +88,15 @@ void myApp::CloseGui(wxCloseEvent &event)
 	if (m_gstreamer.IsRunning())
 	{
 		wxMessageDialog *dialog = new wxMessageDialog(m_frame, "Mincer is currently running. Are you sure you want to stop processing and quit the application?", "Quit Mincer?", wxOK | wxCANCEL | wxCENTRE);
-		
+
 		dialog->Bind(wxEVT_WINDOW_MODAL_DIALOG_CLOSED, &myApp::CloseGuiFinish, this);
 		dialog->ShowWindowModal();
-		
+
 		event.Veto();
-		
+
 		return;
 	}
-	
+
 	event.Skip();
 }
 
@@ -106,7 +106,7 @@ void myApp::CloseGuiFinish(wxWindowModalDialogEvent &event)
 	{
 		return;
 	}
-	
+
 	m_frame->Destroy();
 }
 

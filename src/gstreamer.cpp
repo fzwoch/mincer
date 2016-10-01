@@ -23,7 +23,7 @@
 static GstBusSyncReply bus_callback(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	GError *err;
-	
+
 	switch (GST_MESSAGE_TYPE(msg))
 	{
 		case GST_MESSAGE_WARNING:
@@ -40,7 +40,7 @@ static GstBusSyncReply bus_callback(GstBus *bus, GstMessage *msg, gpointer data)
 		default:
 			break;
 	}
-	
+
 	return GST_BUS_DROP;
 }
 
@@ -63,7 +63,7 @@ extern "C" {
 	GST_PLUGIN_STATIC_DECLARE(volume);
 	GST_PLUGIN_STATIC_DECLARE(x264);
 #endif
-	
+
 #if defined __APPLE__
 	GST_PLUGIN_STATIC_DECLARE(applemedia);
 	GST_PLUGIN_STATIC_DECLARE(osxaudio);
@@ -78,12 +78,12 @@ GStreamer::GStreamer()
 {
 #if defined __APPLE__ || defined _WIN32
 	extern gboolean _priv_gst_disable_registry_update;
-	
+
 	_priv_gst_disable_registry_update = TRUE;
 #endif
-	
+
 	gst_init(NULL, NULL);
-	
+
 #if defined __APPLE__ || defined _WIN32
 	GST_PLUGIN_STATIC_REGISTER(audioconvert);
 	GST_PLUGIN_STATIC_REGISTER(audiomixer);
@@ -123,12 +123,12 @@ void GStreamer::Start(myFrame *frame)
 	GString *desc = g_string_new(NULL);
 	GDateTime *date = g_date_time_new_now_local();
 	GstBus *bus = NULL;
-	
+
 	if (m_pipeline != NULL)
 	{
 		Stop();
 	}
-	
+
 #if defined __APPLE__
 	if (frame->GetVideoDevice() < frame->GetScreenCount())
 	{
@@ -143,7 +143,7 @@ void GStreamer::Start(myFrame *frame)
 #else
 	g_string_append_printf(desc, "ximagesrc use-damage=false show-pointer=true display-name=:0.%d ! ", frame->GetVideoDevice());
 #endif
-	
+
 	if (frame->GetVideoDevice() < frame->GetScreenCount())
 	{
 		g_string_append_printf(desc, "video/x-raw, framerate=%d/1 ! ", frame->GetFramerate());
@@ -152,7 +152,7 @@ void GStreamer::Start(myFrame *frame)
 	g_string_append_printf(desc, "queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! ");
 	g_string_append_printf(desc, "videoconvert ! queue max-size-bytes=0 ! ");
 	g_string_append_printf(desc, "videoscale method=lanczos ! queue max-size-bytes=0 ! video/x-raw, width=%d, height=%d ! ", frame->GetWidth(), frame->GetHeight());
-	
+
 	if (frame->GetVideoEncoder() == 0)
 	{
 		g_string_append_printf(desc, "x264enc bitrate=%d speed-preset=%d key-int-max=%d ! ", frame->GetVideoBitrate(), frame->GetVideoEncoderSpeed(), frame->GetFramerate() * 2);
@@ -162,13 +162,13 @@ void GStreamer::Start(myFrame *frame)
 		g_string_append_printf(desc, "vtenc_h264 bitrate=%d quality=%f max-keyframe-interval=%d realtime=true ! ", frame->GetVideoBitrate(), frame->GetVideoEncoderSpeed() / 10.0, frame->GetFramerate() * 2);
 	}
 	g_string_append_printf(desc, "video/x-h264, profile=main ! h264parse ! tee name=tee_264 ");
-	
+
 	g_string_append_printf(desc, "audiomixer name=audio_mix ! audioconvert ! audioresample ! ");
-	
+
 	if (frame->GetAudioEncoder() > 0)
 	{
 		int rate = 44100;
-		
+
 		if (frame->GetAudioBitrate() / 1000 < 64)
 		{
 			rate = 11025;
@@ -177,14 +177,14 @@ void GStreamer::Start(myFrame *frame)
 		{
 			rate = 22050;
 		}
-		
+
 		g_string_append_printf(desc, "lamemp3enc bitrate=%d target=bitrate ! audio/mpeg, rate=%d ! mpegaudioparse ! tee name=tee_aac ", frame->GetAudioBitrate() / 1000, rate);
 	}
 	else
 	{
 		g_string_append_printf(desc, "voaacenc bitrate=%d ! audio/mpeg, channels=2 ! aacparse ! tee name=tee_aac ", frame->GetAudioBitrate());
 	}
-	
+
 	if (frame->GetAudioSystemDevice() != 0)
 	{
 #if defined __APPLE__
@@ -196,7 +196,7 @@ void GStreamer::Start(myFrame *frame)
 #endif
 		g_string_append_printf(desc, "queue ! audioconvert ! audioresample ! audio_mix. ");
 	}
-	
+
 	if (frame->GetAudioDevice() != 0)
 	{
 #if defined __APPLE__
@@ -208,29 +208,29 @@ void GStreamer::Start(myFrame *frame)
 #endif
 		g_string_append_printf(desc, "provide-clock=%s ! queue ! volume name=volume ! audioconvert ! audioresample ! audio_mix. ", frame->GetAudioSystemDevice() != 0 ? "false" : "true");
 	}
-	
+
 	if (frame->GetAudioSystemDevice() == 0 && frame->GetAudioDevice() == 0)
 	{
 		g_string_append_printf(desc, "audiotestsrc is-live=true wave=silence ! queue ! audio_mix. ");
 	}
-	
+
 	if (frame->GetUrl() != NULL)
 	{
 		g_string_append_printf(desc, "tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! flv_mux. ");
 		g_string_append_printf(desc, "tee_264. ! queue ! flvmux streamable=true name=flv_mux ! rtmpsink location=\"%s\" ", frame->GetUrl());
 	}
-	
+
 	if (frame->GetRecordingDirectory() != NULL)
 	{
 		g_string_append_printf(desc, "tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! mp4_mux. ");
 		g_string_append_printf(desc, "tee_264. ! queue ! mp4mux name=mp4_mux ! filesink location=\"%s/mincer_%s.mp4\"", frame->GetRecordingDirectory(), g_date_time_format(date, "%Y-%m-%d_%H%M%S"));
 	}
-	
+
 	g_date_time_unref(date);
-	
+
 	m_pipeline = gst_parse_launch(desc->str, &err);
 	g_string_free(desc, TRUE);
-	
+
 	if (err != NULL)
 	{
 		wxGetApp().CallAfter(&myApp::GStreamerError, err->message);
@@ -241,11 +241,11 @@ void GStreamer::Start(myFrame *frame)
 		
 		return;
 	}
-	
+
 	bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
 	gst_bus_set_sync_handler(bus, bus_callback, NULL, NULL);
 	gst_object_unref(bus);
-	
+
 	gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
 }
 
@@ -255,22 +255,22 @@ void GStreamer::Stop()
 	{
 		return;
 	}
-	
+
 	if (gst_element_get_state(m_pipeline, NULL, NULL, GST_CLOCK_TIME_NONE) == GST_STATE_CHANGE_SUCCESS)
 	{
 		GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
-		
+
 		gst_bus_set_sync_handler(bus, NULL, NULL, NULL);
 		gst_element_send_event(m_pipeline, gst_event_new_eos());
-		
+
 		GstMessage *msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_EOS);
-		
+
 		gst_message_unref(msg);
 		gst_object_unref(bus);
 	}
-	
+
 	gst_element_set_state(m_pipeline, GST_STATE_NULL);
-	
+
 	gst_object_unref(m_pipeline);
 	m_pipeline = NULL;
 }
@@ -278,7 +278,7 @@ void GStreamer::Stop()
 void GStreamer::SetMute(bool mute)
 {
 	GstElement *elem = gst_bin_get_by_name(GST_BIN(m_pipeline), "volume");
-	
+
 	if (elem)
 	{
 		g_object_set(elem, "mute", mute, NULL);
@@ -295,17 +295,17 @@ float GStreamer::GetFps()
 {
 	GstElement *elem = gst_bin_get_by_name(GST_BIN(m_pipeline), "video_src");
 	gint fps = 0;
-	
+
 	if (elem)
 	{
 		g_object_get(elem, "fps", &fps, NULL);
 		g_object_unref(elem);
-		
+
 		if (fps < 0)
 		{
 			fps = 0;
 		}
 	}
-	
+
 	return fps;
 }
