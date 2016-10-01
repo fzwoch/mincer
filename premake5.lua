@@ -34,7 +34,7 @@ solution "mincer"
 	project "mincer"
 		kind "WindowedApp"
 		language "C++"
-		files { "src/*.cpp", "include/*.h" }
+		files { "src/*.cpp", "src/*.h" }
 		includedirs "include"
 
 		filter { "system:macosx", "configurations:release" }
