@@ -25,7 +25,7 @@ solution "mincer"
 		optimize "full"
 
 	filter "configurations:debug"
-		flags "symbols"
+		symbols "on"
 
 	filter "system:macosx"
 		toolset "clang"
