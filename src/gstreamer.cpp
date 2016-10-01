@@ -178,7 +178,7 @@ void GStreamer::Start(myFrame *frame)
 			rate = 22050;
 		}
 		
-		g_string_append_printf(desc, "lamemp3enc bitrate=%d target=bitrate ! audio/mpeg, rate=%d ! mpegaudioparse ! tee name=tee_aac ", frame->GetAudioBitrate(), rate);
+		g_string_append_printf(desc, "lamemp3enc bitrate=%d target=bitrate ! audio/mpeg, rate=%d ! mpegaudioparse ! tee name=tee_aac ", frame->GetAudioBitrate() / 1000, rate);
 	}
 	else
 	{
