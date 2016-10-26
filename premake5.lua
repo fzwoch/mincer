@@ -37,6 +37,9 @@ solution "mincer"
 		files { "src/*.cpp", "src/*.h" }
 		includedirs "include"
 
+		local version = "0.2.2"
+		defines { "MINCER_VERSION=" .. "\"" .. (version) .. "\"" }
+
 		filter { "system:macosx", "configurations:release" }
 			postbuildcommands "strip -x %{cfg.buildtarget.abspath}"
 
@@ -74,7 +77,7 @@ solution "mincer"
 				"/usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string mincer' Mincer.app/Contents/Info.plist",
 				"/usr/libexec/PlistBuddy -c 'Add :CFBundleIconFile string mincer.icns' Mincer.app/Contents/Info.plist",
 				"/usr/libexec/PlistBuddy -c 'Add :CFBundleIdentifier string zwoch.florian.mincer' Mincer.app/Contents/Info.plist",
-				"/usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 0.2.2' Mincer.app/Contents/Info.plist",
+				"/usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string " .. (version) .."' Mincer.app/Contents/Info.plist",
 				"/usr/libexec/PlistBuddy -c 'Add :NSHighResolutionCapable bool YES' Mincer.app/Contents/Info.plist",
 				"/usr/libexec/PlistBuddy -c 'Add :NSHumanReadableCopyright string © 2013-2016 Florian Zwoch' Mincer.app/Contents/Info.plist",
 
