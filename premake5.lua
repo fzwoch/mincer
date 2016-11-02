@@ -37,7 +37,7 @@ solution "mincer"
 		files { "src/*.cpp", "src/*.h" }
 		includedirs "include"
 
-		local version = "0.2.2"
+		local version = "0.2.3"
 		defines { "MINCER_VERSION=" .. "\"" .. (version) .. "\"" }
 
 		filter { "system:macosx", "configurations:release" }
