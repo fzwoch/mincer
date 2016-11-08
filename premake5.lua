@@ -61,6 +61,7 @@ solution "mincer"
 			links "QuartzCore.framework"
 			links "QTKit.framework"
 			links "VideoToolBox.framework"
+			links "resolv"
 
 			linkoptions "-mmacosx-version-min=10.9"
 			buildoptions "-mmacosx-version-min=10.9"

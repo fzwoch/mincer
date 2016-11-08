@@ -24,6 +24,10 @@
 #include "gui.h"
 #include "gstreamer.h"
 
+#ifndef MINCER_VERSION
+#define MINCER_VERSION "0.0.0"
+#endif
+
 class myApp: public wxApp
 {
 	virtual bool OnInit();

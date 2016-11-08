@@ -33,10 +33,6 @@ void myApp::OnMenu(wxCommandEvent &event)
 	wxAboutDialogInfo info;
 
 #ifndef __APPLE__
-	#ifndef MINCER_VERSION
-	#define MINCER_VERSION "0.0.0"
-	#endif
-
 	info.SetName("Mincer");
 	info.SetVersion(MINCER_VERSION);
 	info.SetCopyright("(C) 2013-2016 Florian Zwoch");

@@ -46,6 +46,7 @@ static GstBusSyncReply bus_callback(GstBus *bus, GstMessage *msg, gpointer data)
 
 extern "C" {
 #if defined __APPLE__ || defined _WIN32
+	GST_PLUGIN_STATIC_DECLARE(app);
 	GST_PLUGIN_STATIC_DECLARE(audioconvert);
 	GST_PLUGIN_STATIC_DECLARE(audiomixer);
 	GST_PLUGIN_STATIC_DECLARE(audioparsers);
@@ -56,6 +57,10 @@ extern "C" {
 	GST_PLUGIN_STATIC_DECLARE(isomp4);
 	GST_PLUGIN_STATIC_DECLARE(lame);
 	GST_PLUGIN_STATIC_DECLARE(rtmp);
+	GST_PLUGIN_STATIC_DECLARE(rtp);
+	GST_PLUGIN_STATIC_DECLARE(rtpmanager);
+	GST_PLUGIN_STATIC_DECLARE(rtspclientsink);
+	GST_PLUGIN_STATIC_DECLARE(udp);
 	GST_PLUGIN_STATIC_DECLARE(videoconvert);
 	GST_PLUGIN_STATIC_DECLARE(videoparsersbad);
 	GST_PLUGIN_STATIC_DECLARE(videoscale);
@@ -85,6 +90,7 @@ GStreamer::GStreamer()
 	gst_init(NULL, NULL);
 
 #if defined __APPLE__ || defined _WIN32
+	GST_PLUGIN_STATIC_REGISTER(app);
 	GST_PLUGIN_STATIC_REGISTER(audioconvert);
 	GST_PLUGIN_STATIC_REGISTER(audiomixer);
 	GST_PLUGIN_STATIC_REGISTER(audioparsers);
@@ -95,6 +101,10 @@ GStreamer::GStreamer()
 	GST_PLUGIN_STATIC_REGISTER(isomp4);
 	GST_PLUGIN_STATIC_REGISTER(lame);
 	GST_PLUGIN_STATIC_REGISTER(rtmp);
+	GST_PLUGIN_STATIC_REGISTER(rtp);
+	GST_PLUGIN_STATIC_REGISTER(rtpmanager);
+	GST_PLUGIN_STATIC_REGISTER(rtspclientsink);
+	GST_PLUGIN_STATIC_REGISTER(udp);
 	GST_PLUGIN_STATIC_REGISTER(videoconvert);
 	GST_PLUGIN_STATIC_REGISTER(videoparsersbad);
 	GST_PLUGIN_STATIC_REGISTER(videoscale);
@@ -216,8 +226,17 @@ void GStreamer::Start(myFrame *frame)
 
 	if (frame->GetUrl() != NULL)
 	{
-		g_string_append_printf(desc, "tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! flv_mux. ");
-		g_string_append_printf(desc, "tee_264. ! queue ! flvmux streamable=true name=flv_mux ! rtmpsink location=\"%s\" ", frame->GetUrl());
+		g_string_append_printf(desc, "tee_aac. ! queue max-size-time=0 max-size-buffers=0 max-size-time=4000000000 leaky=upstream ! stream_mux. ");
+		g_string_append_printf(desc, "tee_264. ! queue ! stream_mux. ");
+
+		if (g_ascii_strncasecmp(frame->GetUrl(), "rtsp", strlen("rtsp")) == 0)
+		{
+			g_string_append_printf(desc, "rtspclientsink location=\"%s\" user-agent=Mincer/%s name=stream_mux ", frame->GetUrl(), MINCER_VERSION);
+		}
+		else
+		{
+			g_string_append_printf(desc, "flvmux streamable=true name=stream_mux ! rtmpsink location=\"%s\" ", frame->GetUrl());
+		}
 	}
 
 	if (frame->GetRecordingDirectory() != NULL)
