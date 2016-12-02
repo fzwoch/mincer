@@ -202,7 +202,7 @@ void GStreamer::Start(myFrame *frame)
 #elif defined _WIN32
 		g_string_append_printf(desc, "directsoundsrc device-name=\"%s\" ! ", frame->GetAudioSystemDeviceName());
 #else
-		g_string_append_printf(desc, "osxaudiosrc device=%d ! ", frame->GetAudioSystemDevice());
+		g_string_append_printf(desc, "pulsesrc device=%s ! ", frame->GetAudioSystemDeviceName());
 #endif
 		g_string_append_printf(desc, "queue ! audioconvert ! audioresample ! audio_mix. ");
 	}
@@ -214,7 +214,7 @@ void GStreamer::Start(myFrame *frame)
 #elif defined _WIN32
 		g_string_append_printf(desc, "directsoundsrc device-name=\"%s\" ", frame->GetAudioDeviceName());
 #else
-		g_string_append_printf(desc, "osxaudiosrc device=%d ", frame->GetAudioDevice());
+		g_string_append_printf(desc, "pulsesrc device=%s ", frame->GetAudioDeviceName());
 #endif
 		g_string_append_printf(desc, "provide-clock=%s ! queue ! volume name=volume ! audioconvert ! audioresample ! audio_mix. ", frame->GetAudioSystemDevice() != 0 ? "false" : "true");
 	}

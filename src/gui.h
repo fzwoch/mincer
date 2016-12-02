@@ -32,6 +32,7 @@
 	#include <d3d9.h>
 #else
 	#include <X11/Xlib.h>
+	#include <pulse/pulseaudio.h>
 #endif
 
 class myFrame: public wxFrame
@@ -86,11 +87,17 @@ class myFrame: public wxFrame
 #ifdef __APPLE__
 	AudioDeviceID m_audio_capture_id;
 	AudioDeviceID m_audio_device_ids[32];
+#elif _WIN32
+	int m_audio_capture_id;
+	int m_audio_device_ids[32];
 #else
 	int m_audio_capture_id;
 	int m_audio_device_ids[32];
+
+	char m_audio_device_string[32][1024];
+
+	static void pa_sourcelist_cb(pa_context *c, const pa_source_info *l, int eol, void *userdata);
 #endif
-	
 	void OnVideoInput(wxCommandEvent &event);
 	void OnVideoSpeed(wxCommandEvent &event);
 	void OnVideoBitrate(wxCommandEvent &event);

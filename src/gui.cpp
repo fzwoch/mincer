@@ -74,6 +74,35 @@ static const wxString encoder_speeds[] =
 	"Placebo"
 };
 
+#ifdef __linux__
+
+void myFrame::pa_sourcelist_cb(pa_context *c, const pa_source_info *l, int eol, void *userdata)
+{
+	myFrame *frame = (myFrame*)userdata;
+	int index = frame->m_audio->GetCount();
+
+	if (eol)
+	{
+		return;
+	}
+
+	if (index >= sizeof(frame->m_audio_device_string) / sizeof(frame->m_audio_device_string[0]))
+	{
+		return;
+	}
+
+	strncpy(frame->m_audio_device_string[index], l->name, sizeof(frame->m_audio_device_string[0]));
+	frame->m_audio->Append(l->description);
+
+	if (frame->m_audio_capture_id == 0 && l->monitor_of_sink != PA_INVALID_INDEX)
+	{
+		frame->m_audio_capture_id = index;
+
+		frame->m_system_audio_label->SetLabel("System audio capture via PulseAudio");
+	}
+}
+#endif
+
 myFrame::myFrame()
 	: wxFrame(NULL, wxID_ANY, "Mincer", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 	, m_timer(this)
@@ -306,6 +335,40 @@ myFrame::myFrame()
 	{
 		free(devices);
 	}
+#elif _WIN32
+#else
+	pa_mainloop *pa_ml = pa_mainloop_new();
+	pa_mainloop_api *pa_mlapi = pa_mainloop_get_api(pa_ml);
+	pa_context *pa_ctx = pa_context_new(pa_mlapi, "mincer");
+
+	pa_context_connect(pa_ctx, NULL, PA_CONTEXT_NOFLAGS, NULL);
+
+	while (1)
+	{
+		if (pa_context_get_state(pa_ctx) == PA_CONTEXT_READY)
+		{
+			break;
+		}
+
+		pa_mainloop_iterate(pa_ml, 1, NULL);
+	}
+
+	pa_operation *pa_op = pa_context_get_source_info_list(pa_ctx, myFrame::pa_sourcelist_cb, this);
+
+	while (1)
+	{
+		if (pa_operation_get_state(pa_op) == PA_OPERATION_DONE)
+		{
+			pa_operation_unref(pa_op);
+			break;
+		}
+
+		pa_mainloop_iterate(pa_ml, 1, NULL);
+	}
+
+	pa_context_disconnect(pa_ctx);
+	pa_context_unref(pa_ctx);
+	pa_mainloop_free(pa_ml);
 #endif
 
 	m_mute->Disable();
@@ -651,8 +714,11 @@ int myFrame::GetAudioSystemDevice()
 
 const char* myFrame::GetAudioSystemDeviceName()
 {
+#ifdef __linux__
+	strncpy(m_char_buffer, m_audio_device_string[m_audio_capture_id], sizeof(m_char_buffer));
+#else
 	strncpy(m_char_buffer, (const char*)m_audio->GetString(m_audio_capture_id).mb_str(), sizeof(m_char_buffer));
-
+#endif
 	return m_char_buffer;
 }
 
@@ -663,8 +729,11 @@ int myFrame::GetAudioDevice()
 
 const char* myFrame::GetAudioDeviceName()
 {
+#ifdef __linux__
+	strncpy(m_char_buffer, m_audio_device_string[m_audio->GetSelection()], sizeof(m_char_buffer));
+#else
 	strncpy(m_char_buffer, (const char*)m_audio->GetString(m_audio->GetSelection()).mb_str(), sizeof(m_char_buffer));
-
+#endif
 	return m_char_buffer;
 }
 
