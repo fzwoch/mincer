@@ -124,6 +124,7 @@ myFrame::myFrame()
 	/*
 	 * gui
 	 */
+	SetMaxSize(wxSize(360,-1));
 
 	wxBoxSizer *sizer;
 	wxBoxSizer *sizer_tmp;
