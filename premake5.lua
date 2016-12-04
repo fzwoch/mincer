@@ -106,7 +106,5 @@ solution "mincer"
 			buildoptions "`wx-config --cflags`"
 			linkoptions "`wx-config --libs`"
 
-			buildoptions "`pkg-config --cflags gstreamer-1.0 libpulse`"
-			linkoptions "`pkg-config --libs gstreamer-1.0 libpulse`"
-
-			links "X11"
+			buildoptions "`pkg-config --cflags gstreamer-1.0 x11 libpulse`"
+			linkoptions "`pkg-config --libs gstreamer-1.0 x11 libpulse`"
