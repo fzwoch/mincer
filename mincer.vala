@@ -190,7 +190,6 @@ class Mincer : Gtk.Application {
 							var dialog = new MessageDialog (window, 0, Gtk.MessageType.ERROR, ButtonsType.CLOSE, "%s", e.message);
 							dialog.run ();
 							dialog.destroy ();
-							stop();
 							break;
 						default:
 							break;
