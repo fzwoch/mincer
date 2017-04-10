@@ -79,7 +79,7 @@ class Mincer : Gtk.Application {
 		window.delete_event.connect (() => {
 			if (pipeline != null) {
 				var dialog = new MessageDialog (window, 0, Gtk.MessageType.QUESTION, ButtonsType.YES_NO, "Quit Mincer?");
-				dialog.format_secondary_text("Mincer is currently running. Are you sure you want to stop processing and quit the application?");
+				dialog.secondary_text = "Mincer is currently running. Are you sure you want to stop processing and quit the application?";
 				var response = dialog.run ();
 				dialog.destroy ();
 
