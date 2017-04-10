@@ -1,6 +1,5 @@
 using Gtk;
 using Gst;
-using PulseAudio;
 
 const string[] speeds = {
 	"None", "Ultrafast", "Superfast", "Veryfast", "Faster", "Fast",
@@ -48,33 +47,11 @@ class Mincer : Gtk.Application {
 		}
 		video_input.active = 0;
 
-		var pa_loop = new PulseAudio.MainLoop ();
-		var pa_ctx = new PulseAudio.Context (pa_loop.get_api (), "mincer");
-
-		pa_ctx.connect ();
-
-		while (true) {
-			if (pa_ctx.get_state () == PulseAudio.Context.State.READY) {
-				break;
-			}
-			pa_loop.iterate ();
-		}
-
-		var pa_op = pa_ctx.get_source_info_list ((context, info, eol) => {
-			if (eol != 0) {
-				return;
-			}
-			audio_input.append_text (info.description);
+		var monitor = new DeviceMonitor ();
+		monitor.add_filter ("Audio/Source", null);
+		monitor.get_devices ().foreach ((entry) => {
+			audio_input.append_text (entry.display_name);
 		});
-
-		while (true) {
-			if (pa_op.get_state () == PulseAudio.Operation.State.DONE) {
-				break;
-			}
-			pa_loop.iterate ();
-		}
-
-		pa_ctx.disconnect ();
 
 		window.delete_event.connect (() => {
 			if (pipeline != null) {
