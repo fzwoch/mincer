@@ -25,6 +25,9 @@ class Mincer : Gtk.Application {
 		var audio_bitrate = builder.get_object ("audio_bitrate") as Scale;
 		var recordings = builder.get_object ("recordings") as Button;
 		var start_stop = builder.get_object ("start_stop") as Button;
+		var chooser = builder.get_object ("chooser") as FileChooserDialog;
+		var chooser_disable = builder.get_object ("chooser_disable") as Button;
+		var chooser_select = builder.get_object ("chooser_select") as Button;
 
 		var display = new X.Display ();
 		for (int i = 0; i < display.number_of_screens (); i++) {
@@ -112,6 +115,25 @@ class Mincer : Gtk.Application {
 			var num = (int)(adjustment.value + 0.5);
 
 			audio_bitrate_label.label = "Audio Bitrate - " + num.to_string () + " kbps";
+		});
+
+		recordings.clicked.connect (() => {
+			chooser.run ();
+		});
+
+		chooser.delete_event.connect (() => {
+			chooser.hide ();
+			return true;
+		});
+
+		chooser_disable.clicked.connect (() => {
+			chooser.hide ();
+			recordings.label = "- Disabled -";
+		});
+
+		chooser_select.clicked.connect (() => {
+			chooser.hide ();
+			recordings.label = chooser.get_filename ();
 		});
 
 		start_stop.clicked.connect ((button) => {
