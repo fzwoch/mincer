@@ -176,8 +176,28 @@ class Mincer : Gtk.Application {
 				try {
 					pipeline = parse_launch (tmp) as Pipeline;
 				} catch (GLib.Error e) {
-					print (e.message);
+					var dialog = new MessageDialog (window, 0, Gtk.MessageType.ERROR, ButtonsType.CLOSE, "%s", e.message);
+					dialog.run ();
+					dialog.destroy ();
+					return;
 				}
+
+				pipeline.bus.add_watch (Priority.DEFAULT, (bus, message) => {
+					switch (message.type) {
+						case Gst.MessageType.ERROR:
+							GLib.Error e;
+							message.parse_error (out e, null);
+							var dialog = new MessageDialog (window, 0, Gtk.MessageType.ERROR, ButtonsType.CLOSE, "%s", e.message);
+							dialog.run ();
+							dialog.destroy ();
+							stop();
+							break;
+						default:
+							break;
+					}
+					return true;
+				});
+
 				pipeline.set_state (State.PLAYING);
 
 				var start = new GLib.DateTime.now_utc ();
@@ -224,7 +244,7 @@ class Mincer : Gtk.Application {
 		if (pipeline != null) {
 			var eos = new Event.eos ();
 			pipeline.send_event (eos);
-			pipeline.get_bus ().pop_filtered (Gst.MessageType.EOS);
+			pipeline.bus.pop_filtered (Gst.MessageType.EOS);
 			pipeline.set_state (State.NULL);
 			pipeline.unref ();
 			pipeline = null;
