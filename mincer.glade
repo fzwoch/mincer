@@ -345,7 +345,7 @@
                     <property name="active">0</property>
                     <property name="has_entry">True</property>
                     <items>
-                      <item id="&lt;Enter ID&gt;" translatable="yes">None</item>
+                      <item id="-1" translatable="yes">None</item>
                     </items>
                     <child internal-child="entry">
                       <object class="GtkEntry">
