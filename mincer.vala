@@ -50,7 +50,7 @@ class Mincer : Gtk.Application {
 		var monitor = new DeviceMonitor ();
 		monitor.add_filter ("Audio/Source", null);
 		monitor.get_devices ().foreach ((entry) => {
-			audio_input.append_text (entry.display_name);
+			audio_input.insert_text (1, entry.display_name);
 		});
 
 		window.delete_event.connect (() => {
@@ -135,14 +135,24 @@ class Mincer : Gtk.Application {
 				int width = 0, height = 0;
 				video_resolution.get_active_text ().scanf ("%dx%d", &width, &height);
 
-				var tmp = "ximagesrc use-damage=false show-pointer=true " +
-				"display-name=:0." + video_input.active.to_string () + " ! " +
-				"video/x-raw, framerate=" + video_framerate.get_active_text () + "/1 ! " +
-				"videoscale method=lanczos ! video/x-raw, " +
-				"width=" + width.to_string () + ", height=" + height.to_string () + " ! " +
-				"videoconvert ! x264enc tune=zerolatency name=video_encoder bitrate=2000 ! video/x-h264, profile=main ! h264parse ! tee name=video_tee " +
-				"pulsesrc ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={44100, 48000} ! " +
-				"voaacenc bitrate=128000 ! aacparse ! tee name=audio_tee ";
+				string tmp = "";
+				tmp += "ximagesrc use-damage=false show-pointer=true ";
+				tmp += "display-name=:0." + video_input.active.to_string () + " ! ";
+				tmp += "video/x-raw, framerate=" + video_framerate.get_active_text () + "/1 ! ";
+				tmp += "videoscale method=lanczos ! video/x-raw, ";
+				tmp += "width=" + width.to_string () + ", height=" + height.to_string () + " ! ";
+				tmp += "videoconvert ! x264enc tune=zerolatency name=video_encoder ";
+				tmp += "bitrate=" + ((int)(video_bitrate.adjustment.value + 0.5)).to_string () + " ! ";
+				tmp += "video/x-h264, profile=main ! h264parse ! tee name=video_tee ";
+
+				if (audio_input.active == 0) {
+					tmp += "audiotest is-live=true wave=silence ! ";
+				} else {
+					tmp += "pulsesrc device=" + (audio_input.active - 1).to_string () + " ! ";
+				}
+				tmp += "audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
+				tmp += "voaacenc bitrate=" + ((int)(audio_bitrate.adjustment.value + 0.5) * 1000).to_string () + " ! ";
+				tmp += "aacparse ! tee name=audio_tee ";
 
 		//		tmp += "video_tee. ! queue ! flvmux name=flv_mux ! rtmpsink location=rtmp:// ";
 		//		tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! flv_mux. ";
