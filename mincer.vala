@@ -28,22 +28,9 @@ class Mincer : Gtk.Application {
 		var chooser_disable = builder.get_object ("chooser_disable") as Button;
 		var chooser_select = builder.get_object ("chooser_select") as Button;
 
-		var display = new X.Display ();
-		for (int i = 0; i < display.number_of_screens (); i++) {
-			switch (i) {
-				case 0:
-					video_input.append_text("Primary Screen");
-					break;
-				case 1:
-					video_input.append_text("Secondary Screen");
-					break;
-				case 2:
-					video_input.append_text("Tertiary Screen");
-					break;
-				default:
-					video_input.append_text("Screen #" + i.to_string ());
-					break;
-			}
+		var display = Gdk.Display.get_default ();
+		for (int i = 0; i < display.get_n_monitors (); i++) {
+			video_input.append_text(display.get_monitor (i).model);
 		}
 		video_input.active = 0;
 
