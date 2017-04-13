@@ -141,11 +141,20 @@ class Mincer : Gtk.Application {
 				tmp += "voaacenc bitrate=" + ((int)(audio_bitrate.adjustment.value + 0.5) * 1000).to_string () + " ! ";
 				tmp += "aacparse ! tee name=audio_tee ";
 
-		//		tmp += "video_tee. ! queue ! flvmux name=flv_mux ! rtmpsink location=rtmp:// ";
-		//		tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! flv_mux. ";
+				if (url.text == "" && recordings.label == "- Disabled -") {
+					tmp += "video_tee. ! queue ! fakesink ";
+					tmp += "audio_tee. ! queue ! fakesink ";
+				}
 
-				tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=bla.mp4 ";
-				tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! mp4_mux. ";
+				if (url.text != "") {
+					tmp += "video_tee. ! queue ! flvmux name=flv_mux ! rtmpsink location=rtmp:// ";
+					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! flv_mux. ";
+				}
+
+				if (recordings.label != "") {
+					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=bla.mp4 ";
+					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! mp4_mux. ";
+				}
 
 				try {
 					pipeline = parse_launch (tmp) as Pipeline;
