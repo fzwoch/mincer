@@ -177,7 +177,7 @@ class Mincer : Gtk.Application {
 				Timeout.add (100, () => {
 					var elapsed = builder.get_object ("elapsed") as Label;
 
-					if (button.label == "Start") {
+					if (pipeline == null) {
 						elapsed.label = "00:00:00";
 						return false;
 					}
