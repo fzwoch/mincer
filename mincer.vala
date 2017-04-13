@@ -84,11 +84,7 @@ class Mincer : Gtk.Application {
 		audio_mute.toggled.connect (() => {
 			var audio = pipeline.get_by_name ("audio") as dynamic Element;
 
-			if (audio_mute.active) {
-				audio.mute = true;
-			} else {
-				audio.mute = false;
-			}
+			audio.mute = audio_mute.active;
 		});
 
 		recordings.clicked.connect (() => {
