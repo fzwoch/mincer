@@ -108,23 +108,6 @@ class Mincer : Gtk.Application {
 
 		start_stop.clicked.connect ((button) => {
 			if (pipeline == null) {
-				url.visibility = false;
-				url.sensitive = false;
-
-				video_input.sensitive = false;
-				video_resolution.sensitive = false;
-				video_framerate.sensitive = false;
-				video_speed.sensitive = false;
-				audio_input.sensitive = false;
-				audio_bitrate.sensitive = false;
-				recordings.sensitive = false;
-
-				if (audio_input.active != 0) {
-					audio_mute.sensitive = true;
-				}
-
-				button.label = "Stop";
-
 				int width = 0, height = 0;
 				video_resolution.get_active_text ().scanf ("%dx%d", &width, &height);
 
@@ -205,6 +188,23 @@ class Mincer : Gtk.Application {
 					elapsed.label = diff.format ("%H:%M:%S");
 					return true;
 				});
+
+				url.visibility = false;
+				url.sensitive = false;
+
+				video_input.sensitive = false;
+				video_resolution.sensitive = false;
+				video_framerate.sensitive = false;
+				video_speed.sensitive = false;
+				audio_input.sensitive = false;
+				audio_bitrate.sensitive = false;
+				recordings.sensitive = false;
+
+				if (audio_input.active != 0) {
+					audio_mute.sensitive = true;
+				}
+
+				button.label = "Stop";
 			} else {
 				stop ();
 
