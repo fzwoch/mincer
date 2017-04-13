@@ -81,6 +81,16 @@ class Mincer : Gtk.Application {
 			audio_bitrate_label.label = "Audio Bitrate - " + num.to_string () + " kbps";
 		});
 
+		audio_mute.toggled.connect (() => {
+			var audio = pipeline.get_by_name ("audio") as dynamic Element;
+
+			if (audio_mute.active) {
+				audio.mute = true;
+			} else {
+				audio.mute = false;
+			}
+		});
+
 		recordings.clicked.connect (() => {
 			chooser.run ();
 		});
@@ -135,7 +145,7 @@ class Mincer : Gtk.Application {
 				if (audio_input.active == 0) {
 					tmp += "audiotestsrc is-live=true wave=silence ! ";
 				} else {
-					tmp += "pulsesrc device=" + (audio_input.active - 1).to_string () + " ! ";
+					tmp += "pulsesrc name=audio device=" + (audio_input.active - 1).to_string () + " ! ";
 				}
 				tmp += "audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
 				tmp += "voaacenc bitrate=" + ((int)(audio_bitrate.adjustment.value + 0.5) * 1000).to_string () + " ! ";
