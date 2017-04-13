@@ -106,7 +106,7 @@ class Mincer : Gtk.Application {
 			recordings.label = chooser.get_filename ();
 		});
 
-		start_stop.clicked.connect ((button) => {
+		start_stop.clicked.connect (() => {
 			if (pipeline == null) {
 				int width = 0, height = 0;
 				video_resolution.get_active_text ().scanf ("%dx%d", &width, &height);
@@ -204,7 +204,7 @@ class Mincer : Gtk.Application {
 					audio_mute.sensitive = true;
 				}
 
-				button.label = "Stop";
+				start_stop.label = "Stop";
 			} else {
 				stop ();
 
@@ -222,7 +222,7 @@ class Mincer : Gtk.Application {
 				audio_mute.sensitive = false;
 				audio_mute.active = false;
 
-				button.label = "Start";
+				start_stop.label = "Start";
 			}
 		});
 
