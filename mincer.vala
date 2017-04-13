@@ -231,14 +231,12 @@ class Mincer : Gtk.Application {
 	}
 
 	private void stop () {
-		if (pipeline != null) {
-			var eos = new Event.eos ();
-			pipeline.send_event (eos);
-			pipeline.bus.timed_pop_filtered (CLOCK_TIME_NONE, Gst.MessageType.EOS);
-			pipeline.set_state (State.NULL);
-			pipeline.unref ();
-			pipeline = null;
-		}
+		var eos = new Event.eos ();
+		pipeline.send_event (eos);
+		pipeline.bus.timed_pop_filtered (CLOCK_TIME_NONE, Gst.MessageType.EOS);
+		pipeline.set_state (State.NULL);
+		pipeline.unref ();
+		pipeline = null;
 	}
 
 	public static int main (string[] args) {
