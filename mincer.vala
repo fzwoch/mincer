@@ -217,7 +217,7 @@ class Mincer : Gtk.Application {
 		if (pipeline != null) {
 			var eos = new Event.eos ();
 			pipeline.send_event (eos);
-			pipeline.bus.pop_filtered (Gst.MessageType.EOS);
+			pipeline.bus.timed_pop_filtered (CLOCK_TIME_NONE, Gst.MessageType.EOS);
 			pipeline.set_state (State.NULL);
 			pipeline.unref ();
 			pipeline = null;
