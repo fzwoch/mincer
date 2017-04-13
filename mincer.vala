@@ -162,7 +162,9 @@ class Mincer : Gtk.Application {
 				}
 
 				if (recordings.label != "- Disabled -") {
-					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=\"" + chooser.get_filename () + "/bla.mp4\" ";
+					var now = new GLib.DateTime.now_local ();
+
+					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=\"" + chooser.get_filename () + "/mincer_" + now.format("%Y-%m-%d_%H%M%S") + ".mp4\" ";
 					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! mp4_mux. ";
 				}
 
