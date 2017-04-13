@@ -147,12 +147,12 @@ class Mincer : Gtk.Application {
 				}
 
 				if (url.text != "") {
-					tmp += "video_tee. ! queue ! flvmux name=flv_mux ! rtmpsink location=rtmp:// ";
+					tmp += "video_tee. ! queue ! flvmux name=flv_mux ! rtmpsink location=" + url.text;
 					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! flv_mux. ";
 				}
 
 				if (recordings.label != "") {
-					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=" + recordings.label + "/bla.mp4 ";
+					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=\"" + recordings.label + "/bla.mp4\" ";
 					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! mp4_mux. ";
 				}
 
