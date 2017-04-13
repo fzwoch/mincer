@@ -133,7 +133,7 @@ class Mincer : Gtk.Application {
 				tmp += "video/x-h264, profile=main ! h264parse ! tee name=video_tee ";
 
 				if (audio_input.active == 0) {
-					tmp += "audiotest is-live=true wave=silence ! ";
+					tmp += "audiotestsrc is-live=true wave=silence ! ";
 				} else {
 					tmp += "pulsesrc device=" + (audio_input.active - 1).to_string () + " ! ";
 				}
