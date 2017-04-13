@@ -151,7 +151,7 @@ class Mincer : Gtk.Application {
 					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! flv_mux. ";
 				}
 
-				if (recordings.label != "") {
+				if (recordings.label != "- Disabled -") {
 					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=\"" + chooser.get_filename () + "/bla.mp4\" ";
 					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! mp4_mux. ";
 				}
