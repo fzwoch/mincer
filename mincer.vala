@@ -147,7 +147,7 @@ class Mincer : Gtk.Application {
 				}
 
 				if (url.text != "") {
-					tmp += "video_tee. ! queue ! flvmux name=flv_mux ! rtmpsink location=" + url.text;
+					tmp += "video_tee. ! queue ! flvmux name=flv_mux ! rtmpsink location=\"" + url.text + "\" ";
 					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! flv_mux. ";
 				}
 
