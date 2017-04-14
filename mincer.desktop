@@ -1,5 +1,5 @@
 [Desktop Entry]
 Name=Mincer
 Exec=mincer
-Icon=mincer
+Icon=/usr/share/mincer/mincer.svg
 Type=Application
