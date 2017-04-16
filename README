@@ -9,6 +9,7 @@ Building + Installing
 ---------------------
 
 	$ meson --buildtype=release release
+	$ ninja -C release
 	$ sudo ninja -C release install
 
 Binaries
