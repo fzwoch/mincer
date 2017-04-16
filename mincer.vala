@@ -10,7 +10,7 @@ class Mincer : Gtk.Application {
 	Pipeline pipeline = null;
 
 	public override void activate () {
-		var builder = new Builder.from_file ("/usr/share/mincer/mincer.glade");
+		var builder = new Builder.from_file ("/usr/local/share/mincer/mincer.glade");
 
 		var window = builder.get_object ("window") as ApplicationWindow;
 		var url = builder.get_object ("url") as Entry;
