@@ -118,10 +118,10 @@ class Mincer : Gtk.Application {
 				string tmp = "";
 				tmp += "ximagesrc use-damage=false show-pointer=true ";
 				tmp += "startx=" + geometry.x.to_string () + " starty=" + geometry.y.to_string () + " endx=" + endx.to_string () + " endy=" + endy.to_string () + " ! ";
-				tmp += "video/x-raw, framerate=" + video_framerate.get_active_text () + "/1 ! ";
+				tmp += "queue ! video/x-raw, framerate=" + video_framerate.get_active_text () + "/1 ! ";
 				tmp += "videoscale method=lanczos ! video/x-raw, ";
 				tmp += "width=" + width.to_string () + ", height=" + height.to_string () + " ! ";
-				tmp += "videoconvert ! x264enc tune=zerolatency name=video_encoder ";
+				tmp += "queue ! videoconvert ! x264enc name=video_encoder ";
 				tmp += "bitrate=" + ((int)(video_bitrate.adjustment.value + 0.5)).to_string () + " ! ";
 				tmp += "video/x-h264, profile=main ! h264parse ! tee name=video_tee ";
 
@@ -130,7 +130,7 @@ class Mincer : Gtk.Application {
 				} else {
 					tmp += "pulsesrc name=audio device=" + (audio_input.active - 1).to_string () + " ! ";
 				}
-				tmp += "audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
+				tmp += "queue ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
 				tmp += "voaacenc bitrate=" + ((int)(audio_bitrate.adjustment.value + 0.5) * 1000).to_string () + " ! ";
 				tmp += "aacparse ! tee name=audio_tee ";
 
