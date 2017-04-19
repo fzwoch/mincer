@@ -52,6 +52,29 @@ class Mincer : Gtk.Application {
 				}
 				stop ();
 			}
+
+			var key_file = new KeyFile ();
+
+			key_file.set_string("mincer", "url", url.text);
+			key_file.set_integer("mincer", "video_input", video_input.active);
+			key_file.set_integer("mincer", "video_resolution", video_resolution.active);
+			key_file.set_integer("mincer", "video_framerate", video_framerate.active);
+			key_file.set_double("mincer", "video_speed", video_speed.adjustment.value);
+			key_file.set_double("mincer", "video_bitrate", video_bitrate.adjustment.value);
+			key_file.set_integer("mincer", "audio_input", audio_input.active);
+			key_file.set_double("mincer", "audio_bitrate", audio_bitrate.adjustment.value);
+
+			if (recordings.label != "- Disabled -") {
+				key_file.set_string("mincer", "recordings", chooser.get_filename ());
+			} else {
+				key_file.set_string("mincer", "recordings", "");
+			}
+
+			try {
+				key_file.save_to_file(Environment.get_home_dir () + "/.mincer.conf");
+			} catch (GLib.Error e) {
+			}
+
 			return false;
 		});
 
@@ -229,6 +252,29 @@ class Mincer : Gtk.Application {
 				start_stop.label = "Start";
 			}
 		});
+
+		var key_file = new KeyFile();
+
+		try {
+			key_file.load_from_file(Environment.get_home_dir () + "/.mincer.conf", KeyFileFlags.NONE);
+
+			url.text = key_file.get_string("mincer", "url");
+			video_input.active = key_file.get_integer("mincer", "video_input");
+			video_resolution.active = key_file.get_integer("mincer", "video_resolution");
+			video_framerate.active = key_file.get_integer("mincer", "video_framerate");
+			video_speed.adjustment.value = key_file.get_double("mincer", "video_speed");
+			video_bitrate.adjustment.value = key_file.get_double("mincer", "video_bitrate");
+			audio_input.active = key_file.get_integer("mincer", "audio_input");
+			audio_bitrate.adjustment.value = key_file.get_double("mincer", "audio_bitrate");
+
+			var record_value = key_file.get_string("mincer", "recordings");
+
+			if (record_value != "") {
+				chooser.set_filename(record_value);
+				recordings.label = record_value;
+			}
+		} catch (GLib.Error e) {
+		}
 
 		window.application = this;
 		window.show_all ();
