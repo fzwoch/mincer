@@ -24,9 +24,8 @@ class Mincer : Gtk.Application {
 		var audio_bitrate = builder.get_object ("audio_bitrate") as Scale;
 		var recordings = builder.get_object ("recordings") as Button;
 		var start_stop = builder.get_object ("start_stop") as Button;
-		var chooser = builder.get_object ("chooser") as FileChooserDialog;
-		var chooser_disable = builder.get_object ("chooser_disable") as Button;
-		var chooser_select = builder.get_object ("chooser_select") as Button;
+
+		var chooser = new FileChooserDialog("Select Recording Directory", window, FileChooserAction.SELECT_FOLDER, "Disable", ResponseType.CANCEL, "Select", ResponseType.ACCEPT, null);
 
 		var display = Gdk.Display.get_default ();
 		for (int i = 0; i < display.get_n_monitors (); i++) {
@@ -111,22 +110,12 @@ class Mincer : Gtk.Application {
 		});
 
 		recordings.clicked.connect (() => {
-			chooser.run ();
-		});
-
-		chooser.delete_event.connect (() => {
+			if (chooser.run () == ResponseType.ACCEPT) {
+				recordings.label = chooser.get_filename();
+			} else {
+				recordings.label = "- Disabled -";
+			}
 			chooser.hide ();
-			return true;
-		});
-
-		chooser_disable.clicked.connect (() => {
-			chooser.hide ();
-			recordings.label = "- Disabled -";
-		});
-
-		chooser_select.clicked.connect (() => {
-			chooser.hide ();
-			recordings.label = chooser.get_filename ();
 		});
 
 		start_stop.clicked.connect (() => {
