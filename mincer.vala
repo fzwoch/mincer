@@ -59,10 +59,10 @@ class Mincer : Gtk.Application {
 			key_file.set_integer("mincer", "video_input", video_input.active);
 			key_file.set_integer("mincer", "video_resolution", video_resolution.active);
 			key_file.set_integer("mincer", "video_framerate", video_framerate.active);
-			key_file.set_double("mincer", "video_speed", video_speed.adjustment.value);
-			key_file.set_double("mincer", "video_bitrate", video_bitrate.adjustment.value);
+			key_file.set_double("mincer", "video_speed", Math.round(video_speed.adjustment.value));
+			key_file.set_double("mincer", "video_bitrate", Math.round(video_bitrate.adjustment.value));
 			key_file.set_integer("mincer", "audio_input", audio_input.active);
-			key_file.set_double("mincer", "audio_bitrate", audio_bitrate.adjustment.value);
+			key_file.set_double("mincer", "audio_bitrate", Math.round(audio_bitrate.adjustment.value));
 
 			if (recordings.label != "- Disabled -") {
 				key_file.set_string("mincer", "recordings", chooser.get_filename ());
@@ -80,14 +80,14 @@ class Mincer : Gtk.Application {
 
 		video_speed.adjustment.value_changed.connect ((adjustment) => {
 			var video_speed_label = builder.get_object ("video_speed_label") as Label;
-			var idx = (int)(adjustment.value + 0.5);
+			var idx = (int)Math.round(adjustment.value);
 
 			video_speed_label.label = "Video Encoder Speed - " + speeds[idx];
 		});
 
 		video_bitrate.adjustment.value_changed.connect ((adjustment) => {
 			var video_bitrate_label = builder.get_object ("video_bitrate_label") as Label;
-			var num = (int)(adjustment.value + 0.5);
+			var num = (int)Math.round(adjustment.value);
 
 			video_bitrate_label.label = "Video Bitrate - " + num.to_string () + " kbps";
 
@@ -99,7 +99,7 @@ class Mincer : Gtk.Application {
 
 		audio_bitrate.adjustment.value_changed.connect ((adjustment) => {
 			var audio_bitrate_label = builder.get_object ("audio_bitrate_label") as Label;
-			var num = (int)(adjustment.value + 0.5);
+			var num = (int)Math.round(adjustment.value);
 
 			audio_bitrate_label.label = "Audio Bitrate - " + num.to_string () + " kbps";
 		});
@@ -145,7 +145,7 @@ class Mincer : Gtk.Application {
 				tmp += "videoscale method=lanczos ! video/x-raw, ";
 				tmp += "width=" + width.to_string () + ", height=" + height.to_string () + " ! ";
 				tmp += "queue ! videoconvert ! x264enc name=video_encoder ";
-				tmp += "bitrate=" + ((int)(video_bitrate.adjustment.value + 0.5)).to_string () + " ! ";
+				tmp += "bitrate=" + ((int)Math.round(video_bitrate.adjustment.value)).to_string () + " ! ";
 				tmp += "video/x-h264, profile=main ! h264parse ! tee name=video_tee ";
 
 				if (audio_input.active == 0) {
@@ -154,7 +154,7 @@ class Mincer : Gtk.Application {
 					tmp += "pulsesrc name=audio device=" + (audio_input.active - 1).to_string () + " ! ";
 				}
 				tmp += "queue ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
-				tmp += "voaacenc bitrate=" + ((int)(audio_bitrate.adjustment.value + 0.5) * 1000).to_string () + " ! ";
+				tmp += "voaacenc bitrate=" + ((int)Math.round(audio_bitrate.adjustment.value) * 1000).to_string () + " ! ";
 				tmp += "aacparse ! tee name=audio_tee ";
 
 				if (url.text == "" && recordings.label == "- Disabled -") {
