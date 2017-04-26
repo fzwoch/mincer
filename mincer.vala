@@ -132,7 +132,7 @@ class Mincer : Gtk.Application {
 				int width = 0, height = 0;
 				video_resolution.get_active_text ().scanf ("%dx%d", &width, &height);
 
-				string tmp = "";
+				var tmp = "";
 				tmp += "ximagesrc use-damage=false show-pointer=true ";
 				tmp += "startx=" + geometry.x.to_string () + " starty=" + geometry.y.to_string () + " endx=" + endx.to_string () + " endy=" + endy.to_string () + " ! ";
 				tmp += "queue ! video/x-raw, framerate=" + video_framerate.get_active_text () + "/1 ! ";
