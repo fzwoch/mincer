@@ -1,11 +1,6 @@
 using Gtk;
 using Gst;
 
-const string[] speeds = {
-	"None", "Ultrafast", "Superfast", "Veryfast", "Faster", "Fast",
-	"Medium", "Slow", "Slower", "Veryslow", "Placebo"
-};
-
 class Mincer : Gtk.Application {
 	Pipeline pipeline = null;
 
@@ -78,6 +73,11 @@ class Mincer : Gtk.Application {
 		});
 
 		video_speed.adjustment.value_changed.connect ((adjustment) => {
+			const string[] speeds = {
+				"None", "Ultrafast", "Superfast", "Veryfast", "Faster", "Fast",
+				"Medium", "Slow", "Slower", "Veryslow", "Placebo"
+			};
+
 			var video_speed_label = builder.get_object ("video_speed_label") as Label;
 			var idx = (int)Math.round (adjustment.value);
 
