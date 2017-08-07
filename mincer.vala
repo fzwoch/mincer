@@ -222,7 +222,7 @@ class Mincer : Gtk.Application {
 								rms += GLib.Math.pow (10, list.get_nth (i).get_double () / 20);
 							}
 							GLib.Idle.add (() => {
-								audio_level.fraction = rms / (double)channels;
+								audio_level.fraction = rms / channels;
 								return false;
 							});
 							break;
@@ -258,6 +258,7 @@ class Mincer : Gtk.Application {
 				video_framerate.sensitive = false;
 				video_speed.sensitive = false;
 				audio_input.sensitive = false;
+				audio_level.sensitive = true;
 				audio_bitrate.sensitive = false;
 				recordings.sensitive = false;
 
@@ -277,6 +278,7 @@ class Mincer : Gtk.Application {
 				video_framerate.sensitive = true;
 				video_speed.sensitive = true;
 				audio_input.sensitive = true;
+				audio_level.sensitive = false;
 				audio_bitrate.sensitive = true;
 				recordings.sensitive = true;
 

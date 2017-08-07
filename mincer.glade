@@ -390,6 +390,7 @@
         <child>
           <object class="GtkProgressBar" id="audio_level">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
           </object>
           <packing>
