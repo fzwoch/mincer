@@ -28,7 +28,10 @@ class Mincer : Gtk.Application {
 			color.connect_sync ();
 			color_devices = color.get_devices_by_kind_sync (Cd.DeviceKind.DISPLAY);
 			color_devices.foreach ((device) => {
-				device.connect_sync ();
+				try {
+					device.connect_sync ();
+				} catch (GLib.Error e) {
+				}
 			});
 		} catch (GLib.Error e) {
 		}
@@ -47,7 +50,7 @@ class Mincer : Gtk.Application {
 		monitor.add_filter ("Audio/Source", null);
 		monitor.get_devices ().foreach ((device) => {
 			var element = device.create_element (null) as dynamic Gst.Element;
-			if (element.get_factory ().get_name () != "pulsesrc")
+			if (element.get_factory ().name != "pulsesrc")
 				return;
 //			var props = entry.get_properties ();
 //			if (props.get_string ("device.class") == "sound")
