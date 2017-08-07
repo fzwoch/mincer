@@ -28,14 +28,15 @@ class Mincer : Gtk.Application {
 		}
 		video_input.active = 0;
 
-		var count = 0;
 		var monitor = new DeviceMonitor ();
 		monitor.add_filter ("Audio/Source", null);
-		monitor.get_devices ().foreach ((entry) => {
+		monitor.get_devices ().foreach ((device) => {
+			var element = device.create_element (null) as dynamic Gst.Element;
+			if (element.get_factory ().get_name () != "pulsesrc")
+				return;
 //			var props = entry.get_properties ();
 //			if (props.get_string ("device.class") == "sound")
-				audio_input.insert (1, count.to_string (), entry.display_name);
-			count++;
+				audio_input.insert (1, element.device, device.display_name);
 		});
 
 		window.delete_event.connect (() => {
