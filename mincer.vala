@@ -15,6 +15,7 @@ class Mincer : Gtk.Application {
 		var video_speed = builder.get_object ("video_speed") as Scale;
 		var video_bitrate = builder.get_object ("video_bitrate") as Scale;
 		var audio_input = builder.get_object ("audio_input") as ComboBoxText;
+		var audio_level = builder.get_object ("audio_level") as ProgressBar;
 		var audio_mute = builder.get_object ("audio_mute") as ToggleButton;
 		var audio_bitrate = builder.get_object ("audio_bitrate") as Scale;
 		var recordings = builder.get_object ("recordings") as Button;
@@ -172,7 +173,7 @@ class Mincer : Gtk.Application {
 				} else {
 					tmp += "pulsesrc name=audio device=" + audio_input.active_id + " ! ";
 				}
-				tmp += "queue ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
+				tmp += "queue ! level ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
 				tmp += "voaacenc bitrate=" + ((int)Math.round (audio_bitrate.adjustment.value) * 1000).to_string () + " ! ";
 				tmp += "aacparse ! tee name=audio_tee ";
 
@@ -210,6 +211,20 @@ class Mincer : Gtk.Application {
 							var dialog = new MessageDialog (window, 0, Gtk.MessageType.ERROR, ButtonsType.CLOSE, "%s", e.message);
 							dialog.run ();
 							dialog.destroy ();
+							break;
+						case Gst.MessageType.ELEMENT:
+							if (message.get_structure ().get_name () != "level")
+								break;
+							var rms = 0.0;
+							unowned GLib.ValueArray list = (GLib.ValueArray*) message.get_structure ().get_value ("rms").get_boxed ();
+							var channels = list.n_values;
+							for (int i = 0; i < channels; i++) {
+								rms += GLib.Math.pow (10, list.get_nth (i).get_double () / 20);
+							}
+							GLib.Idle.add (() => {
+								audio_level.fraction = rms / (double)channels;
+								return false;
+							});
 							break;
 						default:
 							break;
@@ -267,6 +282,8 @@ class Mincer : Gtk.Application {
 
 				audio_mute.sensitive = false;
 				audio_mute.active = false;
+
+				audio_level.fraction = 0.0;
 
 				start_stop.label = "Start";
 			}
