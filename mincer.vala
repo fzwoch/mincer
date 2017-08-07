@@ -28,10 +28,14 @@ class Mincer : Gtk.Application {
 		}
 		video_input.active = 0;
 
+		var count = 0;
 		var monitor = new DeviceMonitor ();
 		monitor.add_filter ("Audio/Source", null);
 		monitor.get_devices ().foreach ((entry) => {
-			audio_input.insert_text (1, entry.display_name);
+//			var props = entry.get_properties ();
+//			if (props.get_string ("device.class") == "sound")
+				audio_input.insert (1, count.to_string (), entry.display_name);
+			count++;
 		});
 
 		window.delete_event.connect (() => {
@@ -146,7 +150,7 @@ class Mincer : Gtk.Application {
 				if (audio_input.active == 0) {
 					tmp += "audiotestsrc is-live=true wave=silence ! ";
 				} else {
-					tmp += "pulsesrc name=audio device=" + (audio_input.active - 1).to_string () + " ! ";
+					tmp += "pulsesrc name=audio device=" + audio_input.active_id + " ! ";
 				}
 				tmp += "queue ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
 				tmp += "voaacenc bitrate=" + ((int)Math.round (audio_bitrate.adjustment.value) * 1000).to_string () + " ! ";
