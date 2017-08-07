@@ -26,7 +26,6 @@ class Mincer : Gtk.Application {
 		for (int i = 0; i < display.get_n_monitors (); i++) {
 			video_input.append_text (display.get_monitor (i).model);
 		}
-		video_input.active = 0;
 
 		var monitor = new DeviceMonitor ();
 		monitor.add_filter ("Audio/Source", null);
