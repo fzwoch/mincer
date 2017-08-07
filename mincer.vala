@@ -289,11 +289,11 @@ class Mincer : Gtk.Application {
 		pipeline.send_event (eos);
 		pipeline.bus.timed_pop_filtered (CLOCK_TIME_NONE, Gst.MessageType.EOS);
 		pipeline.set_state (State.NULL);
-		pipeline.unref ();
 		pipeline = null;
 	}
 
 	public static int main (string[] args) {
+		Gtk.init (ref args);
 		Gst.init (ref args);
 
 		return new Mincer ().run (args);
