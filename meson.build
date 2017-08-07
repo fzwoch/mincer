@@ -4,6 +4,7 @@ executable('mincer', 'mincer.vala',
 	dependencies : [
 		dependency('gstreamer-1.0'),
 		dependency('gtk+-3.0'),
+		dependency('colord'),
 		meson.get_compiler('c').find_library('m')
 	],
 	install : true

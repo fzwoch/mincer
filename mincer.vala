@@ -22,10 +22,26 @@ class Mincer : Gtk.Application {
 
 		var chooser = new FileChooserDialog ("Select Recording Directory", window, FileChooserAction.SELECT_FOLDER, "Disable", ResponseType.CANCEL, "Select", ResponseType.ACCEPT, null);
 
+		var color = new Cd.Client ();
+		GLib.GenericArray<Cd.Device> color_devices = null;
+		try {
+			color.connect_sync ();
+			color_devices = color.get_devices_by_kind_sync (Cd.DeviceKind.DISPLAY);
+			color_devices.foreach ((device) => {
+				device.connect_sync ();
+			});
+		} catch (GLib.Error e) {
+		}
+
 		var display = Gdk.Display.get_default ();
 		for (int i = 0; i < display.get_n_monitors (); i++) {
-			video_input.append_text (display.get_monitor (i).model);
+			color_devices.foreach ((device) => {
+				if (device.get_metadata_item("XRANDR_name") == display.get_monitor (i).model) {
+					video_input.append_text (device.vendor + " - " + device.model);
+				}
+			});
 		}
+		video_input.active = 0;
 
 		var monitor = new DeviceMonitor ();
 		monitor.add_filter ("Audio/Source", null);
@@ -37,6 +53,7 @@ class Mincer : Gtk.Application {
 //			if (props.get_string ("device.class") == "sound")
 				audio_input.insert (1, element.device, device.display_name);
 		});
+		audio_input.active = 0;
 
 		window.delete_event.connect (() => {
 			if (pipeline != null) {
