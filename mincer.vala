@@ -135,16 +135,11 @@ class Mincer : Gtk.Application {
 		});
 
 		recordings.clicked.connect (() => {
-			if (chooser.run () == ResponseType.ACCEPT) {
+			if (chooser.run () == ResponseType.ACCEPT)
 				recordings.label = chooser.get_filename ();
-
-				var label = recordings.get_child () as Label;
-
-				label.ellipsize = Pango.EllipsizeMode.MIDDLE;
-				label.max_width_chars = 40;
-			} else {
+			else
 				recordings.label = "- Disabled -";
-			}
+
 			chooser.hide ();
 		});
 
