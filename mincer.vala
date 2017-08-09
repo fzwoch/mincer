@@ -310,14 +310,14 @@ class Mincer : Gtk.Application {
 			if (record_value != "") {
 				chooser.set_filename (record_value);
 				recordings.label = record_value;
-
-				var label = recordings.get_child () as Label;
-
-				label.ellipsize = Pango.EllipsizeMode.MIDDLE;
-				label.max_width_chars = 40;
 			}
 		} catch (GLib.Error e) {
 		}
+
+		var label = recordings.get_child () as Label;
+
+		label.ellipsize = Pango.EllipsizeMode.MIDDLE;
+		label.max_width_chars = 40;
 
 		window.application = this;
 		window.show_all ();
