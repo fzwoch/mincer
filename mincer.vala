@@ -22,6 +22,7 @@ class Mincer : Gtk.Application {
 		var start_stop = builder.get_object ("start_stop") as Button;
 
 		var chooser = new FileChooserDialog ("Select Recording Directory", window, FileChooserAction.SELECT_FOLDER, "Disable", ResponseType.CANCEL, "Select", ResponseType.ACCEPT, null);
+		var audio_monitor = "";
 
 		var color = new Cd.Client ();
 		GLib.GenericArray<Cd.Device> color_devices = null;
@@ -53,9 +54,11 @@ class Mincer : Gtk.Application {
 			var element = device.create_element (null) as dynamic Gst.Element;
 			if (element.get_factory ().name != "pulsesrc")
 				return;
-//			var props = entry.get_properties ();
-//			if (props.get_string ("device.class") == "sound")
+			var device_class = device.get_properties ().get_string ("device.class");
+			if (device_class == "sound")
 				audio_input.insert (1, element.device, device.display_name);
+			else if (device_class == "monitor")
+				audio_monitor = element.device;
 		});
 		audio_input.active = 0;
 
@@ -65,10 +68,8 @@ class Mincer : Gtk.Application {
 				dialog.secondary_text = "Mincer is currently running. Are you sure you want to stop processing and quit the application?";
 				var response = dialog.run ();
 				dialog.destroy ();
-
-				if (response == ResponseType.NO) {
+				if (response == ResponseType.NO)
 					return true;
-				}
 				stop ();
 			}
 
@@ -83,11 +84,10 @@ class Mincer : Gtk.Application {
 			key_file.set_integer ("mincer", "audio_input", audio_input.active);
 			key_file.set_double ("mincer", "audio_bitrate", Math.round (audio_bitrate.adjustment.value));
 
-			if (recordings.label != "- Disabled -") {
+			if (recordings.label != "- Disabled -")
 				key_file.set_string ("mincer", "recordings", chooser.get_filename ());
-			} else {
+			else
 				key_file.set_string ("mincer", "recordings", "");
-			}
 
 			try {
 				key_file.save_to_file (Environment.get_home_dir () + "/.mincer.conf");
@@ -168,14 +168,17 @@ class Mincer : Gtk.Application {
 				tmp += "speed-preset=" + ((int)Math.round (video_speed.adjustment.value)).to_string () + " ! ";
 				tmp += "video/x-h264, profile=main ! h264parse ! tee name=video_tee ";
 
-				if (audio_input.active == 0) {
+				if (audio_input.active == 0)
 					tmp += "audiotestsrc is-live=true wave=silence ! ";
-				} else {
+				else
 					tmp += "pulsesrc name=audio device=" + audio_input.active_id + " ! ";
-				}
-				tmp += "queue ! level ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
+
+				tmp += "queue ! audiomixer name=mixer ! level ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
 				tmp += "voaacenc bitrate=" + ((int)Math.round (audio_bitrate.adjustment.value) * 1000).to_string () + " ! ";
 				tmp += "aacparse ! tee name=audio_tee ";
+
+				if (audio_monitor != "")
+					tmp += "pulsesrc name=audio_monitor device=" + audio_monitor + " ! queue ! mixer. ";
 
 				if (url.text == "" && recordings.label == "- Disabled -") {
 					tmp += "video_tee. ! queue ! fakesink ";
@@ -218,9 +221,8 @@ class Mincer : Gtk.Application {
 							var rms = 0.0;
 							unowned GLib.ValueArray list = (GLib.ValueArray*) message.get_structure ().get_value ("rms").get_boxed ();
 							var channels = list.n_values;
-							for (int i = 0; i < channels; i++) {
+							for (int i = 0; i < channels; i++)
 								rms += GLib.Math.pow (10, list.get_nth (i).get_double () / 20);
-							}
 							GLib.Idle.add (() => {
 								audio_level.fraction = rms / channels;
 								return false;
@@ -262,9 +264,8 @@ class Mincer : Gtk.Application {
 				audio_bitrate.sensitive = false;
 				recordings.sensitive = false;
 
-				if (audio_input.active != 0) {
+				if (audio_input.active != 0)
 					audio_mute.sensitive = true;
-				}
 
 				start_stop.label = "Stop";
 			} else {
