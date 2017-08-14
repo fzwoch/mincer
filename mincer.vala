@@ -15,6 +15,7 @@ class Mincer : Gtk.Application {
 		var video_speed = builder.get_object ("video_speed") as Scale;
 		var video_bitrate = builder.get_object ("video_bitrate") as Scale;
 		var audio_input = builder.get_object ("audio_input") as ComboBoxText;
+		var audio_system = builder.get_object ("audio_system") as Label;
 		var audio_level = builder.get_object ("audio_level") as ProgressBar;
 		var audio_mute = builder.get_object ("audio_mute") as ToggleButton;
 		var audio_bitrate = builder.get_object ("audio_bitrate") as Scale;
@@ -55,10 +56,15 @@ class Mincer : Gtk.Application {
 			if (element.get_factory ().name != "pulsesrc")
 				return;
 			var device_class = device.get_properties ().get_string ("device.class");
-			if (device_class == "sound")
+			if (device_class == "sound") {
 				audio_input.insert (1, element.device, device.display_name);
-			else if (device_class == "monitor")
+			} else if (device_class == "monitor") {
 				audio_monitor = element.device;
+				audio_system.label = " - " + device.display_name;
+				audio_system.ellipsize = Pango.EllipsizeMode.END;
+				audio_system.max_width_chars = 30;
+				audio_system.set_tooltip_text (device.display_name);
+			}
 		});
 		audio_input.active = 0;
 
