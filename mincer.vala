@@ -135,9 +135,9 @@ class Mincer : Gtk.Application {
 		});
 
 		audio_mute.toggled.connect (() => {
-			var audio = pipeline.get_by_name ("audio") as dynamic Element;
+			var volume = pipeline.get_by_name ("volume") as dynamic Element;
 
-			audio.mute = audio_mute.active;
+			volume.mute = audio_mute.active;
 		});
 
 		recordings.clicked.connect (() => {
@@ -172,9 +172,9 @@ class Mincer : Gtk.Application {
 				if (audio_input.active == 0)
 					tmp += "audiotestsrc is-live=true wave=silence ! ";
 				else
-					tmp += "pulsesrc name=audio device=" + audio_input.active_id + " ! ";
+					tmp += "pulsesrc device=" + audio_input.active_id + " ! ";
 
-				tmp += "queue ! audiomixer name=mixer ! level ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
+				tmp += "queue ! audiomixer name=mixer ! volume name=volume ! level ! audioconvert ! audioresample ! audio/x-raw, channels=2, rate={ 44100, 48000 } ! ";
 				tmp += "voaacenc bitrate=" + ((int)Math.round (audio_bitrate.adjustment.value) * 1000).to_string () + " ! ";
 				tmp += "aacparse ! tee name=audio_tee ";
 
@@ -261,12 +261,11 @@ class Mincer : Gtk.Application {
 				video_framerate.sensitive = false;
 				video_speed.sensitive = false;
 				audio_input.sensitive = false;
+				audio_mute.sensitive = true;
 				audio_level.sensitive = true;
 				audio_bitrate.sensitive = false;
 				recordings.sensitive = false;
 
-				if (audio_input.active != 0)
-					audio_mute.sensitive = true;
 
 				start_stop.label = "Stop";
 			} else {
@@ -280,12 +279,11 @@ class Mincer : Gtk.Application {
 				video_framerate.sensitive = true;
 				video_speed.sensitive = true;
 				audio_input.sensitive = true;
+				audio_mute.sensitive = false;
+				audio_mute.active = false;
 				audio_level.sensitive = false;
 				audio_bitrate.sensitive = true;
 				recordings.sensitive = true;
-
-				audio_mute.sensitive = false;
-				audio_mute.active = false;
 
 				audio_level.fraction = 0.0;
 
