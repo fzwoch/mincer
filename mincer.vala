@@ -164,7 +164,7 @@ class Mincer : Gtk.Application {
 				tmp += "queue ! video/x-raw, framerate=" + video_framerate.get_active_text () + "/1 ! ";
 				tmp += "videoscale method=lanczos ! video/x-raw, ";
 				tmp += "width=" + width.to_string () + ", height=" + height.to_string () + " ! ";
-				tmp += "queue ! videoconvert ! x264enc name=video_encoder ";
+				tmp += "queue ! videoconvert ! x264enc name=video_encoder vbv-buf-capacity=2000 ";
 				tmp += "bitrate=" + ((int)Math.round (video_bitrate.adjustment.value)).to_string () + " ";
 				tmp += "speed-preset=" + ((int)Math.round (video_speed.adjustment.value)).to_string () + " ! ";
 				tmp += "video/x-h264, profile=main ! h264parse ! tee name=video_tee ";
