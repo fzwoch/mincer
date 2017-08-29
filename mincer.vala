@@ -193,8 +193,16 @@ class Mincer : Gtk.Application {
 
 				if (recordings.label != "- Disabled -") {
 					var now = new GLib.DateTime.now_local ();
+					var filename = chooser.get_filename () + "/mincer_" + now.format("%Y-%m-%d_%H%M%S") + ".mp4";
 
-					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=\"" + chooser.get_filename () + "/mincer_" + now.format("%Y-%m-%d_%H%M%S") + ".mp4\" ";
+					if (FileUtils.test(filename, FileTest.EXISTS)) {
+						var dialog = new MessageDialog (window, 0, Gtk.MessageType.ERROR, ButtonsType.CLOSE, "File already exists!");
+						dialog.run ();
+						dialog.destroy ();
+						return;
+					}
+
+					tmp += "video_tee. ! queue ! mp4mux name=mp4_mux ! filesink location=\"" + filename + "\" ";
 					tmp += "audio_tee. ! queue max-size-bytes=0 max-size-buffers=0 max-size-time=4000000000 ! mp4_mux. ";
 				}
 
