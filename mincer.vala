@@ -343,6 +343,8 @@ class Mincer : Gtk.Application {
 		Gtk.init (ref args);
 		Gst.init (ref args);
 
+		Posix.signal(Posix.SIGPIPE, Posix.SIG_IGN);
+
 		return new Mincer ().run (args);
 	}
 }
