@@ -25,28 +25,9 @@ class Mincer : Gtk.Application {
 		var chooser = new FileChooserDialog ("Select Recording Directory", window, FileChooserAction.SELECT_FOLDER, "Disable", ResponseType.CANCEL, "Select", ResponseType.ACCEPT, null);
 		var audio_monitor = "";
 
-		var color = new Cd.Client ();
-		GLib.GenericArray<Cd.Device> color_devices = null;
-		try {
-			color.connect_sync ();
-			color_devices = color.get_devices_by_kind_sync (Cd.DeviceKind.DISPLAY);
-			color_devices.foreach ((device) => {
-				try {
-					device.connect_sync ();
-				} catch (GLib.Error e) {
-				}
-			});
-		} catch (GLib.Error e) {
-		}
-
 		var display = Gdk.Display.get_default ();
-		for (int i = 0; i < display.get_n_monitors (); i++) {
-			color_devices.foreach ((device) => {
-				if (device.get_metadata_item("XRANDR_name") == display.get_monitor (i).model) {
-					video_input.append_text (device.vendor + " - " + device.model);
-				}
-			});
-		}
+		for (int i = 0; i < display.get_n_monitors (); i++)
+			video_input.append_text (display.get_monitor (i).get_model ());
 		video_input.active = 0;
 
 		var monitor = new DeviceMonitor ();
